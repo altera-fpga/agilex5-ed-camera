@@ -1,6 +1,0 @@
-<?xml version="1.0"?>
-<library>
-<index file="intel_vvp_icon/intel_vvp_icon_algo_comp_hw.tcl" />
-<index file="intel_vvp_icon/intel_vvp_icon_scheduler_hw.tcl" />
-<index file="intel_vvp_icon/intel_vvp_icon_hw.tcl" />
-</library>

@@ -1,2 +1,0 @@
-part /mnt/boot --source bootimg-partition --ondisk mmcblk0 --fstype=vfat --mkfs-extraopts "-F 32" --label boot --active --align 1024 --fixed-size 250M --system-id b
-part / --source rootfs --ondisk mmcblk0 --fstype=ext4 --label root --align 1024 --fixed-size 400M

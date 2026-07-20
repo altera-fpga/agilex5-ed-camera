@@ -1,4 +1,0 @@
-define KFEATURE_DESCRIPTION "Enable features required for RealSense cameras"
-define KFEATURE_COMPATIBILITY board
-
-kconf non-hardware realsense.cfg
