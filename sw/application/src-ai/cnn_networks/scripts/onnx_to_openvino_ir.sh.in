@@ -1,0 +1,23 @@
+#!/bin/bash
+# *******************************************************************************
+# Copyright (C) Altera Corporation
+#
+# This code and the related documents are Altera copyrighted materials and your
+# use of them is governed by the express license under which they were provided to
+# you ("License"). This code and the related documents are provided as is, with no
+# express or implied warranties other than those that are expressly stated in the 
+# License.
+# *******************************************************************************/
+
+export MODEL=$1
+export RESOLUTION_STR=$2
+if [ ! -z "@HTTPS_PROXY_STR@" ]; then
+    export @HTTPS_PROXY_STR@
+fi
+source python_env/bin/activate
+source @OPENVINO_SETUPVARS@
+source @DLA_SETUPVARS@
+export LD_LIBRARY_PATH=${VIRTUAL_ENV}/lib:${LD_LIBRARY_PATH}
+echo "Convert to Openvino IR"
+python3 @OPENVINO_OVC@ ${MODEL}_short_${RESOLUTION_STR}.onnx --compress_to_fp16=False --output_model ${MODEL}_ir_${RESOLUTION_STR} || true
+echo "Conversion Complete"

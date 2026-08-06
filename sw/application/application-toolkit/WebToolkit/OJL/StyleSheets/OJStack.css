@@ -1,0 +1,8 @@
+.stack_class
+{
+	position:absolute;
+	border:<!--#window_border#-->;
+	border-width:1px;
+	border-style:solid;
+	/* Don't add this, it breaks the stack: overflow:hidden;*/
+}

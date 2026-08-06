@@ -1,0 +1,13 @@
+[Unit]
+Description=Expand root filesystem
+Wants=systemd-udevd.service first-boot-complete.target
+After=systemd-remount-fs.service systemd-udevd.service
+Before=first-boot-complete.target
+ConditionFirstBoot=yes
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/expand-root-partition
+
+[Install]
+WantedBy=basic.target

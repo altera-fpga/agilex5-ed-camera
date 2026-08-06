@@ -1,0 +1,111 @@
+k_vector: 32
+c_vector: 16
+family: "AGX5"
+arch_precision: FP12AGX
+filter_precision: FP12AGX
+sb_precision: FP12AGX
+num_lanes: 1
+filter_size_width_max: 28
+filter_size_height_max: 28
+output_channels_max: 14320
+stream_buffer_depth: 20548
+dma {
+  csr_addr_width: 11
+  csr_data_bytes: 4
+  ddr_addr_width: 32
+  ddr_burst_width: 4
+  ddr_data_bytes: 32
+  ddr_read_id_width: 2
+  ddr_write_id_width: 5
+}
+config_network {
+  config_cache_depth: 256
+  modules {
+    module {
+      name: "filter_reader"
+      cross_clock: 1
+    }
+    module {
+      name: "input_feeder_mux"
+    }
+    module {
+      name: "input_feeder_writer"
+    }
+    module {
+      name: "input_feeder_in"
+    }
+    module {
+      name: "input_feeder_reader"
+    }
+    module {
+      name: "input_feeder_out"
+    }
+    module {
+      name: "feature_writer"
+      cross_clock: 1
+    }
+    module {
+      name: "feature_reader"
+      cross_clock: 1
+    }
+    module {
+      name: "xbar"
+    }
+    module {
+      name: "activation"
+    }
+    module {
+      name: "pool"
+    }
+  }
+}
+xbar {
+  xbar_k_vector: 16
+  max_input_interfaces: 4
+  max_output_interfaces: 4
+  xbar_ports {
+    xbar_aux_port {
+      name: "pool"
+      input_connection: "xbar_in_port"
+      input_connection: "activation"
+    }
+    xbar_aux_port {
+      name: "activation"
+      input_connection: "xbar_in_port"
+    }
+  }
+  xbar_in_port {
+    external_connection: "pe_array"
+  }
+  xbar_out_port {
+    external_connection: "input_feeder"
+    external_connection: "output_writer"
+    input_connection: "xbar_in_port"
+    input_connection: "activation"
+    input_connection: "pool"
+  }
+}
+activation {
+  enable_leaky_relu: false
+  enable_prelu: false
+  enable_clamp: false
+  enable_sigmoid: true
+  k_vector: 16
+}
+pool {
+  max_window_height: 7
+  max_window_width: 7
+  max_stride_vertical: 4
+  max_stride_horizontal: 4
+  k_vector: 2
+}
+pe_array {
+  dsp_limit: 75
+  num_interleaved_features: 12
+  num_interleaved_filters: 1
+  exit_fifo_depth: 1024
+}
+filter_scratchpad {
+  filter_depth: 512
+  bias_scale_depth: 512
+}

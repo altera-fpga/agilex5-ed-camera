@@ -1,0 +1,46 @@
+.input_control_class
+{
+	background-color: <!--#background_high#-->;
+	position:absolute;
+	border:0px;
+	height:22px;
+	text-indent:10px;
+	font-size:16px;	
+	font-family:"<!--#font_family#-->", sans-serif;
+	border:<!--#window_border#-->;
+	border-width:1px;
+	border-style:solid;	
+	border-radius:5px;
+}
+
+.keypad_input_control_class
+{
+	background-color: #3d5f9a;
+	color:#c0c0c0;
+	position:absolute;
+	border:0px;
+	left:1px;
+	top:1px;
+	height:35px;
+	line-height:35px;
+	width:210px;
+	text-indent:10px;
+	text-align:right;
+	font-size:16px;	
+}
+
+.alpha_keypad_input_control_class
+{
+	background-color: #3d5f9a;
+	color:#c0c0c0;
+	position:absolute;
+	border:0px;
+	left:1px;
+	top:1px;
+	height:35px;
+	line-height:35px;
+	width:900px;
+	text-indent:10px;
+	text-align:right;
+	font-size:16px;	
+}

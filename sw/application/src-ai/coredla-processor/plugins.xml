@@ -1,0 +1,10 @@
+<ie>
+    <plugins>
+        <plugin name="HETERO" location="./lib/libcoreDLAHeteroPlugin.so">
+        </plugin>
+        <plugin name="CPU" location="./lib/libopenvino_arm_cpu_plugin.so">
+        </plugin>
+        <plugin name="FPGA" location="./lib/libAltera_FPGA_AI_Suite_OpenVINO_plugin.so">
+        </plugin>
+    </plugins>
+</ie>

@@ -1,0 +1,71 @@
+.oj_table
+{
+	position:absolute;
+
+}
+
+.header_row_class
+{
+	position:absolute;
+	background-color:<!--#background_low#-->;
+	text-indent:1px;
+	border-style:solid;
+	border-bottom-width:1px;
+	border-top-width:0px;
+	border-left-width:0px;
+	border-right-width:0px;
+	border-bottom-color:#808080;
+	white-space:nowrap;
+}
+
+.header_row_dim_class
+{
+	position:absolute;
+	background-color:<!--#background_low#-->;
+	text-align:center;
+	opacity:0.4;
+	white-space:nowrap;
+}
+
+.header_row_dim_class:hover
+{
+	position:absolute;
+	background-color:<!--#background_low#-->;
+	text-align:center;
+	opacity:1;
+	white-space:nowrap;
+}
+
+.header_row_hilite_class
+{
+	position:absolute;
+	background-color:#505060;
+    color:#f0f0f0;
+	text-align:center;
+	white-space:nowrap;
+}
+
+.header_row_hilite_class:hover
+{
+	position:absolute;
+	background-color:#707080;
+    color:#ffffff;
+	text-align:center;
+	white-space:nowrap;
+}
+
+.even_row_class
+{
+	position:absolute;
+	text-indent:1px;
+	overflow:hidden;
+	white-space:nowrap;
+}
+
+.odd_row_class
+{
+	position:absolute;
+	text-indent:1px;
+	overflow:hidden;
+	white-space:nowrap;
+}

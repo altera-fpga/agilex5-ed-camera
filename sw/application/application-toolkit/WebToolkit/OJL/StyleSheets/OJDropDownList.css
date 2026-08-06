@@ -1,0 +1,12 @@
+.drop_container_class
+{
+	position: relative;
+}
+
+.drop_list_class
+{
+    visibility: hidden;
+	/*-moz-box-shadow:3.5px 3.5px 5px #000000;
+	-webkit-box-shadow:3.5px 3.5px 5px #000000;
+	box-shadow:3.5px 3.5px 5px #000000;*/
+}

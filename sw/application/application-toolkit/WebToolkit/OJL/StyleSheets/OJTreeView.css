@@ -1,0 +1,59 @@
+.tree_view_table
+{
+	border-spacing:0px;
+	border-collapse:collapse;
+	cursor: default;
+	overflow:hidden;
+}
+
+@-webkit-keyframes splitter_fadein /* Safari and Chrome */
+{
+	0%   {opacity:0;}
+	100% {opacity:1;}
+}
+
+
+@-webkit-keyframes splitter_fadeout /* Safari and Chrome */
+{
+	0% {opacity:1;}
+	100%   {opacity:0;}
+}
+
+@keyframes splitter_fadein
+{
+	0%   {opacity:0;}
+	100% {opacity:1;}
+}
+
+
+@keyframes splitter_fadeout
+{
+	0% {opacity:1;}
+	100%   {opacity:0;}
+}
+
+.tree_view_column_one
+{
+	overflow:hidden;
+}
+		
+.tree_view_column_two
+{
+	overflow:hidden;
+}
+		
+.separator_column
+{
+	width:3px;
+	background:#404040;
+	opacity:0;
+	cursor:e-resize;
+	overflow:hidden;
+}
+
+.tree_view_row
+{
+	height:20px;
+	overflow:hidden;
+}
+		

@@ -1,0 +1,22 @@
+
+.list_box_entry_class
+{
+    border-width: 0px;
+    text-indent: 5px;
+    position: absolute;
+    background: rgb(76, 76, 114);
+	cursor: default;
+	-moz-user-select: -moz-none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.list_box_class
+{
+    visibility: hidden;
+	/*-moz-box-shadow:3.5px 3.5px 5px #000000;
+	-webkit-box-shadow:3.5px 3.5px 5px #000000;
+	box-shadow:3.5px 3.5px 5px #000000;*/
+}

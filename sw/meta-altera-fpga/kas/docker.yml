@@ -1,0 +1,22 @@
+header:
+  version: 17
+repos:
+  meta-virtualization:
+    url: "https://git.yoctoproject.org/meta-virtualization"
+    commit: 3dd635f613f7299d986a8ab6bc9f584370f8ed1d
+    branch: scarthgap
+    path: layers/meta-virtualization
+  meta-oe:
+    url: "https://git.openembedded.org/meta-openembedded"
+    commit: 4d3e2639dec542b58708244662d5ce36810fc510
+    branch: scarthgap
+    path: layers/meta-openembedded
+    layers:
+      meta-oe:
+      meta-filesystems:
+      meta-python:
+      meta-networking:
+local_conf_header:
+  meta-altera-fpga-docker: |
+    DISTRO_FEATURES:append = " virtualization"
+    IMAGE_INSTALL:append = " docker docker-compose"

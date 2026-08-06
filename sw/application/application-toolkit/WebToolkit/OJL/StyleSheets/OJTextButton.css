@@ -1,0 +1,115 @@
+.text_button_class 
+{
+    position: absolute;
+    /*width: 470px;
+    height: 40px;
+    line-height: 40px;*/
+    cursor: default;
+    text-align: start;
+    text-indent: 5px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: <!--#alt_white_text_colour#-->;
+    background-color: <!--#altera_light_blue#-->;
+    /* box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15); */
+    border: 1px solid transparent;
+    border-radius: 5px;
+}
+
+.text_button_no_background_class
+{
+	/*position:absolute;
+	width:470px;
+	height:40px;
+	line-height:40px;*/
+	cursor:default;
+	text-align:start;
+	text-indent:10px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+	overflow:hidden;
+}
+
+.multiline_text_button_class
+{
+	position:absolute;
+	width:470px;
+	height:40px;
+	line-height:30px;
+	cursor:default;
+	text-align:start;
+	text-indent:0px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+	background-color: <!--#background_low#-->;
+}
+
+/*.text_button_class:hover
+{
+	background-color:<!--#background_hover#-->;
+}*/
+
+.popup_text_button_class {
+    position: absolute;
+    width: 470px;
+    height: 40px;
+    line-height: 50px;
+    cursor: default;
+    text-align: start;
+    text-indent: 10px;
+    line-height: 50px;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: <!--#alt_white_text_colour#-->;
+    background-color: <!--#altera_light_blue#-->;
+}
+
+.popup_text_button_class:hover
+{
+    background-color: <!--#altera_dark_blue#-->;
+}
+
+.colour_key_class_side
+{
+	position:absolute;
+	width:6px;
+	height:24px;
+	left:4px;
+	top:4px;
+	background-color:#808000;
+}
+
+.tool_tip_class
+{
+	position:absolute;
+	/*background-color:#a0a0a0;
+	color:#101010;*/
+	background-color:#707090;
+	color:#d8d8d8;
+	width:100px;
+	height:40px;
+	line-height:40px;
+	cursor:default;
+	text-align:center;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+	overflow:hidden;
+	border: 1px solid #e0e0e0;
+	border-radius:4px;
+	z-index:999999;
+}

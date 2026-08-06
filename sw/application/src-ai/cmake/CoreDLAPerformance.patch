@@ -1,0 +1,132 @@
+# *******************************************************************************
+# Copyright (C) Altera Corporation
+#
+# This code and the related documents are Altera copyrighted materials and your
+# use of them is governed by the express license under which they were provided to
+# you ("License"). This code and the related documents are provided as is, with no
+# express or implied warranties other than those that are expressly stated in the 
+# License.
+# *******************************************************************************/
+
+diff -rupN mycoredla-src-patch1/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_fp.hpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_fp.hpp
+--- mycoredla-src-patch1/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_fp.hpp	2026-05-12 15:26:23.161916723 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_fp.hpp	2026-05-12 15:36:52.294967592 +0100
+@@ -120,6 +120,7 @@ inline std::uint16_t uint8tofp16(const s
+     return floattofp16(float_value);
+ }
+ 
++#if 0
+ inline float fp16tofloat(std::uint16_t half_raw) {
+   union FP32 {
+     std::uint32_t u;
+@@ -151,6 +152,19 @@ inline float fp16tofloat(std::uint16_t h
+   res.u |= (half_raw & 0x8000) << 16;
+   return res.f;
+ }
++#else
++inline float fp16tofloat(std::uint16_t half_raw) {
++  union FP32 {
++    std::uint16_t u;
++    __fp16 f;
++  };
++
++  FP32 res;
++  res.u = half_raw;
++
++  return res.f;
++}
++#endif
+ 
+ template <typename Out, typename In>
+ Out convertFloat(const In& in);
+diff -rupN mycoredla-src-patch1/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_output_convolution.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_output_convolution.cpp
+--- mycoredla-src-patch1/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_output_convolution.cpp	2026-05-12 15:26:23.161916723 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_output_convolution.cpp	2026-05-12 15:36:52.294967592 +0100
+@@ -149,6 +149,7 @@ bool OutputConvolutionTransformation::in
+   return true;
+ }
+ 
++#if 0
+ template <typename In, typename Out>
+ static inline void outputConvolutionTransformationTable(const void* const& in_,
+                                                         void* const& out_,
+@@ -161,6 +162,32 @@ static inline void outputConvolutionTran
+     out[n * outputData._rawSize + i] = convertFloat<Out>(in[inIdxs[n * outputData._rawSize + i]]);
+   });
+ }
++#else
++template <typename In, typename Out>
++static inline void outputConvolutionTransformationTable(const void* const& in_,
++                                                        void* const& out_,
++                                                        const std::uint32_t* inIdxs,
++                                                        const GraphData& graphData,
++                                                        const OutputTransformation::Data& outputData) {
++  const std::uint32_t* inIdx = inIdxs;
++  auto in = static_cast<const In* const>(in_);
++  auto out = static_cast<Out* const>(out_);
++  for(size_t i = 0; i < outputData._rawSize; i++)
++  {
++    union FP32 {
++      std::uint16_t u;
++      __fp16 f;
++    };
++
++    FP32 res;
++    res.u = in[*inIdx];
++    *out = res.f;
++
++    inIdx++;
++    out++;
++  }
++}
++#endif
+ 
+ bool OutputConvolutionTransformationTable::init(const GraphData& graphData,
+                                                 const OutputTransformation::Data& outputData,
+diff -rupN mycoredla-src-patch1/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_infer_request.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_infer_request.cpp
+--- mycoredla-src-patch1/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_infer_request.cpp	2026-05-12 15:26:23.165916712 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_infer_request.cpp	2026-05-12 15:36:52.298967541 +0100
+@@ -22,6 +22,7 @@
+ 
+ #include <algorithm>
+ #include <utility>
++#include <pthread.h>
+ 
+ #include <cassert>
+ // OpenVINO
+@@ -208,6 +209,17 @@ void DLIAInferRequest::applyInputScaleSh
+ }
+ 
+ void DLIAInferRequest::inferPreprocess() {
++  cpu_set_t cpuset;
++  CPU_ZERO(&cpuset);
++  CPU_SET(2, &cpuset);
++  CPU_SET(3, &cpuset);
++  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
++
++  int priority = sched_get_priority_min(SCHED_RR);
++  struct	sched_param param;
++  param.sched_priority = priority;
++  pthread_setschedparam(pthread_self(), SCHED_RR, &param);
++  
+   if (this->streaming_input_) {
+     return;  // Streaming enabled, preprocessing not available.
+   }
+@@ -343,6 +355,17 @@ void DLIAInferRequest::startPipeline(
+ }
+ 
+ void DLIAInferRequest::waitPipeline(size_t thread_id, std::function<bool()> is_cancelled_predicate) {
++  cpu_set_t cpuset;
++  CPU_ZERO(&cpuset);
++  CPU_SET(2, &cpuset);
++  CPU_SET(3, &cpuset);
++  pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
++
++  int priority = sched_get_priority_min(SCHED_RR);
++  struct	sched_param param;
++  param.sched_priority = priority;
++  pthread_setschedparam(pthread_self(), SCHED_RR, &param);
++
+   const std::shared_ptr<Dev>& dla_device_struct = this->compiled_model_->GetDLADeviceStruct();
+   // Wait for inference to finish on CoreDLA FPGA device
+   dla_device_struct->dla_device->WaitForDla(this->instance_, this->dla_device_job_->GetThreadId(), is_cancelled_predicate);

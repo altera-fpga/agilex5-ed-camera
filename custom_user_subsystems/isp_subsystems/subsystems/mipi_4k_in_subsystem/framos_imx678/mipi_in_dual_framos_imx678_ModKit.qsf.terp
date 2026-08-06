@@ -1,0 +1,147 @@
+###################################################################################
+# Copyright (C) 2025 Altera Corporation
+#
+# This software and the related documents are Altera copyrighted materials, and
+# your use of them is governed by the express license under which they were
+# provided to you ("License"). Unless the License provides otherwise, you may
+# not use, modify, copy, publish, distribute, disclose or transmit this software
+# or the related documents without Altera's prior written permission.
+#
+# This software and the related documents are provided as is, with no express
+# or implied warranties, other than those that are expressly stated in the License.
+###################################################################################
+
+@@ set entity_name $param0
+
+# Framos Common Signals
+#CL130  MIPI_I2C_SCL_SPI_SCLK_1V8
+#CL128  MIPI_I2C_SDA_SPI_MOSI_1V8
+#CH128  MIPI_XVS0_1V8
+#CF132  MIPI_XHS0_1V8
+#CF121  MIPI_XTRIG0_1V8
+
+# Framos 0 Signals
+#CF89   MIPI0_CLK_DN
+#CH89   MIPI0_CLK_DP
+#CA92   MIPI0_DATA0_DN
+#CC92   MIPI0_DATA0_DP
+#CH92   MIPI0_DATA1_DN
+#CF92   MIPI0_DATA1_DP
+#CH81   MIPI0_DATA2_DN
+#CF81   MIPI0_DATA2_DP
+#CC81   MIPI0_DATA3_DN
+#CA81   MIPI0_DATA3_DP
+#CL125  MIPI0_FSTROBE_1V8
+
+# Framos 1 Signals
+#CA89   MIPI1_CLK_DN
+#BW89   MIPI1_CLK_DP
+#BU89   MIPI1_DATA0_DN
+#BR89   MIPI1_DATA0_DP
+#BU92   MIPI1_DATA1_DN
+#BR92   MIPI1_DATA1_DP
+#BU81   MIPI1_DATA2_DN
+#BR81   MIPI1_DATA2_DP
+#BU78   MIPI1_DATA3_DN
+#BR78   MIPI1_DATA3_DP
+#CH132  MIPI1_FSTROBE_1V8
+
+# Framos XMaster and RST signals controlled vis MAX 10 I2C
+#BU109  BMC_UART_RXD_I2C_SCL_3V3
+#BK109  BMC_UART_TXD_I2C_SDA_3V3
+
+#-- 100MHz "MIPI" clock from carrier card
+set_location_assignment PIN_BM71                                             -to mipi_dphy_ref_clk -comment IOBANK_3B_B
+set_instance_assignment -name IO_STANDARD "1.2V TRUE DIFFERENTIAL SIGNALING" -to mipi_dphy_ref_clk -entity ${entity_name}
+set_location_assignment PIN_BP71                                             -to mipi_dphy_ref_clk(n) -comment IOBANK_3B_B
+set_instance_assignment -name IO_STANDARD "1.2V TRUE DIFFERENTIAL SIGNALING" -to mipi_dphy_ref_clk(n) -entity ${entity_name}
+
+#-- BANK 2A RZQ
+set_location_assignment PIN_BH69                  -to mipi_dphy_rzq
+set_instance_assignment -name IO_STANDARD "1.2 V" -to mipi_dphy_rzq -entity ${entity_name}
+
+set_location_assignment PIN_CH89               -to LINK0_dphy_io_dphy_link_c_p
+set_location_assignment PIN_CF89               -to LINK0_dphy_io_dphy_link_c_n
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_c_p    -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_c_n    -entity ${entity_name}
+
+set_location_assignment PIN_CC92               -to LINK0_dphy_io_dphy_link_d_p[0]
+set_location_assignment PIN_CA92               -to LINK0_dphy_io_dphy_link_d_n[0]
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_d_p[0] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_d_n[0] -entity ${entity_name}
+
+set_location_assignment PIN_CF92               -to LINK0_dphy_io_dphy_link_d_p[1]
+set_location_assignment PIN_CH92               -to LINK0_dphy_io_dphy_link_d_n[1]
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_d_p[1] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_d_n[1] -entity ${entity_name}
+
+set_location_assignment PIN_CF81               -to LINK0_dphy_io_dphy_link_d_p[2]
+set_location_assignment PIN_CH81               -to LINK0_dphy_io_dphy_link_d_n[2]
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_d_p[2] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_d_n[2] -entity ${entity_name}
+
+set_location_assignment PIN_CA81               -to LINK0_dphy_io_dphy_link_d_p[3]
+set_location_assignment PIN_CC81               -to LINK0_dphy_io_dphy_link_d_n[3]
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_d_p[3] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK0_dphy_io_dphy_link_d_n[3] -entity ${entity_name}
+
+set_location_assignment PIN_BW89               -to LINK1_dphy_io_dphy_link_c_p
+set_location_assignment PIN_CA89               -to LINK1_dphy_io_dphy_link_c_n
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_c_p    -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_c_n    -entity ${entity_name}
+
+set_location_assignment PIN_BR89               -to LINK1_dphy_io_dphy_link_d_p[0]
+set_location_assignment PIN_BU89               -to LINK1_dphy_io_dphy_link_d_n[0]
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_d_p[0] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_d_n[0] -entity ${entity_name}
+
+set_location_assignment PIN_BR92               -to LINK1_dphy_io_dphy_link_d_p[1]
+set_location_assignment PIN_BU92               -to LINK1_dphy_io_dphy_link_d_n[1]
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_d_p[1] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_d_n[1] -entity ${entity_name}
+
+set_location_assignment PIN_BR81               -to LINK1_dphy_io_dphy_link_d_p[2]
+set_location_assignment PIN_BU81               -to LINK1_dphy_io_dphy_link_d_n[2]
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_d_p[2] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_d_n[2] -entity ${entity_name}
+
+set_location_assignment PIN_BR78               -to LINK1_dphy_io_dphy_link_d_p[3]
+set_location_assignment PIN_BU78               -to LINK1_dphy_io_dphy_link_d_n[3]
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_d_p[3] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD DPHY -to LINK1_dphy_io_dphy_link_d_n[3] -entity ${entity_name}
+
+set_location_assignment PIN_CL130 -to cam_i2c_scl
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to cam_i2c_scl -entity ${entity_name}
+set_instance_assignment -name AUTO_OPEN_DRAIN_PINS ON -to cam_i2c_scl -entity ${entity_name}
+set_instance_assignment -name WEAK_PULL_UP_DN_SEL PULL_UP_20 -to cam_i2c_scl -entity ${entity_name}
+
+set_location_assignment PIN_CL128 -to cam_i2c_sda
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to cam_i2c_sda -entity ${entity_name}
+set_instance_assignment -name AUTO_OPEN_DRAIN_PINS ON -to cam_i2c_sda -entity ${entity_name}
+set_instance_assignment -name WEAK_PULL_UP_DN_SEL PULL_UP_20 -to cam_i2c_sda -entity ${entity_name}
+
+# declare as inputs for now
+set_location_assignment PIN_CL125 -to cam_mipi0_fstrobe
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to cam_mipi0_fstrobe -entity ${entity_name}
+
+set_location_assignment PIN_CH132 -to cam_mipi1_fstrobe
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to cam_mipi1_fstrobe -entity ${entity_name}
+
+set_location_assignment PIN_CH128 -to cam_mipi_xvs
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to cam_mipi_xvs -entity ${entity_name}
+
+set_location_assignment PIN_CF132 -to cam_mipi_xhs
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to cam_mipi_xhs -entity ${entity_name}
+
+set_location_assignment PIN_CF121 -to cam_xtrig_xvs
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to cam_xtrig_xvs -entity ${entity_name}
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to max10_i2c_scl -entity ${entity_name}
+set_location_assignment PIN_BU109 -to max10_i2c_scl
+set_instance_assignment -name AUTO_OPEN_DRAIN_PINS ON -to max10_i2c_scl -entity ${entity_name}
+set_instance_assignment -name WEAK_PULL_UP_DN_SEL PULL_UP_20 -to max10_i2c_scl -entity ${entity_name}
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to max10_i2c_sda -entity ${entity_name}
+set_location_assignment PIN_BK109 -to max10_i2c_sda
+set_instance_assignment -name AUTO_OPEN_DRAIN_PINS ON -to max10_i2c_sda -entity ${entity_name}
+set_instance_assignment -name WEAK_PULL_UP_DN_SEL PULL_UP_20 -to max10_i2c_sda -entity ${entity_name}

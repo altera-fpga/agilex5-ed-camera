@@ -1,0 +1,181 @@
+# *******************************************************************************
+# Copyright (C) Altera Corporation
+#
+# This code and the related documents are Altera copyrighted materials and your
+# use of them is governed by the express license under which they were provided to
+# you ("License"). This code and the related documents are provided as is, with no
+# express or implied warranties other than those that are expressly stated in the 
+# License.
+# *******************************************************************************/
+
+diff -rupN mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_compiled_model.h mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_compiled_model.h
+--- mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_compiled_model.h	2026-05-12 15:36:52.294967592 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_compiled_model.h	2026-05-12 15:45:35.609539656 +0100
+@@ -351,6 +351,7 @@ class DLACompiledModel : public ov::ICom
+   mutable std::function<bool()> cancel_check_ = nullptr;
+   IOMap<InputTransformation::Ptr> input_transformation_;
+   IOMap<OutputTransformation::Ptr> output_transformation_;
++  bool bypass_output_layout_transform_ = false;
+   mutable std::atomic<std::size_t> request_id_ = {0};
+   GraphData graph_data_;
+ 
+diff -rupN mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_config.hpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_config.hpp
+--- mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_config.hpp	2026-05-12 15:36:52.294967592 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_config.hpp	2026-05-12 15:45:35.601539728 +0100
+@@ -79,6 +79,7 @@ struct Configuration {
+   uint32_t num_streaming_infer_req = 4;
+   std::string streaming_input_pipe = "";
+   bool mmdLogging = false;
++  bool bypass_output_layout_transform = false;
+   std::string jtagPath = "";
+ #ifdef EMULATOR_DLA_PLUGIN
+   int inference_num_threads = 1;
+diff -rupN mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_plugin_config.hpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_plugin_config.hpp
+--- mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_plugin_config.hpp	2026-05-12 15:36:52.294967592 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_plugin_config.hpp	2026-05-12 15:45:35.601539728 +0100
+@@ -355,6 +355,12 @@ static constexpr ov::Property<std::strin
+ static constexpr ov::Property<uint32_t, ov::PropertyMutability::RW> num_streaming_inference_requests{
+     "NUM_STREAMING_INFERENCE_REQUESTS"};
+ 
++/**
++ * @brief Bypass output layout transform, result will be in NCHWCvec format
++ */
++static constexpr ov::Property<uint32_t, ov::PropertyMutability::RW> bypass_output_layout_transform{
++    "BYPASS_OUTPUT_LAYOUT_TRANSFORM"};
++
+ #else  // Compiler dla plugin config keys
+ 
+ /**
+diff -rupN mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_io_transformation.h mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_io_transformation.h
+--- mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_io_transformation.h	2026-05-12 15:36:52.294967592 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_io_transformation.h	2026-05-12 15:45:35.609539656 +0100
+@@ -31,6 +31,7 @@ struct GraphData {
+   std::size_t _num_feature_banks = 0;
+   std::size_t _outputRawSize = 0;
+   std::size_t _outputDDRSize = 0;
++  bool _bypass_output_layout_transform = false;
+ };
+ 
+ struct InputTransformation {
+@@ -129,6 +130,9 @@ struct OutputTransformation {
+     std::size_t _outputWidth = 0;
+     std::size_t _outputChannels = 0;
+     std::size_t _outputDepth = 0;
++    
++    std::size_t _outputCvecChannels = 0;
++    std::size_t _rawCvecSize = 0;
+   };
+ 
+   virtual ~OutputTransformation() = default;
+diff -rupN mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_output_convolution.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_output_convolution.cpp
+--- mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_output_convolution.cpp	2026-05-12 15:36:52.294967592 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/dlia_output_convolution.cpp	2026-05-12 15:45:35.617539584 +0100
+@@ -224,7 +224,11 @@ bool OutputConvolutionTransformationTabl
+                                                      const OutputTransformation::Data& outputData,
+                                                      const ov::element::Type_t& inputPrecision,
+                                                      const ov::element::Type_t& outputPrecision) {
+-  if (ov::element::Type_t::f16 == inputPrecision && ov::element::Type_t::f16 == outputPrecision) {
++  if (graphData._bypass_output_layout_transform) {
++    _transform = [this, outputData](const void* const& input, void* const& output) {
++      memcpy(output, (__fp16*)input + inIdxs.data()[0], outputData._rawCvecSize*sizeof(__fp16));
++    };
++  } else if (ov::element::Type_t::f16 == inputPrecision && ov::element::Type_t::f16 == outputPrecision) {
+     _transform = [this, graphData, outputData](const void* const& input, void* const& output) {
+       outputConvolutionTransformationTable<std::uint16_t, std::uint16_t>(
+           input, output, inIdxs.data(), graphData, outputData);
+diff -rupN mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_compiled_model.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_compiled_model.cpp
+--- mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_compiled_model.cpp	2026-05-12 15:36:52.298967541 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_compiled_model.cpp	2026-05-12 15:45:35.641539368 +0100
+@@ -505,6 +505,9 @@ void DLIAPlugin::DLACompiledModel::InitO
+     output_data._rawSize =
+         output_data._outputChannels * output_data._outputHeight * output_data._outputWidth * output_data._outputDepth;
+     output_data._rawOffset = dla_raw_offset;
++    output_data._outputCvecChannels = dims.size() >= 2 ? (((dims[1] + 15)/16)*16) : 1;
++    output_data._rawCvecSize =
++        output_data._outputCvecChannels * output_data._outputHeight * output_data._outputWidth * output_data._outputDepth;
+ 
+     // Perform a OpenVINO <--> CoreDLA dim by dim sanity check to catch mismatches
+     // This saves us if somehow the FPGA compiled output order does not align with the OpenVINO order
+@@ -553,6 +556,8 @@ void DLIAPlugin::DLACompiledModel::InitG
+   this->graph_data_._c_vector = this->compiled_result_->get_input_configuration().begin()->second.c_vector;
+   this->graph_data_._num_feature_banks =
+       this->compiled_result_->get_input_configuration().begin()->second.feature_ddr_banks;
++  this->graph_data_._bypass_output_layout_transform =
++      this->cfg_.bypass_output_layout_transform;
+ }
+ #endif
+ 
+@@ -671,6 +676,7 @@ ov::Any DLIAPlugin::DLACompiledModel::ge
+       DLIAPlugin::properties::cancel_semaphore_name.name(),
+       DLIAPlugin::properties::external_streaming.name(),
+       DLIAPlugin::properties::streaming_drop_source_buffers.name(),
++      DLIAPlugin::properties::bypass_output_layout_transform.name(),
+       DLIAPlugin::properties::streaming_properties.name()
+     #else  // Compiler exclusive configs
+       ,
+@@ -707,6 +713,8 @@ ov::Any DLIAPlugin::DLACompiledModel::ge
+     return ov::Any(this->cancel_semaphore_name_);
+   } else if (DLIAPlugin::properties::stream_controller_status == name) {
+     return ov::Any(this->device_->dla_device->SchedulerGetStatus());
++  }  else if (DLIAPlugin::properties::bypass_output_layout_transform == name) {
++    return ov::Any(this->cfg_.bypass_output_layout_transform);
+   }
+ #else  // Compiler exclusive
+   #ifndef DLA_ARM_BUILD
+diff -rupN mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_config.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_config.cpp
+--- mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_config.cpp	2026-05-12 15:36:52.298967541 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_config.cpp	2026-05-12 15:45:35.641539368 +0100
+@@ -123,6 +123,8 @@ DLIAPlugin::Configuration::Configuration
+       streaming_input_pipe = value.as<std::string>();
+     } else if (DLIAPlugin::properties::enable_mmd_log_name == key) {
+       mmdLogging = value.as<bool>();
++    } else if (DLIAPlugin::properties::bypass_output_layout_transform == key) {
++      bypass_output_layout_transform = value.as<bool>();
+     } else if (DLIAPlugin::properties::jtag_path == key) {
+       jtagPath = value.as<std::string>();
+     }
+@@ -247,6 +249,8 @@ ov::Any DLIAPlugin::Configuration::Get(c
+     return streamingDropSourceBuffers;
+   } else if (name == DLIAPlugin::properties::num_streaming_inference_requests) {
+     return {num_streaming_infer_req};
++  } else if (name == DLIAPlugin::properties::bypass_output_layout_transform) {
++    return {bypass_output_layout_transform};
+   } else if (name == DLIAPlugin::properties::streaming_input_pipe) {
+     return streaming_input_pipe;
+   } else if (name == DLIAPlugin::properties::enable_mmd_log_name) {
+diff -rupN mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_plugin.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_plugin.cpp
+--- mycoredla-src-patch2/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_plugin.cpp	2026-05-12 15:36:52.298967541 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_plugin.cpp	2026-05-12 15:45:35.641539368 +0100
+@@ -133,6 +133,24 @@ std::shared_ptr<ov::ICompiledModel> DLIA
+   // This is identical to the model that was compiled prior to any OpenVINO IR passses.
+   // This is used to interface from OpenVINO API and CoreDLA compiled result.
+   std::shared_ptr<ov::Model> model = this->get_core()->read_model(xml, std::move(weights));
++
++  if(this->cfg_.bypass_output_layout_transform)
++  {
++    auto outputs = model->outputs();
++    for(auto& output : outputs)
++    {
++      auto tensor = output.get_tensor_ptr();
++      auto shape = tensor->get_shape();
++      shape[1] = ((shape[1] + 15) / 16)*16;
++      const std::shared_ptr<ov::descriptor::Tensor>& tensorDummy =
++          std::make_shared<ov::descriptor::Tensor>(ov::element::f16,
++                                                    shape,
++                                                    output.get_names());
++
++      output.set_tensor_ptr(tensorDummy);
++    }
++  }
++
+   // Extract Input scaleshift data. This is an input scaleshift that has been moved to preprocessing.
+   // If there is none, scales and shifts will be empty.
+   IOMap<std::vector<float>> scales;
+@@ -257,6 +275,7 @@ ov::Any DLIAPlugin::Engine::get_property
+       DLIAPlugin::properties::streaming_drop_source_buffers.name(),
+       DLIAPlugin::properties::num_streaming_inference_requests.name(),
+       DLIAPlugin::properties::streaming_input_pipe.name(),
++      DLIAPlugin::properties::bypass_output_layout_transform.name(),
+       DLIAPlugin::properties::online_reconfig.name()
+       #ifdef EMULATOR_DLA_PLUGIN
+       ,

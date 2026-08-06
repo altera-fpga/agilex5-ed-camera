@@ -1,0 +1,10 @@
+.textarea_class
+{
+	font-family:monospace;
+	font-size:12px;
+	background:#d0d0f0;
+	position:absolute;
+	left:380px;
+	top:50px;
+	/*box-shadow: 0 0 2px #000000;*/
+}

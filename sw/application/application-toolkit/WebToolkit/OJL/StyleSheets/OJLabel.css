@@ -1,0 +1,67 @@
+.oj_label_class
+{
+	/*background-color: <!--#background_medium#-->;*/
+	position:absolute;
+	top: 0px;
+	left: 0px;	
+	display:table;
+	text-align:center;
+	border:0px;
+	overflow:hidden;
+}
+
+.oj_label_no_background_class
+{
+	position:absolute;
+	top: 0px;
+	left: 0px;	
+	display:table;
+	text-align:center;
+	border:0px;
+	overflow:hidden;
+}
+
+.label_paragraph_class
+{
+	display: table-cell;
+	vertical-align:middle;
+	border:0px;
+}
+
+.label_paragraph_right_class
+{
+	display: table-cell;
+	vertical-align:middle;
+	text-align:right;
+	border:0px;
+}
+
+.label_paragraph_centre_class
+{
+	display: table-cell;
+	vertical-align:middle;
+	text-align:center;
+	border:0px;
+}
+
+.label_paragraph_left_class
+{
+	display: table-cell;
+	vertical-align:middle;
+	text-align:left;
+	border:0px;
+}
+
+
+.label_column_header
+{
+	position:absolute;
+	top: 0px;
+	left: 0px;	
+	display:table;
+	text-align:center;
+	border:0px;
+	overflow:hidden;
+	font-style:italic;
+	height:30px;
+}

@@ -1,0 +1,63 @@
+.inactive_window_header_class
+{
+	background-color: <!--#altera_dark_blue#-->;
+    color: #fefefe;
+	position:absolute;
+	height:50px;
+	text-indent:20px;
+	line-height:34px;
+	overflow:hidden;
+    /*box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15)*/
+}
+
+.active_window_header_class 
+{
+    position: absolute;
+    height: 50px;
+	text-indent:20px;
+    line-height: 34px;
+    overflow: hidden;
+    background-color: <!--#altera_light_blue#-->;
+    color: #fefefe;
+    border-bottom-width: 2px;
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15)
+}
+
+.simple_window_header_class 
+{
+    position: absolute;
+    height: 30px;
+    text-indent: 5px;
+    line-height: 30px;
+    overflow: hidden;
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.15)
+}
+
+.window_header_label_class
+{
+	position:absolute;
+}
+
+.dialog_header_class
+{
+    position: absolute;
+    height: 50px;
+	text-indent:20px;
+    line-height: 34px;
+    overflow: hidden;
+    background-color: <!--#altera_light_blue#-->;
+    color: #fefefe;
+    border-bottom-width: 2px;
+}
+
+.picture_image_class
+{   
+    /* this is picture window that allows dynamic picture through */
+	background-color: rgba(0, 0, 0, 0);
+	overflow:hidden;
+	position:absolute;
+	top:0%;
+	left:0%;
+	margin-left:0px;
+	margin-top:0px;
+}

@@ -1,0 +1,20 @@
+--- b/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
++++ a/arch/arm64/boot/dts/intel/socfpga_agilex5_socdk.dts
+@@ -50,7 +50,7 @@
+ 
+ &gmac0 {
+ 	status = "disabled";
+-	phy-mode = "rgmii";
++	phy-mode = "rgmii-id";
+ 	phy-handle = <&emac0_phy0>;
+ 
+ 	max-frame-size = <9000>;
+@@ -85,7 +85,7 @@
+ 
+ &gmac2 {
+ 	status = "okay";
+-	phy-mode = "rgmii";
++	phy-mode = "rgmii-id";
+ 	phy-handle = <&emac2_phy0>;
+ 
+ 	max-frame-size = <9000>;

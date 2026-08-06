@@ -1,0 +1,37 @@
+#!/bin/bash
+# *******************************************************************************
+# Copyright (C) Altera Corporation
+#
+# This code and the related documents are Altera copyrighted materials and your
+# use of them is governed by the express license under which they were provided to
+# you ("License"). This code and the related documents are provided as is, with no
+# express or implied warranties other than those that are expressly stated in the 
+# License.
+# *******************************************************************************/
+
+export ARCH_FILE_M2M=$1
+export MODEL=$2
+export RESOLUTION_STR=$3
+export ARCH=$(basename ${ARCH_FILE_M2M})
+if [ ! -z "@HTTPS_PROXY_STR@" ]; then
+    export @HTTPS_PROXY_STR@
+fi
+source python_env/bin/activate
+export PYTHON_LIBS=`cat python_env/pyvenv.cfg | grep '^home' | sed 's/home = \(.*\)\/bin/\1\/lib/'`
+export HOST_LIBS=`echo ${PYTHON_LIBS} | sed 's/\(.*\)\/usr\/.*/\1\/lib/'`
+echo "PYTHON_LIBS=${PYTHON_LIBS} HOST_LIBS=${HOST_LIBS}"
+source @OPENVINO_SETUPVARS@
+source @DLA_SETUPVARS@
+
+pip install patchelf
+patchelf --set-interpreter ${HOST_LIBS}/ld-linux-x86-64.so.2 ${COREDLA_ROOT}/bin/dlac
+
+mkdir -p ${MODEL}_dla_m2m/${ARCH}
+cd ${MODEL}_dla_m2m/${ARCH}
+echo "Compile CoreDLA graph"
+export LD_LIBRARY_PATH=${VIRTUAL_ENV}/lib:${PYTHON_LIBS}:${LD_LIBRARY_PATH}
+dla_compiler --overwrite-output-files --network-file ../../${MODEL}_ir_${RESOLUTION_STR}.xml --march=${ARCH_FILE_M2M} --foutput-format=open_vino_hetero --o ./${MODEL}_dla_m2m_compiled_${RESOLUTION_STR}.bin --fanalyze-performance --fanalyze-area --fdump-performance-report ${MODEL}_dla_m2m_compiled_${RESOLUTION_STR}-perf-report.txt --fdump-area-report ${MODEL}_dla_m2m_compiled_${RESOLUTION_STR}-area-report.txt
+unset LD_LIBRARY_PATH
+echo "Compilation complete"
+mkdir -p @INSTALL_PREFIX@/${ARCH}
+cp ${MODEL}_dla_m2m_compiled_${RESOLUTION_STR}.bin @INSTALL_PREFIX@/${ARCH}/${MODEL}_dla_m2m_compiled_${RESOLUTION_STR}.bin

@@ -1,0 +1,64 @@
+###################################################################################
+# Copyright (C) 2025 Altera Corporation
+#
+# This software and the related documents are Altera copyrighted materials, and
+# your use of them is governed by the express license under which they were
+# provided to you ("License"). Unless the License provides otherwise, you may
+# not use, modify, copy, publish, distribute, disclose or transmit this software
+# or the related documents without Altera's prior written permission.
+#
+# This software and the related documents are provided as is, with no express
+# or implied warranties, other than those that are expressly stated in the License.
+###################################################################################
+
+# This script is used to ensure that the 3D LUT preset is updated on compilation
+# required as IP expects an absolute address
+
+@@ set v_project_name     $param0
+@@ set v_subsystem_name   $param1
+@@ set v_preset_file_0    $param2
+@@ set v_preset_file_1    $param3
+
+proc update_3d_lut_preset {} {
+
+@@ if {$v_preset_file_0 != ""} {
+  set v_preset_0      [file normalize ./../non_qpds_ip/user/${v_preset_file_0}]
+@@ }
+@@ if {$v_preset_file_1 != ""} {
+  set v_preset_1      [file normalize ./../non_qpds_ip/user/${v_preset_file_1}]
+@@ }
+  set v_subsystem   "./../rtl/user/${v_subsystem_name}.qsys"
+
+  set cmd { \\
+    package require qsys 23.2; \\
+@@ if {$v_preset_file_0 != ""} {
+    load_component isp_intel_vvp_3d_lut_hdr_1; \\
+    set_component_parameter_value LUT_INIT_FILENAME_0  \${v_preset_0}; \\
+    save_component; \\
+@@ }
+@@ if {$v_preset_file_1 != "" } {
+    load_component isp_intel_vvp_3d_lut_hdr_2; \\
+    set_component_parameter_value LUT_INIT_FILENAME_0  \${v_preset_1}; \\
+    save_component; \\
+@@ }
+    save_system; \\
+  }
+
+  set cmd [subst \${cmd}]
+  set cmd [list qsys-script --system-file=\${v_subsystem} --cmd=\${cmd} --quartus-project=${v_project_name}.qpf]
+
+  set result [catch {exec -ignorestderr -- {*}\$cmd 2>@1} result_text result_options ]
+
+  return -code \$result -options \$result_options \$result_text
+
+}
+
+post_message -type info "Updating 3D LUT preset path"
+
+set result [catch update_3d_lut_preset result_text result_options]
+
+if {\$result!=0} {
+  post_message -type error \$result_text
+}
+
+return -code \$result -options \$result_options \$result_text

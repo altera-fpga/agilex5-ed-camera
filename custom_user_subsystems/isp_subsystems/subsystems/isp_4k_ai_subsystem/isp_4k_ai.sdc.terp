@@ -1,0 +1,25 @@
+###################################################################################
+# Copyright (C) 2025 Altera Corporation
+#
+# This software and the related documents are Altera copyrighted materials, and
+# your use of them is governed by the express license under which they were
+# provided to you ("License"). Unless the License provides otherwise, you may
+# not use, modify, copy, publish, distribute, disclose or transmit this software
+# or the related documents without Altera's prior written permission.
+#
+# This software and the related documents are provided as is, with no express
+# or implied warranties, other than those that are expressly stated in the License.
+###################################################################################
+
+set_false_path -from [get_keepers {u0|isp_ai_subsystem|isp_ai_dla_lt|isp_ai_dla_lt|u_intel_dla_lt_gen|*}]       -to [get_keepers {u0|isp_ai_subsystem|isp_ai_dla_lt|isp_ai_dla_lt|u_intel_dla_lt_cpu|*_meta[*]*}]
+set_false_path -from [get_keepers {u0|isp_ai_subsystem|isp_ai_dla_lt|isp_ai_dla_lt|u_intel_dla_lt_gen|*[*]*}]   -to [get_keepers {u0|isp_ai_subsystem|isp_ai_dla_lt|isp_ai_dla_lt|u_intel_dla_lt_cpu|*_meta[*]*}]
+
+set_false_path -from [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_vvp_vfw_fres|isp_ai_vvp_vfw_fres|scheduler|vfb_control|control_irq}]       -to [get_keepers -no_duplicates {u0|niosv_subsystem_ai|cpu|cpu|hart|m_core.niosv_m_full_inst|csr_inst|irq_inst|*}]
+set_false_path -from [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_vvp_vfw_lres|isp_ai_vvp_vfw_lres|scheduler|vfb_control|control_irq}]       -to [get_keepers -no_duplicates {u0|niosv_subsystem_ai|cpu|cpu|hart|m_core.niosv_m_full_inst|csr_inst|irq_inst|*}]
+set_false_path -from [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_vvp_vfr_overlay|isp_ai_vvp_vfr_overlay|scheduler|vfr_control|control_irq}] -to [get_keepers -no_duplicates {u0|niosv_subsystem_ai|cpu|cpu|hart|m_core.niosv_m_full_inst|csr_inst|irq_inst|*}]
+set_false_path -from [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_vvp_vfr_fres|isp_ai_vvp_vfr_fres|scheduler|vfr_control|control_irq}]       -to [get_keepers -no_duplicates {u0|niosv_subsystem_ai|cpu|cpu|hart|m_core.niosv_m_full_inst|csr_inst|irq_inst|*}]
+
+set_false_path -from [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_cpu2_issue_irq|isp_ai_cpu2_issue_irq|data_out}]  -to [get_keepers -no_duplicates {u0|niosv_subsystem_ai|cpu|cpu|hart|m_core.niosv_m_full_inst|csr_inst|irq_inst|*}]
+set_false_path -from [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_cpu2_issue_irq|isp_ai_cpu2_issue_irq|data_out}]  -to [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_cpu2_irq_for_cpu|isp_ai_cpu2_irq_for_cpu|*}]
+
+set_false_path -from [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_cpu_issue_irq|isp_ai_cpu_issue_irq|data_out}]    -to [get_keepers -no_duplicates {u0|isp_ai_subsystem|isp_ai_cpu_irq_for_cpu2|isp_ai_cpu_irq_for_cpu2|*}]

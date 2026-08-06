@@ -1,0 +1,19 @@
+/*
+* Add this piece of dtsi fragment in the file socfpga_agilex5_socdk.dts
+* Compile it in the kernel along with socfpga_agilex5.dtsi
+* LW bridge starts on 0x2000_0000
+* Full bridge starts on 0x4000_0000
+*/
+
+/{
+	reserved-memory {
+
+		vfw_reserved: vfwbuffer@0 {
+			compatible = "shared-dma-pool";
+			reg = <0x0 0x82000000 0x0 0x1000000>;
+			alignment = <0x1000>;
+			no-map;
+		};
+		
+	};	
+};

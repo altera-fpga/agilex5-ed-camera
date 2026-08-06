@@ -1,0 +1,10 @@
+notebook==7.6.0
+ipympl==0.10.0
+numpy==2.5.1
+scipy==1.18.0
+colour==0.1.5
+colour-science==0.4.7
+colour-demosaicing==0.2.7
+opencv-python==4.13.0.92
+opencv-contrib-python==4.13.0.92
+matplotlib==3.11.0

@@ -1,0 +1,75 @@
+###################################################################################
+# Copyright (C) 2025 Altera Corporation
+#
+# This software and the related documents are Altera copyrighted materials, and
+# your use of them is governed by the express license under which they were
+# provided to you ("License"). Unless the License provides otherwise, you may
+# not use, modify, copy, publish, distribute, disclose or transmit this software
+# or the related documents without Altera's prior written permission.
+#
+# This software and the related documents are provided as is, with no express
+# or implied warranties, other than those that are expressly stated in the License.
+###################################################################################
+
+@@ set entity_name $param0
+
+set_global_assignment -name IP_FILE             ./../non_qpds_ip/user/dp_tx_phy/dp_clk_ctrl.ip
+set_global_assignment -name IP_FILE             ./../non_qpds_ip/user/dp_tx_phy/dp_gts_rss.ip
+set_global_assignment -name IP_FILE             ./../non_qpds_ip/user/dp_tx_phy/dp_gts_tx.ip
+
+# DP Carrier Board
+set_location_assignment PIN_BB16 -to fgt_refclk_150
+set_location_assignment PIN_BB21 -to fgt_refclk_150(n)
+
+set_instance_assignment -name IO_STANDARD "CURRENT MODE LOGIC (CML)" -to fgt_refclk_150 -entity ${entity_name}
+
+# Si5332 Programming
+set_location_assignment PIN_BR31 -to board_i2c_sda
+set_location_assignment PIN_BR28 -to board_i2c_scl
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to board_i2c_scl -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "3.3-V LVCMOS" -to board_i2c_sda -entity ${entity_name}
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 40 OHM WITHOUT CALIBRATION" -to board_i2c_scl -entity ${entity_name}
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 40 OHM WITHOUT CALIBRATION" -to board_i2c_sda -entity ${entity_name}
+set_instance_assignment -name INPUT_TERMINATION OFF -to board_i2c_scl -entity ${entity_name}
+set_instance_assignment -name INPUT_TERMINATION OFF -to board_i2c_sda -entity ${entity_name}
+set_instance_assignment -name SLEW_RATE 2 -to board_i2c_scl -entity ${entity_name}
+set_instance_assignment -name SLEW_RATE 2 -to board_i2c_sda -entity ${entity_name}
+
+set_location_assignment PIN_BY7 -to pin_dp_tx_p[0]
+set_location_assignment PIN_BT7 -to pin_dp_tx_p[1]
+set_location_assignment PIN_BL7 -to pin_dp_tx_p[2]
+set_location_assignment PIN_BG7 -to pin_dp_tx_p[3]
+
+set_location_assignment PIN_BY10 -to pin_dp_tx_n[0]
+set_location_assignment PIN_BT10 -to pin_dp_tx_n[1]
+set_location_assignment PIN_BL10 -to pin_dp_tx_n[2]
+set_location_assignment PIN_BG10 -to pin_dp_tx_n[3]
+
+set_instance_assignment -name IO_STANDARD "HIGH SPEED DIFFERENTIAL I/O" -to pin_dp_tx_p[0] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "HIGH SPEED DIFFERENTIAL I/O" -to pin_dp_tx_p[1] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "HIGH SPEED DIFFERENTIAL I/O" -to pin_dp_tx_p[2] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "HIGH SPEED DIFFERENTIAL I/O" -to pin_dp_tx_p[3] -entity ${entity_name}
+
+set_instance_assignment -name IO_STANDARD "HIGH SPEED DIFFERENTIAL I/O" -to pin_dp_tx_n[0] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "HIGH SPEED DIFFERENTIAL I/O" -to pin_dp_tx_n[1] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "HIGH SPEED DIFFERENTIAL I/O" -to pin_dp_tx_n[2] -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "HIGH SPEED DIFFERENTIAL I/O" -to pin_dp_tx_n[3] -entity ${entity_name}
+
+set_location_assignment PIN_B30 -to pin_dp_tx_hpd
+set_location_assignment PIN_B39 -to pin_dp_tx_aux_in
+set_location_assignment PIN_B35 -to pin_dp_tx_cad
+set_location_assignment PIN_A33 -to pin_dp_tx_aux_out
+set_location_assignment PIN_B23 -to pin_dp_tx_aux_oe
+
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to pin_dp_tx_hpd -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to pin_dp_tx_aux_in -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to pin_dp_tx_cad -entity ${entity_name}
+set_instance_assignment -name SLEW_RATE 2 -to pin_dp_tx_cad -entity ${entity_name}
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 30 OHM WITHOUT CALIBRATION" -to pin_dp_tx_cad -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to pin_dp_tx_aux_out -entity ${entity_name}
+set_instance_assignment -name SLEW_RATE 2 -to pin_dp_tx_aux_out -entity ${entity_name}
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 30 OHM WITHOUT CALIBRATION" -to pin_dp_tx_aux_out -entity ${entity_name}
+set_instance_assignment -name IO_STANDARD "1.8-V LVCMOS" -to pin_dp_tx_aux_oe -entity ${entity_name}
+set_instance_assignment -name SLEW_RATE 2 -to pin_dp_tx_aux_oe -entity ${entity_name}
+set_instance_assignment -name OUTPUT_TERMINATION "SERIES 30 OHM WITHOUT CALIBRATION" -to pin_dp_tx_aux_oe -entity ${entity_name}

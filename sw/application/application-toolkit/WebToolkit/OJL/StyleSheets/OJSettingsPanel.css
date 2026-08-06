@@ -1,0 +1,143 @@
+.settings_panel_class
+{
+	cursor:default;
+	background-color:#454549;
+	overflow:hidden;
+	position:absolute;
+	left:1920px;
+	top:0px;
+	width:480px;
+	height:1000px;
+	overflow:hidden;
+	z-index:100;
+	/*box-shadow: 0px 0px 2px 2px#909090 ;*/
+}
+
+.settings_sub_panel_class
+{
+	cursor:default;
+	background-color:#454549;
+	overflow:hidden;
+	position:absolute;
+	top:45px;
+	left:0px;
+	width:480px;
+	height:900px;
+	overflow:hidden;
+	opacity:0;
+}
+
+.oj_panel
+{
+	overflow:hidden;
+	background-color: #7f91a4;
+	border: 0px solid;
+	border-radius: 2px;
+	border-color: #ff0000;
+	/*box-shadow: 0px 0px 2px #000000;*/
+	position: absolute;
+	width: 400px;
+	height: 200px;
+	left:10px;
+	top:10px;
+}
+
+.oj_panel_title
+{
+	position: absolute;
+	color: #f0f0f0;
+	background-color: #5d6d7d;
+	border-bottom-color: #ff5040;
+	border-bottom: 2px solid;
+	width: 400px;
+	height: 21px;
+	left: 0px;
+	top: 0px;
+	text-indent:5px;
+}
+
+.oj_panel_item
+{
+	color: #f0f0f0;
+	position: absolute;
+	width: 400px;
+	height: 40px;
+	line-height:35px;
+	left: 0px;
+	text-indent:5px;
+}
+
+@-webkit-keyframes show_settings_panel
+{
+	0% { left:1920px; opacity:0.0; }
+	100% { left:1420px; opacity:1.0; }
+}
+
+@keyframes show_settings_panel
+{
+	0% { left:1920px; opacity:0.0; }
+	100% { left:1420px; opacity:1.0; }
+}
+
+@-webkit-keyframes hide_settings_panel
+{
+	0% { left:1420px; opacity:1.0;}
+	100% { left:1920px; opacity:0.0;}
+}
+
+@keyframes hide_settings_panel
+{
+	0% { left:1420px; opacity:1.0;}
+	100% { left:1920px; opacity:0.0;}
+}
+
+.settings_window_header_class
+{
+	position:absolute;
+	width:470px;
+	height:26px;
+	cursor:default;
+	color:#d0d0d0;
+	position:absolute;
+	border:0px;
+	text-indent:15px;
+	line-height:26px;
+
+	background-image: -ms-linear-gradient(top, #3c646f 0%, #3c646f 90%, #7fcbef 95%, #3c646f 100%);
+	background-image: -moz-linear-gradient(top, #3c646f 0%, #3c646f 90%, #7fcbef 95%, #3c646f 100%);
+	background-image: -o-linear-gradient(top, #3c646f 0%, #3c646f 90%, #7fcbef 95%, #3c646f 100%);
+	background-image: -webkit-linear-gradient(top, #3c646f 0%, #3c646f 90%, #7fcbef 95%, #3c646f 100%);
+	background-image: linear-gradient(to bottom, #3c646f 0%, #3c646f 90%, #7fcbef 95%, #3c646f 100%);
+}
+
+.settings_window_footer_class
+{
+	position:absolute;
+	width:470px;
+	height:26px;
+	cursor:default;
+	color:#d0d0d0;
+	position:absolute;
+	border:0px;
+	text-indent:15px;
+	line-height:26px;
+	bottom:0px;
+
+	background-image: -ms-linear-gradient(top, #3c646f 0%, #7fcbef 5%, #3c646f 10%, #3c646f 100%);
+	background-image: -moz-linear-gradient(top, #3c646f 0%, #7fcbef 5%, #3c646f 10%, #3c646f 100%);
+	background-image: -o-linear-gradient(top, #3c646f 0%, #7fcbef 5%, #3c646f 10%, #3c646f 100%);
+	background-image: -webkit-linear-gradient(top, #3c646f 0%, #7fcbef 5%, #3c646f 10%, #3c646f 100%);
+	background-image: linear-gradient(to bottom, #3c646f 0%, #7fcbef 5%, #3c646f 10%, #3c646f 100%);
+}
+
+@-webkit-keyframes show_settings_sub_panel
+{
+	0% { opacity:0.0; }
+	100% { opacity:1.0; }
+}
+
+@keyframes show_settings_sub_panel
+{
+	0% { opacity:0.0; }
+	100% { opacity:1.0; }
+}

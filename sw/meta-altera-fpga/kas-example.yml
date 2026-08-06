@@ -1,0 +1,24 @@
+header:
+  version: 17
+  includes:
+    - repo: meta-altera-fpga
+      file: kas/base.yml
+    - repo: meta-altera-fpga
+      file: kas/poky.yml
+    - repo: meta-altera-fpga
+      file: kas/dev.yml
+    - repo: meta-altera-fpga
+      file: kas/docker.yml
+repos:
+  meta-altera-fpga:
+    path: .
+    layers:
+      meta-altera-bsp:
+      meta-altera-core:
+      meta-altera-devkit:
+      meta-altera-vendor:
+local_conf_header:
+  example_project: |
+    IMAGE_INSTALL:append = " expand-root-partition"
+    SOCFPGA_FEATURES += ""
+

@@ -1,0 +1,22 @@
+/*
+* Add this piece of dtsi fragment in the file socfpga_agilex5_socdk.dts
+* Compile it in the kernel along with socfpga_agilex5.dtsi
+* LW bridge starts on 0x2000_0000
+* Full bridge starts on 0x4000_0000
+*/
+
+/{
+	soc@0 {
+
+        omnitek0: omnitek0@40000000 {
+			status = "okay";
+			compatible = "Omnitek,OT-hc-localfpga";
+			reg = <0x40000000 0x20000000>;
+			interrupt-parent = <&intc>;
+			interrupts = <0 17 4>, <0 18 4>, <0 19 4>, <0 20 4>, <0 21 4>, <0 22 4>,
+				<0 23 4>, <0 24 4>, <0 25 4>, <0 26 4>,
+				<0 27 4>, <0 28 4>, <0 29 4>, <0 30 4>,
+				<0 31 4>, <0 32 4>, <0 33 4>, <0 34 4>;
+		};
+	};
+};

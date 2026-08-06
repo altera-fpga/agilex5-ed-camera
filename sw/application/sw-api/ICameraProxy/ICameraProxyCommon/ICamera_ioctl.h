@@ -1,0 +1,148 @@
+/*******************************************************************************
+Copyright (C) Altera Corporation
+
+This code and the related documents are Altera copyrighted materials and your
+use of them is governed by the express license under which they were provided to
+you ("License"). This code and the related documents are provided as is, with no
+express or implied warranties other than those that are expressly stated in the 
+License.
+*******************************************************************************/
+
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <sys/ioctl.h>
+#include <ICamera.h>
+
+#define ICAMERA_MAX_STRING 256
+
+typedef struct _ICameraIOCTL_CTL {
+    uint32_t addr;
+    uint32_t val;
+} ICameraIOCTL_CTL;
+
+typedef struct _ICameraIOCTL_RESOLUTION {
+    uint16_t width;
+    uint16_t height;
+} ICameraIOCTL_RESOLUTION;
+
+typedef struct _ICameraIOCTL_RANGE_UINT32T {
+    uint32_t low;
+    uint32_t high;
+} ICameraIOCTL_RANGE_UINT32T;
+
+typedef struct _ICameraIOCTL_RANGE_FLOAT {
+    float low;
+    float high;
+} ICameraIOCTL_RANGE_FLOAT;
+
+enum class ICameraIOCTL_N : uint32_t {
+    GET_MIPI_INTERFACE_N,
+
+    START_N,
+    STOP_N,
+    RESET_N,
+
+    GET_FOCUS_N,
+    SET_FOCUS_N,
+    GET_FOCUS_RANGE_N,
+
+    GET_EXPOSURE_N,
+    SET_EXPOSURE_N,
+    GET_EXPOSURE_TIME_N,
+    GET_EXPOSURE_RANGE_N,
+    GET_EXPOSURE_STEP_N,
+
+    GET_FRAMERATE_N,
+    SET_FRAMERATE_N,
+    GET_FRAMERATE_RANGE_N,
+    GET_FRAMERATE_STEP_N,
+
+    GET_SHUTTER_SPEED_N,
+    SET_SHUTTER_SPEED_N,
+    GET_SHUTTER_SPEED_RANGE_N,
+    GET_SHUTTER_SPEED_STEP_N,
+
+    GET_ANALOGUE_GAIN_N,
+    SET_ANALOGUE_GAIN_N,
+    GET_ANALOGUE_GAIN_RANGE_N,
+    GET_ANALOGUE_GAIN_STEP_N,
+
+    GET_DIGITAL_GAIN_N,
+    SET_DIGITAL_GAIN_N,
+    GET_DIGITAL_GAIN_RANGE_N,
+    GET_DIGITAL_GAIN_STEP_N,
+
+    GET_RESOLUTION_N,
+    SET_RESOLUTION_N,
+
+    GET_TARGET_FRAMERATE_N,
+    SET_TARGET_FRAMERATE_N,
+
+    GET_CFA_PHASE_N,
+    SET_CFA_PHASE_N,
+
+    GET_HDR_STATE_N,
+    SET_HDR_STATE_N,
+
+    GET_MODEL_N,
+
+    CTL_READ_N,
+    CTL_WRITE_N,
+};
+
+#define ICAMERA_SUBSYSTEM 'E'
+
+enum class ICameraIOCTL : uint32_t {
+    GET_MIPI_INTERFACE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_MIPI_INTERFACE_N, uint32_t),
+
+    START = _IO(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::START_N),
+    STOP = _IO(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::STOP_N),
+    RESET = _IO(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::RESET_N),
+
+    GET_FOCUS = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_FOCUS_N, uint32_t),
+    SET_FOCUS = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_FOCUS_N, uint32_t),
+    GET_FOCUS_RANGE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_FOCUS_RANGE_N, ICameraIOCTL_RANGE_UINT32T),
+    
+    GET_EXPOSURE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_EXPOSURE_N, float),
+    SET_EXPOSURE = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_EXPOSURE_N, float),
+    GET_EXPOSURE_TIME = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_EXPOSURE_TIME_N, float),
+    GET_EXPOSURE_RANGE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_EXPOSURE_RANGE_N, ICameraIOCTL_RANGE_FLOAT),
+    GET_EXPOSURE_STEP = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_EXPOSURE_STEP_N, float),
+
+    GET_FRAMERATE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_FRAMERATE_N, float),
+    SET_FRAMERATE = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_FRAMERATE_N, float),
+    GET_FRAMERATE_RANGE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_FRAMERATE_RANGE_N, ICameraIOCTL_RANGE_FLOAT),
+    GET_FRAMERATE_STEP = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_FRAMERATE_STEP_N, float),
+
+    GET_SHUTTER_SPEED = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_SHUTTER_SPEED_N, float),
+    SET_SHUTTER_SPEED = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_SHUTTER_SPEED_N, float),
+    GET_SHUTTER_SPEED_RANGE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_SHUTTER_SPEED_RANGE_N, ICameraIOCTL_RANGE_FLOAT),
+    GET_SHUTTER_SPEED_STEP = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_SHUTTER_SPEED_STEP_N, float),
+
+    GET_ANALOGUE_GAIN = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_ANALOGUE_GAIN_N, float),
+    SET_ANALOGUE_GAIN = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_ANALOGUE_GAIN_N, float),
+    GET_ANALOGUE_GAIN_RANGE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_ANALOGUE_GAIN_RANGE_N, ICameraIOCTL_RANGE_FLOAT),
+    GET_ANALOGUE_GAIN_STEP = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_ANALOGUE_GAIN_STEP_N, float),
+
+    GET_DIGITAL_GAIN = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_DIGITAL_GAIN_N, float),
+    SET_DIGITAL_GAIN = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_DIGITAL_GAIN_N, float),
+    GET_DIGITAL_GAIN_RANGE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_DIGITAL_GAIN_RANGE_N, ICameraIOCTL_RANGE_FLOAT),
+    GET_DIGITAL_GAIN_STEP = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_DIGITAL_GAIN_STEP_N, float),
+
+    GET_RESOLUTION = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_RESOLUTION_N, ICameraIOCTL_RESOLUTION),
+    SET_RESOLUTION = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_RESOLUTION_N, ICameraIOCTL_RESOLUTION),
+
+    GET_TARGET_FRAMERATE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_TARGET_FRAMERATE_N, uint32_t),
+    SET_TARGET_FRAMERATE = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_TARGET_FRAMERATE_N, uint32_t),
+
+    GET_CFA_PHASE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_CFA_PHASE_N, TCfaPhase),
+    SET_CFA_PHASE = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_CFA_PHASE_N, TCfaPhase),
+
+    GET_HDR_STATE = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_HDR_STATE_N, bool),
+    SET_HDR_STATE = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::SET_HDR_STATE_N, bool),
+
+    GET_MODEL = _IOR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::GET_MODEL_N, char[ICAMERA_MAX_STRING]),
+
+    CTL_READ = _IOWR(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::CTL_READ_N, ICameraIOCTL_CTL),
+    CTL_WRITE = _IOW(ICAMERA_SUBSYSTEM, (uint32_t)ICameraIOCTL_N::CTL_WRITE_N, ICameraIOCTL_CTL),
+};

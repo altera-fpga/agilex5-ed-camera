@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="100mm"
+   height="85mm"
+   viewBox="0 0 100 85"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <marker
+       style="overflow:visible"
+       id="ArrowWideHeavy"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       markerWidth="1"
+       markerHeight="1"
+       viewBox="0 0 1 1"
+       preserveAspectRatio="xMidYMid">
+      <path
+         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
+         d="m 1,0 -3,3 h -2 l 3,-3 -3,-3 h 2 z"
+         id="path9" />
+    </marker>
+  </defs>
+  <rect
+     style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.25;stroke-dasharray:0.25, 0.750001;stroke-dashoffset:0;stroke-opacity:1"
+     id="rect11"
+     width="100"
+     height="85"
+     x="0"
+     y="0" />
+  <rect
+     style="fill:none;stroke:#000000;stroke-width:0.25;stroke-dasharray:none;stroke-opacity:1"
+     id="rect1"
+     width="5"
+     height="5"
+     x="32.5"
+     y="72.5" />
+  <ellipse
+     style="fill:none;stroke:#000000;stroke-width:0.25;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#ArrowWideHeavy)"
+     id="path2"
+     cx="35"
+     cy="70"
+     rx="1.5"
+     ry="0.5" />
+  <path
+     style="fill:none;stroke:#ff0000;stroke-width:0.25;stroke-dasharray:none;stroke-opacity:1"
+     d="m 35,70 c 0,0 55,-53 55,-53"
+     id="path3" />
+  <path
+     style="fill:none;stroke:#00c400;stroke-width:0.25;stroke-dasharray:none;stroke-opacity:1"
+     d="m 35,75 l 55,-58"
+     id="path4" />
+  <path
+     style="fill:none;stroke:#c4c4c4;stroke-width:0.25;stroke-dasharray:none;stroke-opacity:1"
+     d="m 35,75 l 0,-70"
+     id="path5" />
+  <path
+     style="fill:none;stroke:#ff0000;stroke-width:0.25;stroke-dasharray:none;stroke-opacity:1"
+     d="m 35,55 a 20 20 0 0 1 10 5"
+     id="path6" />
+  <path
+     style="fill:none;stroke:#00c400;stroke-width:0.25;stroke-dasharray:none;stroke-opacity:1"
+     d="m 35,62.5 a 12.5 12.5 0 0 1 8 4"
+     id="path7" />
+  <text
+     xml:space="preserve"
+     style="font-size:4.9389px;writing-mode:lr-tb;direction:ltr;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.25;stroke-dasharray:0.25, 0.25;stroke-dashoffset:0;stroke-opacity:1"
+     x="40"
+     y="55"
+     id="text7"><tspan
+       id="tspan7"
+       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.25;stroke-opacity:1"
+       x="40"
+       y="55">a</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-size:4.9389px;writing-mode:lr-tb;direction:ltr;fill:#00c400;fill-opacity:1;stroke:none;stroke-width:0.25;stroke-dasharray:0.25, 0.25;stroke-dashoffset:0;stroke-opacity:1"
+     x="42"
+     y="72"
+     id="text8"><tspan
+       id="tspan8"
+       style="fill:#00c400;fill-opacity:1;stroke-width:0.25"
+       x="42"
+       y="72">b</tspan></text>
+  <ellipse
+     style="fill:none;stroke:#000000;stroke-width:0.25;stroke-dasharray:none;stroke-opacity:1"
+     id="path2-5"
+     cx="40"
+     cy="75"
+     rx="0.5"
+     ry="1.5" />
+  <circle
+     style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.25;stroke-dasharray:0.25, 0.750001;stroke-dashoffset:0;stroke-opacity:1"
+     id="path10"
+     cx="90"
+     cy="17"
+     r="1" />
+  <text
+     xml:space="preserve"
+     style="font-size:4.9389px;writing-mode:lr-tb;direction:ltr;fill:#00c400;fill-opacity:1;stroke:none;stroke-width:0.25;stroke-dasharray:0.25, 0.750001;stroke-dashoffset:0;stroke-opacity:1"
+     x="60.5"
+     y="53.5"
+     id="text10"><tspan
+       id="tspan10"
+       style="fill:#00c400;fill-opacity:1;stroke-width:0.25"
+       x="60.5"
+       y="53.5">R</tspan></text>
+  <path
+     style="fill:#00c400;fill-opacity:1;stroke:#000000;stroke-width:0.25;stroke-dasharray:0.25, 0.750001;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#ArrowWideHeavy)"
+     d="m 30,75 v -5"
+     id="path11" />
+  <text
+     xml:space="preserve"
+     style="font-size:4.9389px;writing-mode:lr-tb;direction:ltr;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.25;stroke-dasharray:0.25, 0.750001;stroke-dashoffset:0;stroke-opacity:1"
+     x="25"
+     y="75"
+     id="text11"><tspan
+       id="tspan11"
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.25"
+       x="25"
+       y="75">d</tspan></text>
+</svg>

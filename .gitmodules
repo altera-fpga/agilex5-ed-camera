@@ -1,4 +1,3 @@
 [submodule "modular-design-toolkit"]
 	path = modular-design-toolkit
-	url = https://github.com/altera-fpga/modular-design-toolkit.git
-	branch = rel/25.1
+	url = https://grp-sseteamcityagent@github.com/altera-fpga/modular-design-toolkit.git

@@ -1,0 +1,46 @@
+.menu_container_class
+{
+	background:#353545;
+	position:absolute;
+	left:400px;
+	visibility:hidden;
+	/*box-shadow: 0 0 5px #000000;*/
+	border-radius:5px;
+}
+
+.menu_row_class
+{
+}
+
+
+
+.menu_item_cell_class
+{
+	padding-left: 15px;
+	padding-right: 10px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	cursor: default;
+	border:1px;
+	border-style:solid;
+	border-color:#4c4c4c;
+}
+	
+.menu_item_cell_class:hover
+{
+	background:rgb(193, 94, 25);
+}
+
+.tablet_menu_item_cell_class
+{
+	padding-left: 15px;
+	padding-right: 10px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	cursor: default;
+}
+
+.tablet_menu_item_cell_class:hover
+{
+	background:rgb(193, 94, 25);
+}

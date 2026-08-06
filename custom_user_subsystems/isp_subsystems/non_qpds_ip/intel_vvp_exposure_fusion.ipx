@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<library>
+<index file="intel_vvp_exposure_fusion/intel_vvp_exposure_fusion_hw.tcl" />
+</library>

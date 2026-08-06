@@ -1,0 +1,60 @@
+diff --git a/drivers/dma/altera-msgdma.c b/drivers/dma/altera-msgdma.c
+index 63bc82400eeb..3ebe3050da47 100644
+--- a/drivers/dma/altera-msgdma.c
++++ b/drivers/dma/altera-msgdma.c
+@@ -663,6 +663,47 @@
+ }
+ 
+ /**
++ * msgdma_terminate_all - Stop in-flight transfers and reset the channel
++ * @dchan: DMA channel pointer
++ *
++ * Without this callback dmaengine_terminate_sync() is a no-op against
++ * altera-msgdma: the dispatcher stays in its "busy waiting for streaming
++ * data" state after a dma_sync_wait timeout (CSR status bit 0 stuck high)
++ * and mdev->idle is only ever cleared back to true by the IRQ handler on
++ * completion. msgdma_userio_chr's read/write error paths therefore leave
++ * the channel permanently wedged: the next msgdma_start_transfer() short-
++ * circuits on !mdev->idle and the user-mode caller sees back-to-back 5 s
++ * timeouts.
++ *
++ * IMPORTANT: msgdma_userio_chr calls dmaengine_terminate_sync() on every
++ * transfer, including the success path. Pulsing the dispatcher reset on
++ * a healthy idle channel is at best wasted work and at worst disruptive
++ * to the connected Avalon-ST source/sink on the FPGA (which often shares
++ * a reset net with the dispatcher), so we only reset when the channel is
++ * actually stuck.
++ *
++ * msgdma_reset() uses readl_poll_timeout() which can sleep, so it MUST
++ * NOT be called while mdev->lock is held; do the list cleanup under the
++ * lock first and the reset after dropping it.
++ */
++static int msgdma_terminate_all(struct dma_chan *dchan)
++{
++	struct msgdma_device *mdev = to_mdev(dchan);
++	unsigned long flags;
++	bool need_reset;
++
++	spin_lock_irqsave(&mdev->lock, flags);
++	need_reset = !mdev->idle;
++	msgdma_free_descriptors(mdev);
++	spin_unlock_irqrestore(&mdev->lock, flags);
++
++	if (need_reset)
++		msgdma_reset(mdev);
++
++	return 0;
++}
++
++/**
+  * msgdma_alloc_chan_resources - Allocate channel resources
+  * @dchan: DMA channel
+  *
+@@ -902,6 +943,7 @@
+ 
+ 	dma_dev->device_alloc_chan_resources = msgdma_alloc_chan_resources;
+ 	dma_dev->device_free_chan_resources = msgdma_free_chan_resources;
++	dma_dev->device_terminate_all = msgdma_terminate_all;
+ 
+ 	mdev->dmachan.device = dma_dev;
+ 	list_add_tail(&mdev->dmachan.device_node, &dma_dev->channels);

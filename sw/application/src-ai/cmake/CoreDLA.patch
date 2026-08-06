@@ -1,0 +1,407 @@
+# *******************************************************************************
+# Copyright (C) Altera Corporation
+#
+# This code and the related documents are Altera copyrighted materials and your
+# use of them is governed by the express license under which they were provided to
+# you ("License"). This code and the related documents are provided as is, with no
+# express or implied warranties other than those that are expressly stated in the 
+# License.
+# *******************************************************************************/
+
+diff -rupN mycoredla-src-orig/CMakeLists.txt mycoredla-src/CMakeLists.txt
+--- mycoredla-src-orig/CMakeLists.txt	1970-01-01 01:00:00.000000000 +0100
++++ mycoredla-src/CMakeLists.txt	2026-05-12 15:26:22.609918275 +0100
+@@ -0,0 +1,27 @@
++# *******************************************************************************
++# Copyright (C) Altera Corporation
++#
++# This code and the related documents are Altera copyrighted materials and your
++# use of them is governed by the express license under which they were provided to
++# you ("License"). This code and the related documents are provided as is, with no
++# express or implied warranties other than those that are expressly stated in the 
++# License.
++# *******************************************************************************/
++
++cmake_minimum_required(VERSION 3.16)
++project(FpgaAiSuite
++    VERSION 2025.1
++    DESCRIPTION "The FPGA AI Suite enables FPGA designers, machine learning engineers, and software developers to create optimized FPGA AI platforms efficiently."
++    HOMEPAGE_URL "https://www.intel.com/content/www/us/en/products/details/fpga/development-tools/fpga-ai-suite.html"
++    LANGUAGES CXX C)
++
++set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -pipe -Wno-psabi")
++set(CMAKE_C_FLAGS_DEBUG "-g -O0 -pipe -Wno-psabi")
++set(CMAKE_CXX_FLAGS_RELEASE "-g0 -O3 -flto -funroll-all-loops -fpeel-loops -ftracer -ftree-vectorize -pie -fPIE -fPIC -fstack-protector-all -fstack-protector-strong -D_FORTIFY_SOURCE=2 -pipe -Wformat -Wformat-security -Werror=format-security -fstack-clash-protection -feliminate-unused-debug-types -Wno-psabi")
++set(CMAKE_C_FLAGS_RELEASE "-g0 -O3 -flto -funroll-all-loops -fpeel-loops -ftracer -ftree-vectorize -pie -fPIE -fPIC -fstack-protector-all -fstack-protector-strong -D_FORTIFY_SOURCE=2 -pipe -Wformat -Wformat-security -Werror=format-security -fstack-clash-protection -feliminate-unused-debug-types -Wno-psabi")
++
++set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
++set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
++
++
++add_subdirectory(opt/altera/fpga_ai_suite_2026.1.1/dla)
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/CMakeLists.txt mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/CMakeLists.txt
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/CMakeLists.txt	1970-01-01 01:00:00.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/CMakeLists.txt	2026-05-12 15:26:22.613918263 +0100
+@@ -0,0 +1,45 @@
++# *******************************************************************************
++# Copyright (C) Altera Corporation
++#
++# This code and the related documents are Altera copyrighted materials and your
++# use of them is governed by the express license under which they were provided to
++# you ("License"). This code and the related documents are provided as is, with no
++# express or implied warranties other than those that are expressly stated in the 
++# License.
++# *******************************************************************************/
++
++cmake_minimum_required(VERSION 3.16)
++project(FpgaAiSuiteDLA
++    VERSION 2025.1
++    DESCRIPTION "The FPGA AI Suite enables FPGA designers, machine learning engineers, and software developers to create optimized FPGA AI platforms efficiently."
++    HOMEPAGE_URL "https://www.intel.com/content/www/us/en/products/details/fpga/development-tools/fpga-ai-suite.html"
++    LANGUAGES CXX C
++)
++
++
++set(ARM TRUE)
++set(DISABLE_JIT TRUE)
++set(HPS_PLATFORM TRUE)
++set(HW_BUILD_PLATFORM HPS_PLATFORM)
++add_definitions(-DHW_BUILD_PLATFORM=HPS_PLATFORM)
++
++set(Protobuf_USE_STATIC_LIBS ON CACHE BOOL "" FORCE)
++set(protobuf_MODULE_COMPATIBLE ON CACHE BOOL "" FORCE)
++find_package(Protobuf CONFIG REQUIRED)
++if(CMAKE_CROSSCOMPILING)
++    if(NOT Protobuf_HOST_PROTOC_EXECUTABLE)
++        find_program(Protobuf_HOST_PROTOC_EXECUTABLE protoc)
++    endif()
++endif()
++set_target_properties(protobuf::protoc PROPERTIES
++    IMPORTED_LOCATION_RELEASE ${Protobuf_HOST_PROTOC_EXECUTABLE}
++)
++set_target_properties(protobuf::protoc PROPERTIES
++    IMPORTED_LOCATION_DEBUG ${Protobuf_HOST_PROTOC_EXECUTABLE}
++)
++
++set(COREDLA_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
++set(CoreDLA_DIR ${COREDLA_ROOT}/cmake)
++set(ENV{COREDLA_ROOT} ${COREDLA_ROOT})
++set(ENV{COREDLA_XUTIL_DIR} ${COREDLA_ROOT}/util)
++add_subdirectory(runtime)
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/arch/CMakeLists.txt mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/arch/CMakeLists.txt
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/arch/CMakeLists.txt	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/arch/CMakeLists.txt	2026-05-12 15:26:22.613918263 +0100
+@@ -27,9 +27,9 @@ find_package(Protobuf CONFIG REQUIRED)
+ # Protobuf Config find_package does not support Protobuf_PROTOC_EXECUTABLE, but we can do it ourselves here
+ if(HPS_PLATFORM AND CMAKE_CROSSCOMPILING)
+   # Find protoc for the host system
+-  set_target_properties(protobuf::protoc PROPERTIES
+-      IMPORTED_LOCATION_RELEASE $ENV{PROTOBUF_HOME}/bin/protoc
+-  )
++#  set_target_properties(protobuf::protoc PROPERTIES
++#      IMPORTED_LOCATION_RELEASE $ENV{PROTOBUF_HOME}/bin/protoc
++#  )
+ elseif (Protobuf_PROTOC_EXECUTABLE)
+   get_target_property(ORIGINAL_Protobuf_PROTOC_EXECUTABLE protobuf::protoc IMPORTED_LOCATION_RELEASE)
+   set_target_properties(protobuf::protoc PROPERTIES
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_compiled_model.h mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_compiled_model.h
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_compiled_model.h	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_compiled_model.h	2026-05-12 15:26:23.161916723 +0100
+@@ -340,17 +340,13 @@ class DLACompiledModel : public ov::ICom
+   // Maximum number of pipelines per CoreDLA instance. This is configurable but is important to
+   // note that the CoreDLA runtime allocates max_num_pipelines_ of input and output buffers.
+   // This can quickly increase memory requirements if a graph has large input and output sizes.
+-  const int max_num_pipelines_ = 5;
++  const int max_num_pipelines_ = 8;
+   // Number of instances in the architecture
+   int num_instances_;
+   // GraphJob represents a network which is loaded onto a device
+   // Graph data (config, weights, biases) is loaded onto N instances on device
+   // GraphJob is tied to 1 instance. So, there are N GraphJobs created.
+   std::vector<GraphJob*> model_on_device_;
+-  // 4 inference requests are required for streaming. To keep the DLA engine primed,
+-  // 1 will be executing, and 1 will be scheduled. 2 more are required to double-buffer
+-  // the input from the msgdma
+-  const uint32_t num_streaming_infer_req_ = 4;
+   const std::string cancel_semaphore_name_ = "/CoreDLA_cancel_async_inferences";
+   mutable std::function<bool()> cancel_check_ = nullptr;
+   IOMap<InputTransformation::Ptr> input_transformation_;
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_config.hpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_config.hpp
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_config.hpp	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_config.hpp	2026-05-12 15:26:23.161916723 +0100
+@@ -76,6 +76,7 @@ struct Configuration {
+   bool externalStreaming = false;
+   bool heteroEnabled = false;
+   uint32_t streamingDropSourceBuffers = 0;
++  uint32_t num_streaming_infer_req = 4;
+   std::string streaming_input_pipe = "";
+   bool mmdLogging = false;
+   std::string jtagPath = "";
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_plugin_config.hpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_plugin_config.hpp
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_plugin_config.hpp	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dla_plugin_config.hpp	2026-05-12 15:26:23.161916723 +0100
+@@ -121,12 +121,6 @@ static constexpr ov::Property<std::strin
+     "STREAM_CONTROLLER_STATUS"};
+ 
+ /**
+- * @brief Number of inference request to create for streaming
+- */
+-static constexpr ov::Property<uint32_t, ov::PropertyMutability::RO> num_streaming_inference_requests{
+-    "NUM_STREAMING_INFERENCE_REQUESTS"};
+-
+-/**
+  * @brief FPGA board temperature sensor reading.
+  */
+ static constexpr ov::Property<float, ov::PropertyMutability::RO> fpga_board_temperature{"FPGA_BOARD_TEMPERATURE"};
+@@ -358,6 +352,9 @@ static constexpr ov::Property<ov::AnyMap
+  */
+ static constexpr ov::Property<std::string, ov::PropertyMutability::WO> online_reconfig{"ONLINE_RECONFIG"};
+ 
++static constexpr ov::Property<uint32_t, ov::PropertyMutability::RW> num_streaming_inference_requests{
++    "NUM_STREAMING_INFERENCE_REQUESTS"};
++
+ #else  // Compiler dla plugin config keys
+ 
+ /**
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dlia_infer_request.h mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dlia_infer_request.h
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dlia_infer_request.h	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dlia_infer_request.h	2026-05-12 15:26:23.161916723 +0100
+@@ -40,6 +40,13 @@
+ #include "graph_job.h"
+ #include "dla_aligned_allocator.h"
+ 
++class DdrAddressesVariableState : public ov::IVariableState
++{
++public:
++  DdrAddressesVariableState() : ov::IVariableState("DdrAddresses") {}
++  virtual ~DdrAddressesVariableState() {}
++};
++
+ using uchar = unsigned char;
+ using AlignedVec = std::vector<uint8_t, aligned_allocator<uint8_t, kMsgDMAMaxBurstBytes>>;
+ 
+@@ -163,6 +170,8 @@ class DLIAInferRequest : public ov::ISyn
+   std::shared_ptr<BatchJob> dla_device_job_;
+   unsigned int instance_;
+   const bool streaming_input_;
++
++  std::vector<ov::SoPtr<ov::IVariableState>> _state;
+ };
+ 
+ }  // namespace DLIAPlugin
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dlia_plugin.h mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dlia_plugin.h
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dlia_plugin.h	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/inc/dlia_plugin.h	2026-05-12 15:26:23.161916723 +0100
+@@ -318,7 +318,7 @@ class Engine : public ov::IPlugin {
+     }
+   }
+   // How long to wait for an inference to time out
+-  static constexpr uint32_t WAIT_FOR_DLA_TIMEOUT = 30;
++  static constexpr uint32_t WAIT_FOR_DLA_TIMEOUT = 60*60*24;
+   // Throughput estimates imported via AOT flow.
+   // Maps hetero_compile_id -> the throughput estimates for the subgraphs in that hetero compile
+   mutable std::unordered_map<size_t, std::vector<double>> imported_throughput_ests_;
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/CMakeLists.txt mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/CMakeLists.txt
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/CMakeLists.txt	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/io_transformations/CMakeLists.txt	2026-05-12 15:26:23.161916723 +0100
+@@ -26,13 +26,13 @@ else()
+                 $ENV{COREDLA_ROOT}/compiler/core/src/fpga_inc/fpga_common_utils_macros.h)
+ endif()
+ 
+-if (NOT ARM)
++#if (NOT ARM)
+     # ED4 OV is not built with tbb threading
+     find_package(TBB REQUIRED tbb)
+     if (NOT DEFINED TBB_IMPORTED_TARGETS)
+       set (TBB_IMPORTED_TARGETS TBB::tbb)
+     endif()
+-endif()
++#endif()
+ 
+ # Create imported target xbyak
+ #add_library(xbyak INTERFACE IMPORTED)
+@@ -90,7 +90,7 @@ if(NOT DISABLE_JIT)
+         $<TARGET_PROPERTY:dla_compiler_core,INTERFACE_COMPILE_DEFINITIONS>)
+     target_link_libraries(dliaPluginIOTransformations PUBLIC dla_compiled_result  ${TBB_IMPORTED_TARGETS})
+ else()
+-    if ( NOT ARM )
++    #if ( NOT ARM )
+         target_link_libraries(dliaPluginIOTransformations PUBLIC ${TBB_IMPORTED_TARGETS})
+-    endif()
++    #endif()
+ endif()
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_compiled_model.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_compiled_model.cpp
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_compiled_model.cpp	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_compiled_model.cpp	2026-05-12 15:26:23.165916712 +0100
+@@ -335,7 +335,7 @@ void DLIAPlugin::DLACompiledModel::InitD
+     Device* dla_device = this->device_->dla_device.get();
+     bool scheduler_ok =
+         dla_device->InitializeScheduler(source_buffer_size, drop_source_buffers,
+-          this->num_streaming_infer_req_, this->cfg_.streaming_input_pipe);
++          this->cfg_.num_streaming_infer_req, this->cfg_.streaming_input_pipe);
+     if (!scheduler_ok) {
+       OPENVINO_THROW("Scheduler module initialization failed. Check that you have an S2M bitstream.");
+     }
+@@ -702,7 +702,7 @@ ov::Any DLIAPlugin::DLACompiledModel::ge
+   }
+ #ifdef RUNTIME_DLA_PLUGIN  // Runtime exclusive
+   else if (DLIAPlugin::properties::num_streaming_inference_requests == name) {
+-    return ov::Any(this->num_streaming_infer_req_);
++    return ov::Any(this->cfg_.num_streaming_infer_req);
+   } else if (DLIAPlugin::properties::cancel_semaphore_name == name) {
+     return ov::Any(this->cancel_semaphore_name_);
+   } else if (DLIAPlugin::properties::stream_controller_status == name) {
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_config.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_config.cpp
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_config.cpp	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dla_config.cpp	2026-05-12 15:26:23.165916712 +0100
+@@ -117,6 +117,8 @@ DLIAPlugin::Configuration::Configuration
+       enableStreaming = externalStreaming;
+     } else if (DLIAPlugin::properties::streaming_drop_source_buffers == key) {
+       streamingDropSourceBuffers = std::stoul(value.as<std::string>());
++    } else if (DLIAPlugin::properties::num_streaming_inference_requests == key) {
++      num_streaming_infer_req = std::stoul(value.as<std::string>());
+     } else if (DLIAPlugin::properties::streaming_input_pipe == key) {
+       streaming_input_pipe = value.as<std::string>();
+     } else if (DLIAPlugin::properties::enable_mmd_log_name == key) {
+@@ -243,6 +245,8 @@ ov::Any DLIAPlugin::Configuration::Get(c
+     return externalStreaming;
+   } else if (name == DLIAPlugin::properties::streaming_drop_source_buffers) {
+     return streamingDropSourceBuffers;
++  } else if (name == DLIAPlugin::properties::num_streaming_inference_requests) {
++    return {num_streaming_infer_req};
+   } else if (name == DLIAPlugin::properties::streaming_input_pipe) {
+     return streaming_input_pipe;
+   } else if (name == DLIAPlugin::properties::enable_mmd_log_name) {
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_infer_request.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_infer_request.cpp
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_infer_request.cpp	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_infer_request.cpp	2026-05-12 15:26:23.165916712 +0100
+@@ -54,6 +54,17 @@ DLIAInferRequest::DLIAInferRequest(const
+   // Allocates memory for OpenVINO output tensors
+   this->allocateOutputs();
+   this->compiled_model_->IncrementRequestId();
++
++  std::shared_ptr<DdrAddressesVariableState> ddrAddressState = std::make_shared<DdrAddressesVariableState>();
++  ov::Shape shape({2});
++  auto tensor = ov::make_tensor(ov::element::Type_t::u32, shape);
++  uint32_t inputAddrDDR = this->dla_device_job_->GetInputAddrDDR();
++  uint32_t outputAddrDDR = this->dla_device_job_->GetOutputAddrDDR();
++  uint32_t* pData = reinterpret_cast<uint32_t*>(tensor->data());
++  pData[0] = inputAddrDDR;
++  pData[1] = outputAddrDDR;
++  ddrAddressState->set_state(tensor);
++  _state.emplace_back(std::dynamic_pointer_cast<ov::IVariableState>(ddrAddressState));
+ }
+ 
+ DLIAInferRequest::~DLIAInferRequest() { this->compiled_model_->DecrementRequestId(); }
+@@ -374,6 +385,6 @@ std::vector<ov::ProfilingInfo> DLIAInfer
+ }
+ 
+ std::vector<ov::SoPtr<ov::IVariableState>> DLIAInferRequest::query_state() const {
+-  throw std::logic_error("DLIAInferRequest query_state() not implemented.");
++  return _state;
+ }
+ #endif /* RUNTIME_DLA_PLUGIN */
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_plugin.cpp mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_plugin.cpp
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_plugin.cpp	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/src/dlia_plugin.cpp	2026-05-12 15:26:23.165916712 +0100
+@@ -255,6 +255,7 @@ ov::Any DLIAPlugin::Engine::get_property
+       ,
+       DLIAPlugin::properties::external_streaming.name(),
+       DLIAPlugin::properties::streaming_drop_source_buffers.name(),
++      DLIAPlugin::properties::num_streaming_inference_requests.name(),
+       DLIAPlugin::properties::streaming_input_pipe.name(),
+       DLIAPlugin::properties::online_reconfig.name()
+       #ifdef EMULATOR_DLA_PLUGIN
+@@ -516,10 +517,26 @@ void DLIAPlugin::Engine::generateModelAn
+ }
+ 
+ ov::SoPtr<ov::IRemoteContext> DLIAPlugin::Engine::create_context(const ov::AnyMap& remote_properties) const {
++  auto device = getDevice(nullptr);
++  if(device)
++  {
++    if(device->dla_device)
++    {
++      return device->dla_device->GetIRemoteContext();
++    }
++  }
+   throw std::runtime_error("DLIAPlugin create_context() not implemented.");
+ }
+ 
+ ov::SoPtr<ov::IRemoteContext> DLIAPlugin::Engine::get_default_context(const ov::AnyMap& remote_properties) const {
++  auto device = getDevice(nullptr);
++  if(device)
++  {
++    if(device->dla_device)
++    {
++      return device->dla_device->GetIRemoteContext();
++    }
++  }
+   throw std::runtime_error("DLIAPlugin get_default_context() not implemented.");
+ }
+ 
+diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/runtime/CMakeLists.txt mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/runtime/CMakeLists.txt
+--- mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/runtime/CMakeLists.txt	2026-04-14 22:39:44.000000000 +0100
++++ mycoredla-src/opt/altera/fpga_ai_suite_2026.1.1/dla/runtime/CMakeLists.txt	2026-05-12 15:26:26.229908040 +0100
+@@ -334,13 +334,13 @@ get_build_version(PLUGIN_BUILD_VERSION)
+ # Pass PLUGIN_BUILD_VERSION to the source code via a define
+ add_definitions(-DPLUGIN_BUILD_VERSION="${PLUGIN_BUILD_VERSION}")
+ 
+-if (NOT ARM)
++#if (NOT ARM)
+   # ED4 OV is not built with tbb threading
+   find_package(TBB REQUIRED tbb)
+   if ( NOT DEFINED TBB_IMPORTED_TARGETS)
+     set (TBB_IMPORTED_TARGETS TBB::tbb)
+   endif()
+-endif()
++#endif()
+ 
+ SET (INFO 0)
+ SET (WARNING 1)
+@@ -367,7 +367,9 @@ add_subdirectory(${COREDLA_ROOT}/thirdpa
+ add_subdirectory($ENV{COREDLA_XUTIL_DIR}/transformations ${CMAKE_CURRENT_BINARY_DIR}/transformations)
+ 
+ # Required for dla_benchmark and demos
+-add_subdirectory(common)
++if (DEFINED BUILD_DEMO)
++  add_subdirectory(common)
++endif()
+ 
+ # Build runtime plugin CPU io transforms (not needed for spatial which uses sparkPlugin)
+ if (NOT AGX7_ISERIES_SPATIAL)
+@@ -481,6 +483,7 @@ if(NOT EMULATION AND NOT AGX7_ISERIES_SP
+     endif()
+   else()
+     target_link_libraries(coreDlaRuntimePlugin PUBLIC
++      ${TBB_IMPORTED_TARGETS}
+       openvino::runtime
+       openvino_dev_api
+       dliaPluginIOTransformations
+@@ -510,7 +513,9 @@ elseif(EMULATION)
+   file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/plugins_emulation_install.xml INPUT ${CMAKE_CURRENT_BINARY_DIR}/plugins_emulation_install_var_subbed.xml)
+ endif()
+ 
+-add_subdirectory(dla_benchmark)
++if (DEFINED BUILD_DEMO)
++  add_subdirectory(dla_benchmark)
++endif()
+ 
+ # Runtime demos are not built by default.
+ # Pass argument -build_demo to build_runtime.sh to build runtime demos.
+@@ -542,10 +547,12 @@ endif()
+ 
+ # Beware ninja ORIGIN escape issues. If you use origin for ninja you must escape it as \$$ORIGIN. For make, \$ORIGIN
+ if (NOT WIN32)
+-  if ("${CMAKE_GENERATOR}" STREQUAL "Ninja")
+-    set_target_properties(dla_benchmark PROPERTIES AUDIT_LIBRARIES $<TARGET_FILE:AuditLibstdcxx::audit_libstdcxx>)
+-  else()
+-    set_target_properties(dla_benchmark PROPERTIES AUDIT_LIBRARIES $<TARGET_FILE:AuditLibstdcxx::audit_libstdcxx>)
++  if (DEFINED BUILD_DEMO)
++    if ("${CMAKE_GENERATOR}" STREQUAL "Ninja")
++      set_target_properties(dla_benchmark PROPERTIES AUDIT_LIBRARIES $<TARGET_FILE:AuditLibstdcxx::audit_libstdcxx>)
++    else()
++      set_target_properties(dla_benchmark PROPERTIES AUDIT_LIBRARIES $<TARGET_FILE:AuditLibstdcxx::audit_libstdcxx>)
++    endif()
+   endif()
+ 
+   if (NOT EMULATION AND DE10_AGILEX)

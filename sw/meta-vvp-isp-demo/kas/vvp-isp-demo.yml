@@ -1,0 +1,38 @@
+# *******************************************************************************
+# Copyright (C) Altera Corporation
+#
+# This code and the related documents are Altera copyrighted materials and your
+# use of them is governed by the express license under which they were provided to
+# you ("License"). This code and the related documents are provided as is, with no
+# express or implied warranties other than those that are expressly stated in the 
+# License.
+# *******************************************************************************/
+
+header:
+  version: 17
+
+distro: poky
+
+target: vvp-isp-demo-image
+
+local_conf_header:
+  meta-vvp-isp-demo: |
+    DT_SRC_URI:agilex5_mk_a5e065bb32aes1 = "file://agilex5_vvp-isp-demo.dtsi"
+    DT_SRC_URI:agilex5_dk_a5e065bb32aes = "file://agilex5_vvp-isp-demo.dtsi"
+    IMAGE_FSTYPES:remove:agilex5_mk_a5e065bb32aes1 = "ubi multiubi"
+    IMAGE_FSTYPES:remove:agilex5_dk_a5e065bb32aes = "ubi multiubi"
+    # Remove debug libraries and executables from rootfs
+    INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
+    # Add/Remove distro features
+    DISTRO_FEATURES:remove = " tk x11 3g wayland pulseaudio"
+    DISTRO_FEATURES:append = " vfat"
+    RDEPENDS_${KERNEL_PACKAGE_NAME}-base = ""
+    FDT_COMPATIBLE_MACHINE = "(agilex5_dk_a5e065bb32aes|agilex5_mk_a5e065bb32aes1)"
+    SOCFPGA_FEATURES:append = " bitstream"
+    PREFERRED_VERSION_u-boot-socfpga:agilex5_dk_a5e065bb32aes = "v2024.04%"
+    PREFERRED_VERSION_python3="3.12%"
+    PREFERRED_VERSION_python3-native="3.12%"
+    PREFERRED_VERSION_protobuf = "3.21.12"
+    do_fetch[number_threads] = "4"
+    IMAGE_BOOT_ARGS:append = " fbcon=map:1"
+    OCS_CAPABILITY_BASE = "0x40000000"

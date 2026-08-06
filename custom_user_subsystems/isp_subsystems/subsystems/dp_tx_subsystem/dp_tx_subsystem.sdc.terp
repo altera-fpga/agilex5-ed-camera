@@ -1,0 +1,72 @@
+###################################################################################
+# Copyright (C) 2025 Altera Corporation
+#
+# This software and the related documents are Altera copyrighted materials, and
+# your use of them is governed by the express license under which they were
+# provided to you ("License"). Unless the License provides otherwise, you may
+# not use, modify, copy, publish, distribute, disclose or transmit this software
+# or the related documents without Altera's prior written permission.
+#
+# This software and the related documents are provided as is, with no express
+# or implied warranties, other than those that are expressly stated in the License.
+###################################################################################
+
+# *********************************************************************
+# Description
+#
+# Timing constraints for the DisplayPort Example Design
+#
+# *********************************************************************
+# Time Information
+# *********************************************************************
+set_time_format -unit ns -decimal_places 3
+
+# *********************************************************************
+# Create Clocks
+# *********************************************************************
+derive_clock_uncertainty
+
+create_clock -period "150 MHz" -name {clk150} {fgt_refclk_150}
+create_clock -name {board_i2c_clk} -period "400Khz" [get_ports {board_i2c_scl}]
+
+# *********************************************************************
+# I2C for Devkit
+# *********************************************************************
+set_input_delay  -clock [get_clocks board_i2c_clk] 100 [get_ports board_i2c_sda]
+set_output_delay -clock [get_clocks board_i2c_clk] 100 [get_ports board_i2c_sda]
+set_output_delay -clock [get_clocks board_i2c_clk] 100 [get_ports board_i2c_scl]
+
+# *********************************************************************
+# Constraint I2C
+# *********************************************************************
+set_false_path -from [get_clocks {u0|clock_subsystem|iopll_0|iopll_0_refclk}] -to [get_clocks {board_i2c_clk}]
+set_false_path -from [get_clocks {board_i2c_clk}] -to [get_clocks {u0|clock_subsystem|iopll_0|iopll_0_refclk}]
+
+# 50MHz cal clock
+set_false_path -from [get_clocks {u0|clock_subsystem|iopll_0|iopll_0_clk_5}] -to [get_clocks {u0|clock_subsystem|iopll_0|iopll_0_refclk}]
+
+# *********************************************************************
+# Constraint DisplayPort Aux port, HPD
+# - AUX interface is transferring at 1Mbps
+# *********************************************************************
+set_false_path -to [get_ports pin_dp_tx_aux_oe]
+set_false_path -to [get_ports pin_dp_tx_aux_out]
+
+# *********************************************************************
+# Multi-rate PIO support
+# *********************************************************************
+proc apply_cdc {from_list to_list {is_bus 1}} {
+  if {$is_bus} {
+    set_max_skew  -from $from_list -to $to_list -get_skew_value_from_clock_period src_clock_period -skew_value_multiplier 0.8
+  }
+  set_max_delay -from $from_list -to $to_list 100
+  set_min_delay -from $from_list -to $to_list -100
+  if { ![string equal "quartus_syn" $::TimeQuestInfo(nameofexecutable)] } { #avoid set_net_delay being executed during synthesis
+    set_net_delay -from $from_list -to $to_list -max -get_value_from_clock_period dst_clock_period -value_multiplier 0.8
+  }
+}
+
+# PIO shadow regs
+apply_cdc  [get_keepers -nowarn "u0|vid_out_subsystem|vid_out_pio_*|data_out[*]"] [get_keepers -nowarn "dp_tx_*_i_meta[*]"] 1
+apply_cdc  [get_keepers -nowarn "u0|dp_tx|pio_*|data_out[*]"] [get_keepers -nowarn "vid_out_*_i_meta[*]"] 1
+apply_cdc  [get_keepers -nowarn "u0|dp_tx|dp_core_pio_board|dp_core_pio_board|data_out[*]"] [get_keepers -nowarn "vid_out_pio_board_i_meta[*]"] 1

@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<library>
+<index file="altera_vvp_roi/altera_vvp_roi_hw.tcl" />
+</library>

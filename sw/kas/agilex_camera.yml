@@ -1,0 +1,42 @@
+# *******************************************************************************
+# Copyright (C) Altera Corporation
+#
+# This code and the related documents are Altera copyrighted materials and your
+# use of them is governed by the express license under which they were provided to
+# you ("License"). This code and the related documents are provided as is, with no
+# express or implied warranties other than those that are expressly stated in the 
+# License.
+# *******************************************************************************/
+
+header:
+  version: 17 
+  includes:
+    - repo: meta-altera-fpga
+      file: kas/base.yml
+    - repo: meta-altera-fpga
+      file: kas/poky.yml
+    - repo: meta-altera-fpga
+      file: kas/dev.yml
+    - repo: meta-altera-fpga-ocs
+      file: kas/altera-fpga-ocs.yml
+    - repo: meta-vvp-isp-demo
+      file: kas/vvp-isp-demo.yml
+
+# default machine, override with KAS_MACHINE
+machine: agilex5_mk_a5e065bb32aes1  
+
+repos:
+  meta-vvp-isp-demo:
+    path: meta-vvp-isp-demo
+  meta-altera-fpga:
+    path: meta-altera-fpga
+    layers:
+      meta-altera-bsp:
+      meta-altera-core:
+      meta-altera-devkit:
+  meta-altera-fpga-ocs:
+    path: meta-altera-fpga-ocs
+
+local_conf_header:
+  app_features: |
+    APP_FEATURES = "ISP"

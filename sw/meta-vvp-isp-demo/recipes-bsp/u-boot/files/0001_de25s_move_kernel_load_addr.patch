@@ -1,0 +1,11 @@
+--- a/include/configs/socfpga_soc64_common.h
++++ b/include/configs/socfpga_soc64_common.h
+@@ -144,6 +144,6 @@
+
+ #define CFG_EXTRA_ENV_SETTINGS \
+-	"kernel_addr_r=0x82000000\0" \
+-	"fdt_addr_r=0x86000000\0" \
++	"kernel_addr_r=0x83000000\0" \
++	"fdt_addr_r=0x87000000\0" \
+	"qspiscriptaddr=0x02110000\0" \
+	"scriptsize=0x00010000\0" \

@@ -1,0 +1,240 @@
+diff --git a/arch/arm64/boot/dts/arrow/socfpga_agilex5_axe5_eagle.dts b/arch/arm64/boot/dts/arrow/socfpga_agilex5_axe5_eagle.dts
+index 05db1d3ba232..eec88f57da9c 100644
+--- a/arch/arm64/boot/dts/arrow/socfpga_agilex5_axe5_eagle.dts
++++ b/arch/arm64/boot/dts/arrow/socfpga_agilex5_axe5_eagle.dts
+@@ -23,112 +23,6 @@ chosen {
+ 			panic=-1 nosmp rootfstype=ext3";
+ 	};
+ 
+-	leds {
+-		compatible = "gpio-leds";
+-		
+-		hps0 {
+-			label = "hps_led0";
+-			gpios = <&porta 6 GPIO_ACTIVE_HIGH>;
+-		};		
+-
+-		hps1 {
+-			label = "hps_led1";
+-			gpios = <&porta 7 GPIO_ACTIVE_HIGH>;
+-		};
+-		
+-		fpga0_led_red {
+-			label = "fpga_led0_red";
+-			gpios = <&led_pio0 2 1>;
+-		};
+-		
+-		fpga0_led_green {
+-			label = "fpga_led0_green";
+-			gpios = <&led_pio0 1 1>;
+-		};	
+-		
+-		fpga0_led_blue {
+-			label = "fpga_led0_blue";
+-			gpios = <&led_pio0 0 1>;
+-		};
+-		
+-		fpga1_led_red {
+-			label = "fpga_led1_red";
+-			gpios = <&led_pio1 2 1>;
+-		};
+-		
+-		fpga1_led_green {
+-			label = "fpga_led1_green";
+-			gpios = <&led_pio1 1 1>;
+-		};	
+-		
+-		fpga1_led_blue {
+-			label = "fpga_led1_blue";
+-			gpios = <&led_pio1 0 1>;
+-		};
+-		
+-		fpga2_led_red {
+-			label = "fpga_led2_red";
+-			gpios = <&led_pio2 2 1>;
+-		};
+-		
+-		fpga2_led_green {
+-			label = "fpga_led2_green";
+-			gpios = <&led_pio2 1 1>;
+-		};	
+-		
+-		fpga2_led_blue {
+-			label = "fpga_led2_blue";
+-			gpios = <&led_pio2 0 1>;
+-		};
+-		
+-		fpga3_led_red {
+-			label = "fpga_led3_red";
+-			gpios = <&led_pio3 2 1>;
+-		};
+-		
+-		fpga3_led_green {
+-			label = "fpga_led3_green";
+-			gpios = <&led_pio3 1 1>;
+-		};	
+-		
+-		fpga3_led_blue {
+-			label = "fpga_led3_blue";
+-			gpios = <&led_pio3 0 1>;
+-		};									
+-
+-	}; 
+-	
+-	gpio-keys {
+-		compatible = "gpio-keys";
+-
+-		hps_sw0 {
+-			label = "hps_sw0";
+-			gpios = <&porta 10 0>;	
+-			linux,input-type = <5>;	/* EV_SW */
+-			linux,code = <0x0>;		
+-		};
+-		
+-		hps_sw1 {
+-			label = "hps_sw1";
+-			gpios = <&porta 1 0>;	
+-			linux,input-type = <5>;	/* EV_SW */
+-			linux,code = <0x0>;		
+-		};
+-		
+-		hps_pb0 {
+-			label = "hps_pb0";
+-			gpios = <&porta 8 1>;	
+-			linux,code = <187>;		/* KEY_F17 */
+-		};
+-
+-		hps_pb1 {
+-			label = "hps_pb1";
+-			gpios = <&porta 9 1>;	
+-			linux,code = <188>;		/* KEY_F18 */
+-		};		
+-	};					
+-
+-	
+ 	memory {
+ 		device_type = "memory";
+ 		/* We expect the bootloader to fill in the reg */
+@@ -193,111 +87,6 @@ sys_hps_bridges: bridge@20000000 {
+ 	  			 <0x00000001 0x08000060 0x28000060 0x00000010>,
+ 				 <0x00000001 0x10000000 0x30000000 0x00010000>,
+ 				 <0x00000001 0x10010000 0x30010000 0x00000800>;
+-				 
+-			sys_id: sys-id@108000000 {
+-				compatible = "altr,sysid-1.0";
+-				reg = <0x00000001 0x08000000 0x08>;
+-			};				 
+-				 
+-			/* pio device tree entry. for additional information see /linux/Documentation/devicetree/bindings/gpio/gpio-altera.txt */
+-
+-			button_pio: button-pio@108000010 {
+-				compatible = "altr,pio-1.0";
+-				reg = <0x00000001 0x08000010 0x10>;
+-				interrupt-parent = <&intc>;
+-				interrupts = <0 20 4>;
+-				altr,ngpio = <2>;
+-				#gpio-cells = <2>;
+-				gpio-controller;
+-				interrupt-cells = <1>;
+-				interrupt-controller;
+-				altr,interrupt-type = <IRQ_TYPE_EDGE_FALLING>;
+-			};
+-
+-			dipsw_pio: button-pio@108000020 {
+-				compatible = "altr,pio-1.0";
+-				reg = <0x00000001 0x08000020 0x10>;
+-				interrupt-parent = <&intc>;
+-				interrupts = <0 18 4>;
+-				altr,ngpio = <2>;
+-				#gpio-cells = <2>;
+-				gpio-controller;
+-				interrupt-cells = <1>;
+-				interrupt-controller;
+-				altr,interrupt-type = <IRQ_TYPE_EDGE_BOTH>;
+-			};
+-
+-			led_pio0: led-pio0@108000030 {
+-				compatible = "altr,pio-1.0";
+-				reg = <0x00000001 0x08000030 0x10>;
+-				altr,ngpio = <3>;
+-				#gpio-cells = <2>;
+-				gpio-controller;
+-			};
+-			
+-			led_pio1: led-pio1@108000040 {
+-				compatible = "altr,pio-1.0";
+-				reg = <0x00000001 0x08000040 0x10>;
+-				altr,ngpio = <3>;
+-				#gpio-cells = <2>;
+-				gpio-controller;
+-			};
+-			
+-			led_pio2: led-pio2@108000050 {
+-				compatible = "altr,pio-1.0";
+-				reg = <0x00000001 0x08000050 0x10>;
+-				altr,ngpio = <3>;
+-				#gpio-cells = <2>;
+-				gpio-controller;
+-			};
+-			
+-			led_pio3: led-pio3@108000060 {
+-				compatible = "altr,pio-1.0";
+-				reg = <0x00000001 0x08000060 0x10>;
+-				altr,ngpio = <3>;
+-				#gpio-cells = <2>;
+-				gpio-controller;
+-			};									
+-
+-
+-			hdmi_dma: hdmi-dma@110010000 {
+-				compatible = "adi,axi-dmac-1.00.a";
+-				reg = <0x00000001 0x10010000 0x0800>;
+-				#dma-cells = <1>;
+-				interrupt-parent = <&intc>;
+-				interrupts = <0 21 4>;
+-				clocks = <&dma_clk 0>;
+-				status = "okay";
+-
+-				adi,channels {
+-					#size-cells = <0>;
+-					#address-cells = <1>;
+-
+-					dma-channel@0 {
+-						reg = <0>;
+-						adi,source-bus-width = <64>;
+-						adi,source-bus-type = <0>;
+-						adi,destination-bus-width = <64>;
+-						adi,destination-bus-type = <1>;
+-					};
+-				};
+-			};
+-
+-
+-			axi_hdmi: axi-hdmi@110000000 {
+-				compatible = "adi,axi-hdmi-tx-1.00.a";
+-				reg = <0x00000001 0x10000000 0x10000>;
+-				dmas = <&hdmi_dma 0>;
+-				dma-names = "video";
+-				clocks = <&hdmi_pll 0>;
+-				status = "okay";
+-	
+-				port {
+-					axi_hdmi_out: endpoint {
+-						remote-endpoint = <&adv7511_in>;
+-					};
+-				};
+-			};
+ 		};				 
+ 	};
+ };
+@@ -387,9 +176,7 @@ ports {
+ 
+ 					port@0 {
+ 						reg = <0>;
+-						adv7511_in: endpoint {
+-							remote-endpoint = <&axi_hdmi_out>;
+-						};
++
+ 					}; 
+ 
+ 					port@1 {

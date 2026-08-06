@@ -1,0 +1,25 @@
+.horizontal_separator_class
+{
+	position:absolute;
+	background-color:#000000;
+	cursor:ew-resize;
+}
+
+.horizontal_separator_class:hover
+{
+	position:absolute;
+	background-color:#000000;
+}
+
+.vertical_separator_class
+{
+	position:absolute;
+	background-color:#000000;
+	cursor:ns-resize;
+}
+
+.vertical_separator_class:hover
+{
+	position:absolute;
+	background-color:#000000;
+}

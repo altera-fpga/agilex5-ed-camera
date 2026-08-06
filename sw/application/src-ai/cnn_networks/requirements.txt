@@ -1,0 +1,7 @@
+torch==2.13.0+cpu
+torchvision==0.28.0+cpu
+ultralytics==8.4.96
+onnx==1.22.0
+onnxslim==0.1.94
+onnxruntime==1.27.0
+tbb==2023.1.0

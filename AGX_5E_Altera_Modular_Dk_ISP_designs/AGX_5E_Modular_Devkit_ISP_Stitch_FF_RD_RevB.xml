@@ -1,0 +1,182 @@
+<!--
+###################################################################################
+# Copyright (C) 2025 Altera Corporation
+#
+# This software and the related documents are Altera copyrighted materials, and
+# your use of them is governed by the express license under which they were
+# provided to you ("License"). Unless the License provides otherwise, you may
+# not use, modify, copy, publish, distribute, disclose or transmit this software
+# or the related documents without Altera's prior written permission.
+#
+# This software and the related documents are provided as is, with no express
+# or implied warranties, other than those that are expressly stated in the License.
+###################################################################################
+
+###################################################################################
+# Design: AGX_5E_Modular_Devkit_ISP_Stitch_FF_RD
+#
+# Description: 4Kp60 Multi-Sensor Camera Stitch Solution FPGA First Reference
+# Design Demo
+###################################################################################
+-->
+<PROJECT name="agilex5_modkit_vvpisp">
+  <DEVKIT>AGX_5E_Modular_Devkit</DEVKIT>
+  <FAMILY>Agilex 5</FAMILY>
+  <DEVICE>A5ED065BB32AE6SR0</DEVICE>
+  <VERSION>26.1</VERSION>
+  <QUARTUS_INI_COMMAND>vvp_ocs_enabled=on</QUARTUS_INI_COMMAND>
+  <PIP>2</PIP>
+  <VID_OUT_RATE>p60</VID_OUT_RATE>
+  <VID_OUT_BPS>10</VID_OUT_BPS>
+  <VID_OUT_PIP>2</VID_OUT_PIP>
+  <MULTI_SENSOR>1</MULTI_SENSOR>
+  <EXP_FUSION_EN>0</EXP_FUSION_EN>
+  <EN_DEBUG>1</EN_DEBUG>
+  <HPS_DMA_ENABLE>1</HPS_DMA_ENABLE>
+  <HPS_DMA_NUM_OF_CHANNELS>1</HPS_DMA_NUM_OF_CHANNELS>
+  <SUBSYSTEM type="clock" name="clock_subsystem">
+    <NUM_GEN_CLOCKS>5</NUM_GEN_CLOCKS>
+    <GEN_CLK0_NAME>clk_0</GEN_CLK0_NAME>
+    <GEN_CLK0_FREQ>297</GEN_CLK0_FREQ>
+    <GEN_CLK1_NAME>clk_1</GEN_CLK1_NAME>
+    <GEN_CLK1_FREQ>148.5</GEN_CLK1_FREQ>
+    <GEN_CLK2_NAME>clk_2</GEN_CLK2_NAME>
+    <GEN_CLK2_FREQ>200.0</GEN_CLK2_FREQ>
+    <GEN_CLK3_NAME>clk_3</GEN_CLK3_NAME>
+    <GEN_CLK3_FREQ>16.0</GEN_CLK3_FREQ>
+    <GEN_CLK4_NAME>clk_4</GEN_CLK4_NAME>
+    <GEN_CLK4_FREQ>50.0</GEN_CLK4_FREQ>
+    <RESET_MIN_LENGTH>3000</RESET_MIN_LENGTH>
+    <EXPORT_TO_TOP>1</EXPORT_TO_TOP>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="hps" name="hps_subsystem">
+    <H2F_EXPORT>FULL</H2F_EXPORT>
+    <HPS_INIT>AFTER INIT_DONE</HPS_INIT>
+    <I2C0_EXT_EN>1</I2C0_EXT_EN>
+    <I2C1_EXT_EN>1</I2C1_EXT_EN>
+    <MSGDMA_ENABLED>1</MSGDMA_ENABLED>
+    <MSGDMA_AGENT_1>emif</MSGDMA_AGENT_1>
+    <MSGDMA_AGENT_1_CLK_FREQ>200000000</MSGDMA_AGENT_1_CLK_FREQ>
+    <MSGDMA_AGENT_1_ADDR_WIDTH>33</MSGDMA_AGENT_1_ADDR_WIDTH>
+    <MSGDMA_AGENT_2>emif_2</MSGDMA_AGENT_2>
+    <MSGDMA_AGENT_2_CLK_FREQ>200000000</MSGDMA_AGENT_2_CLK_FREQ>
+    <MSGDMA_AGENT_2_ADDR_WIDTH>33</MSGDMA_AGENT_2_ADDR_WIDTH>
+    <I2C0_SCLK>100.0</I2C0_SCLK>
+    <I2C1_SCLK>100.0</I2C1_SCLK>
+    <HPS_AXI_CLK>200000000</HPS_AXI_CLK>
+    <H2F_ADDRESS_WIDTH>34</H2F_ADDRESS_WIDTH>
+    <F2SDRAM_ADDR_WIDTH>36</F2SDRAM_ADDR_WIDTH>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="ocs" name="ocs_subsystem">
+    <AVMM_HOST>
+      <NAME>hps_subsystem</NAME>
+      <OFFSET>0x00000000</OFFSET>
+    </AVMM_HOST>
+    <HPS_AXI_CLK>200000000</HPS_AXI_CLK>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="cpu" name="niosv_subsystem">
+    <CPU_SUBSYSTEM_TYPE>niosv</CPU_SUBSYSTEM_TYPE>
+    <APPLICATION_DIR>./../custom_user_subsystems/isp_subsystems/software_dp_tx/.</APPLICATION_DIR>
+    <BSP_SETTINGS_FILE>./../custom_user_subsystems/isp_subsystems/software_dp_tx/settings.bsp</BSP_SETTINGS_FILE>
+    <CUSTOM_CMAKEFILE>1</CUSTOM_CMAKEFILE>
+    <MEMORY_SIZE>0x20000</MEMORY_SIZE>
+    <TIMER_TYPE>full</TIMER_TYPE>
+    <TIMER_PERIOD>1</TIMER_PERIOD>
+    <TIMER_UNITS>USEC</TIMER_UNITS>
+    <JTAG_UART_EN>0</JTAG_UART_EN>
+    <CPU_TIMER_EN>0</CPU_TIMER_EN>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="emif" name="emif">
+    <PORT>BANK_2B</PORT>
+    <AVMM_EN>1</AVMM_EN>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="emif" name ="emif_2">
+    <PORT>BANK_3B</PORT>
+    <AVMM_EN>1</AVMM_EN>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="board" name="board_subsystem">
+    <USER_LED_TO_AVMM_EN>0</USER_LED_TO_AVMM_EN>
+    <USER_PB_TO_AVMM_EN>0</USER_PB_TO_AVMM_EN>
+    <USER_DIP_SW_TO_AVMM_EN>0</USER_DIP_SW_TO_AVMM_EN>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="user" name="system" script="./../custom_user_subsystems/isp_subsystems/system/isp_system_create.tcl">
+    <FITTER_SEED>3</FITTER_SEED>
+    <OPTIMIZATION_MODE>2</OPTIMIZATION_MODE>
+    <SYNTH_WYSIWYG>1</SYNTH_WYSIWYG>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="user" name="mipi_in_subsystem" script="./../custom_user_subsystems/isp_subsystems/subsystems/mipi_4k_in_subsystem/framos_imx678/mipi_in_framos_imx678_create.tcl">
+    <INST_ID>10</INST_ID>
+    <OCS_ENTRY_BASE>0x00400000</OCS_ENTRY_BASE>
+    <AVMM_HOST>
+      <NAME>hps_subsystem</NAME>
+      <OFFSET>0x00400000</OFFSET>
+    </AVMM_HOST>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="user" name="isp_in_subsystem" script="./../custom_user_subsystems/isp_subsystems/subsystems/isp_4k_in_subsystem/isp_4k_in_create.tcl">
+    <INST_ID>20</INST_ID>
+    <MULTI_SENSOR_OUT>1</MULTI_SENSOR_OUT>
+    <AVMM_HOST>
+      <NAME>hps_subsystem</NAME>
+      <OFFSET>0x00300000</OFFSET>
+    </AVMM_HOST>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="user" name="stitch_isp_0_subsystem" script="./../custom_user_subsystems/isp_subsystems/subsystems/stitch_isp_subsystem/stitch_isp_create.tcl">
+    <INST_ID>60</INST_ID>
+    <IO_ID>0</IO_ID>
+    <WARP_MM>0</WARP_MM>
+    <BLS_EN>0</BLS_EN>
+    <CLIPPER_EN>0</CLIPPER_EN>
+    <SMALL_ANR>1</SMALL_ANR>
+    <EXT_SCALER_EN>1</EXT_SCALER_EN>
+    <EMIF_AGENT>emif</EMIF_AGENT>
+    <EMIF_AGENT_CLK_FREQ>200000000</EMIF_AGENT_CLK_FREQ>
+    <AVMM_HOST>
+      <NAME>hps_subsystem</NAME>
+      <OFFSET>0x00100000</OFFSET>
+    </AVMM_HOST>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="user" name="stitch_isp_1_subsystem" script="./../custom_user_subsystems/isp_subsystems/subsystems/stitch_isp_subsystem/stitch_isp_create.tcl">
+    <INST_ID>70</INST_ID>
+    <IO_ID>1</IO_ID>
+    <WARP_MM>0</WARP_MM>
+    <BLS_EN>0</BLS_EN>
+    <CLIPPER_EN>0</CLIPPER_EN>
+    <SMALL_ANR>1</SMALL_ANR>
+    <EXT_SCALER_EN>1</EXT_SCALER_EN>
+    <EMIF_AGENT>emif_2</EMIF_AGENT>
+    <EMIF_AGENT_CLK_FREQ>200000000</EMIF_AGENT_CLK_FREQ>
+    <ALPHA_EN>1</ALPHA_EN>
+    <AVMM_HOST>
+      <NAME>hps_subsystem</NAME>
+      <OFFSET>0x00200000</OFFSET>
+    </AVMM_HOST>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="user" name="stitch_out_subsystem" script="./../custom_user_subsystems/isp_subsystems/subsystems/stitch_out_subsystem/stitch_out_create.tcl">
+    <INST_ID>80</INST_ID>
+    <AVMM_HOST>
+      <NAME>hps_subsystem</NAME>
+      <OFFSET>0x00600000</OFFSET>
+    </AVMM_HOST>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="user" name="vid_out_subsystem" script="./../custom_user_subsystems/isp_subsystems/subsystems/vid_fr4k_out_subsystem/vid_fr4k_out_create.tcl">
+    <INST_ID>50</INST_ID>
+    <OCS_ENTRY_BASE>0x00500000</OCS_ENTRY_BASE>
+    <LOGO_IRQ_PRIORITY>2</LOGO_IRQ_PRIORITY>
+    <LOGO_IRQ_HOST>hps_subsystem</LOGO_IRQ_HOST>
+    <AVMM_HOST>
+      <NAME>hps_subsystem</NAME>
+      <OFFSET>0x00500000</OFFSET>
+    </AVMM_HOST>
+  </SUBSYSTEM>
+  <SUBSYSTEM type="user" name="dp_tx" script="./../custom_user_subsystems/isp_subsystems/subsystems/dp_tx_subsystem/dp_tx_create.tcl">
+    <I2C_MASTER_IRQ_PRIORITY>2</I2C_MASTER_IRQ_PRIORITY>
+    <I2C_MASTER_IRQ_HOST>niosv_subsystem</I2C_MASTER_IRQ_HOST>
+    <I2C_BOARD_IRQ_PRIORITY>3</I2C_BOARD_IRQ_PRIORITY>
+    <I2C_BOARD_IRQ_HOST>niosv_subsystem</I2C_BOARD_IRQ_HOST>
+    <DP_IRQ_PRIORITY>4</DP_IRQ_PRIORITY>
+    <DP_IRQ_HOST>niosv_subsystem</DP_IRQ_HOST>
+    <AVMM_HOST>
+      <NAME>niosv_subsystem</NAME>
+    </AVMM_HOST>
+  </SUBSYSTEM>
+</PROJECT>

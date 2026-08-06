@@ -1,0 +1,59 @@
+.picture_button_class
+{
+	position:absolute;
+}
+
+.on_off_button_container_class
+{
+	position:absolute;
+	width:470px;
+	height:40px;
+	left:0px;
+	top:0px;
+}
+
+.on_off_text_button_class
+{
+	position:absolute;
+	width:470px;
+	height:40px;
+	line-height:40px;
+	cursor:default;
+	border-bottom-style:solid;
+	border-bottom-color:<!--#background_hover#-->;
+	border-bottom-width:1px;
+	text-align:start;
+	text-indent:10px;
+}
+
+.on_off_image_class
+{
+	position:absolute;
+	width:100px;
+	height:30px;
+	left:370px;
+	top:5px;
+}
+
+.crosshair_image_class
+{
+	position:absolute;
+	width:40px;
+	height:40px;
+	left:20px;
+	top:20px;
+}
+
+.small_crosshair_image_class
+{
+	position:absolute;
+	width:15px;
+	height:15px;
+	left:-15px;
+	top:-15px;
+}
+
+.crosshair_image_class:active
+{
+	cursor: none;
+}

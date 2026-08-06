@@ -1,0 +1,22 @@
+diff --git a/arch/arm/dts/socfpga_agilex_socdk-u-boot.dtsi b/arch/arm/dts/socfpga_agilex_socdk-u-boot.dtsi
+index 0be4060d27..fa5840514c 100644
+--- a/arch/arm/dts/socfpga_agilex_socdk-u-boot.dtsi
++++ b/arch/arm/dts/socfpga_agilex_socdk-u-boot.dtsi
+@@ -10,7 +10,7 @@
+ /{
+ 	chosen {
+ 		stdout-path = "serial0:115200n8";
+-		u-boot,spl-boot-order = &mmc,&flash0,&nand;
++		u-boot,spl-boot-order = &mmc;
+ 	};
+ 
+ 	aliases {
+@@ -48,7 +48,7 @@
+ };
+ 
+ &nand {
+-	status = "okay";
++	status = "disabled";
+ 	nand-bus-width = <16>;
+ 	bootph-all;
+ };
