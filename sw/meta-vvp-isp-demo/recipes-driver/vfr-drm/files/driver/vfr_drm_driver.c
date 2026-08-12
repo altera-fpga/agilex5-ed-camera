@@ -277,11 +277,6 @@ static enum drm_mode_status vfr_drm_crtc_helper_mode_valid(struct drm_crtc *crtc
     return status;
 }
 
-/*
- * The CRTC is always enabled. Screen updates are performed by
- * the primary plane's atomic_update function. Disabling clears
- * the screen in the primary plane's atomic_disable function.
- */
 static const struct drm_crtc_helper_funcs vfr_drm_crtc_helper_funcs = {
     .mode_valid = vfr_drm_crtc_helper_mode_valid,
     .atomic_check = drm_crtc_helper_atomic_check,
@@ -711,7 +706,6 @@ static void vfr_drm_remove(struct platform_device *pdev)
     vfr_drm_plane_remove(&sdev->primary);   
 
     spin_unlock_irqrestore( &( sdev->lock ), flags );
-
 
     drm_dev_unplug(dev);
 }

@@ -39,6 +39,8 @@ std::recursive_mutex& IDrmHelper::GetLVGLMutex()
 drmHelper::modeset_dev::modeset_dev()
     : mode_blob_id(0)
     , crtc_index(0)
+    , pflip_pending(false)
+    , cleanup(false)
     , pending_modeset(true)
     , write_fb(0)
     , read_fb(1)
@@ -71,6 +73,8 @@ drmHelper::drmHelper()
     , _primary_display(nullptr)
     , _overlay_display(nullptr)
 {
+
+    _os = SwUtils::OS::Get();
     lv_init();
 }
 
@@ -129,7 +133,7 @@ bool drmHelper::Open(const char* const card, uint32_t width, uint32_t height, lv
     _overlay_drm_format = DRM_FORMAT_ARGB8888;
 
     /* open the DRM device */
-	rc = modeset_open(card);
+    rc = modeset_open(card);
 
     if (rc)
     {
@@ -230,7 +234,7 @@ void drmHelper::SetOverlayResolution(uint32_t width, uint32_t height)
 
 bool drmHelper::FlushPrimary()
 {
-	bool rc = true;
+    bool rc = true;
 
     std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
 
@@ -256,7 +260,7 @@ bool drmHelper::FlushPrimary()
 
 bool drmHelper::FlushOverlay()
 {
-	bool rc = true;
+    bool rc = true;
 
     {
         std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
@@ -288,6 +292,17 @@ bool drmHelper::FlushModeset()
     if(_modeset)
     {
         std::lock_guard<std::recursive_mutex> lock(_modeset->lock_fb);
+
+        if(_modeset->cleanup)
+        {
+            std::cerr << "FlushModeset: cleanup in progress, skipping flush" << std::endl;
+            return false;
+        }
+        if(_modeset->pflip_pending)
+        {
+            std::cerr << "FlushModeset: page flip pending, skipping flush" << std::endl;
+            return false;
+        }
 
         int ret, flags;
         drmModeAtomicReq *req;
@@ -339,6 +354,12 @@ bool drmHelper::FlushModeset()
                 std::cerr << "modeset atomic commit failed (" << errno << "): " << strerror(errno) << std::endl;
                 rc = false;
             }
+            else
+            {
+                _modeset->pflip_pending = true;
+                _modeset->timeLastFlush = std::chrono::steady_clock::now();
+                drmModeAtomicFree(req);
+            }
         }
     }
 
@@ -347,16 +368,16 @@ bool drmHelper::FlushModeset()
 
 bool drmHelper::modeset_open(const char *const node)
 {
-	int ret = 0;
+    int ret = 0;
     bool rc = true;
-	
-	uint64_t has_dumb;
+    
+    uint64_t has_dumb;
 
-	_fd = open(node, O_RDWR | O_CLOEXEC);
-	if (_fd < 0) {
-		rc = false;
-		std::cerr << "cannot open '" << node << "': " << strerror(errno) << std::endl;
-	}
+    _fd = open(node, O_RDWR | O_CLOEXEC);
+    if (_fd < 0) {
+        rc = false;
+        std::cerr << "cannot open '" << node << "': " << strerror(errno) << std::endl;
+    }
 
     if(rc)
     {
@@ -388,16 +409,16 @@ bool drmHelper::modeset_open(const char *const node)
         }
     }
 
-	return rc;
+    return rc;
 }
 
 int64_t drmHelper::get_property_value(drmModeObjectPropertiesPtr props, const char *name)
 {
-	drmModePropertyPtr prop;
-	uint64_t value;
-	bool found;
+    drmModePropertyPtr prop;
+    uint64_t value;
+    bool found;
 
-	found = false;
+    found = false;
     if(props)
     {
         for (uint32_t j = 0; j < props->count_props && !found; j++)
@@ -415,9 +436,9 @@ int64_t drmHelper::get_property_value(drmModeObjectPropertiesPtr props, const ch
         }
     }
 
-	if (!found)
-		return -1;
-	return value;
+    if (!found)
+        return -1;
+    return value;
 }
 
 
@@ -425,15 +446,15 @@ bool drmHelper::modeset_output_create(drmModeRes *res, drmModeConnector *conn)
 {
     bool rc = true;
 
-	/* creates an output structure */
-	_modeset = std::make_shared<modeset_dev>();
-	_modeset->connector.id = conn->connector_id;
+    /* creates an output structure */
+    _modeset = std::make_shared<modeset_dev>();
+    _modeset->connector.id = conn->connector_id;
 
-	/* check if a monitor is connected */
-	if (conn->connection != DRM_MODE_CONNECTED) {
-		std::cerr << "ignoring unused connector " << conn->connector_id << std::endl;
+    /* check if a monitor is connected */
+    if (conn->connection != DRM_MODE_CONNECTED) {
+        std::cerr << "ignoring unused connector " << conn->connector_id << std::endl;
         rc = false;
-	}
+    }
 
     if(rc)
     {
@@ -499,16 +520,16 @@ bool drmHelper::modeset_output_create(drmModeRes *res, drmModeConnector *conn)
 
 bool drmHelper::modeset_prepare()
 {
-	drmModeRes *res;
-	drmModeConnector *conn;
+    drmModeRes *res;
+    drmModeConnector *conn;
     bool rc = true;
 
-	/* retrieve resources */
-	res = drmModeGetResources(_fd);
-	if (!res) {
-		std::cerr << "cannot retrieve DRM resources (" << errno << "): " << strerror(errno) << std::endl;
-		rc = false;
-	}
+    /* retrieve resources */
+    res = drmModeGetResources(_fd);
+    if (!res) {
+        std::cerr << "cannot retrieve DRM resources (" << errno << "): " << strerror(errno) << std::endl;
+        rc = false;
+    }
 
     if(rc)
     {
@@ -532,30 +553,30 @@ bool drmHelper::modeset_prepare()
         /* free resources again */
         drmModeFreeResources(res);
     }
-	return rc;
+    return rc;
 }
 
 bool drmHelper::modeset_find_crtc(drmModeRes *res, drmModeConnector *conn)
 {
-	drmModeEncoder *enc;
-	uint32_t crtc;
+    drmModeEncoder *enc;
+    uint32_t crtc;
     bool rc = false;
 
-	/* first try the currently conected encoder+crtc */
-	if (conn->encoder_id)
-		enc = drmModeGetEncoder(_fd, conn->encoder_id);
-	else
-		enc = NULL;
+    /* first try the currently conected encoder+crtc */
+    if (conn->encoder_id)
+        enc = drmModeGetEncoder(_fd, conn->encoder_id);
+    else
+        enc = NULL;
 
-	if (enc) {
-		if (enc->crtc_id) {
-			crtc = enc->crtc_id;
+    if (enc) {
+        if (enc->crtc_id) {
+            crtc = enc->crtc_id;
             if(_modeset)
             {
-				if (_modeset->crtc.id == crtc)
+                if (_modeset->crtc.id == crtc)
                 {
-					crtc = 0;
-				}
+                    crtc = 0;
+                }
 
                 if (crtc > 0) {
                     _modeset->crtc.id = crtc;
@@ -569,10 +590,10 @@ bool drmHelper::modeset_find_crtc(drmModeRes *res, drmModeConnector *conn)
                     rc = true;
                 }
             }
-		}
+        }
 
-		drmModeFreeEncoder(enc);
-	}
+        drmModeFreeEncoder(enc);
+    }
 
     if(!rc)
     {
@@ -622,22 +643,22 @@ bool drmHelper::modeset_find_crtc(drmModeRes *res, drmModeConnector *conn)
 
     if(!rc)
     {
-    	std::cerr << "cannot find suitable CRTC for connector " << conn->connector_id << std::endl;
+        std::cerr << "cannot find suitable CRTC for connector " << conn->connector_id << std::endl;
     }
 
-	return rc;
+    return rc;
 }
 
 bool drmHelper::modeset_find_primary_plane()
 {
-	drmModePlaneResPtr plane_res;
-	bool rc = true;
+    drmModePlaneResPtr plane_res;
+    bool rc = true;
 
-	plane_res = drmModeGetPlaneResources(_fd);
-	if (!plane_res) {
-		std::cerr << "drmModeGetPlaneResources failed: " << strerror(errno) << std::endl;
+    plane_res = drmModeGetPlaneResources(_fd);
+    if (!plane_res) {
+        std::cerr << "drmModeGetPlaneResources failed: " << strerror(errno) << std::endl;
         rc = false;
-	}
+    }
 
     if(rc)
     {
@@ -697,19 +718,19 @@ bool drmHelper::modeset_find_primary_plane()
             std::cout << "couldn't find a primary plane" << std::endl;
         }
     }
-	return rc;
+    return rc;
 }
 
 bool drmHelper::modeset_find_overlay_plane()
 {
-	drmModePlaneResPtr plane_res;
-	bool rc = true;
+    drmModePlaneResPtr plane_res;
+    bool rc = true;
 
-	plane_res = drmModeGetPlaneResources(_fd);
-	if (!plane_res) {
-		std::cerr << "drmModeGetPlaneResources failed: " << strerror(errno) << std::endl;
+    plane_res = drmModeGetPlaneResources(_fd);
+    if (!plane_res) {
+        std::cerr << "drmModeGetPlaneResources failed: " << strerror(errno) << std::endl;
         rc = false;
-	}
+    }
 
     if(rc)
     {
@@ -769,33 +790,33 @@ bool drmHelper::modeset_find_overlay_plane()
             std::cout << "couldn't find a overlay plane" << std::endl;
         }
     }
-	return rc;
+    return rc;
 }
 
 void drmHelper::modeset_drm_object_fini(struct drm_object *obj)
 {
-	for (uint32_t i = 0; i < obj->props->count_props; i++)
+    for (uint32_t i = 0; i < obj->props->count_props; i++)
     {
-		drmModeFreeProperty(obj->props_info[i]);
+        drmModeFreeProperty(obj->props_info[i]);
     }
-	free(obj->props_info);
+    free(obj->props_info);
     obj->props_info = nullptr;
-	drmModeFreeObjectProperties(obj->props);
+    drmModeFreeObjectProperties(obj->props);
     obj->props = nullptr;
 }
 
 bool drmHelper::modeset_setup_objects()
 {
     bool rc = true;
-	struct drm_object *connector = &_modeset->connector;
-	struct drm_object *crtc = &_modeset->crtc;
-	struct drm_object *primary_plane = &_modeset->primary_plane;
-	struct drm_object *overlay_plane = &_modeset->overlay_plane;
+    struct drm_object *connector = &_modeset->connector;
+    struct drm_object *crtc = &_modeset->crtc;
+    struct drm_object *primary_plane = &_modeset->primary_plane;
+    struct drm_object *overlay_plane = &_modeset->overlay_plane;
 
-	modeset_get_object_properties(connector, DRM_MODE_OBJECT_CONNECTOR);
-	if (!connector->props)
+    modeset_get_object_properties(connector, DRM_MODE_OBJECT_CONNECTOR);
+    if (!connector->props)
     {
-		rc = false;
+        rc = false;
     }
 
     if(rc)
@@ -831,32 +852,32 @@ bool drmHelper::modeset_setup_objects()
         }
     }
 
-	return rc;
+    return rc;
 }
 
 void drmHelper::modeset_destroy_objects()
 {
-	modeset_drm_object_fini(&_modeset->connector);
-	modeset_drm_object_fini(&_modeset->crtc);
-	modeset_drm_object_fini(&_modeset->primary_plane);
-	modeset_drm_object_fini(&_modeset->overlay_plane);
+    modeset_drm_object_fini(&_modeset->connector);
+    modeset_drm_object_fini(&_modeset->crtc);
+    modeset_drm_object_fini(&_modeset->primary_plane);
+    modeset_drm_object_fini(&_modeset->overlay_plane);
 }
 
 bool drmHelper::modeset_create_fb(uint32_t drm_format, struct modeset_buf *buf)
 {
-	struct drm_mode_create_dumb creq;
-	struct drm_mode_destroy_dumb dreq;
-	struct drm_mode_map_dumb mreq;
-	bool rc = true;
+    struct drm_mode_create_dumb creq;
+    struct drm_mode_destroy_dumb dreq;
+    struct drm_mode_map_dumb mreq;
+    bool rc = true;
     int ret;
     uint32_t handles[4] = {0, 0, 0, 0};
     uint32_t pitches[4] = {0, 0, 0, 0};
     uint32_t offsets[4] = {0, 0, 0, 0};
 
-	/* create dumb buffer */
-	memset(&creq, 0, sizeof(creq));
-	creq.width = buf->width;
-	creq.height = buf->height;
+    /* create dumb buffer */
+    memset(&creq, 0, sizeof(creq));
+    creq.width = buf->width;
+    creq.height = buf->height;
     switch(drm_format)
     {
     case DRM_FORMAT_ARGB8888:
@@ -877,11 +898,11 @@ bool drmHelper::modeset_create_fb(uint32_t drm_format, struct modeset_buf *buf)
         creq.bpp = 32;
         break;
     }
-	ret = drmIoctl(_fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq);
-	if (ret < 0) {
-		std::cerr << "cannot create dumb buffer (" << errno << "): " << strerror(errno) << std::endl;
-		rc = false;
-	}
+    ret = drmIoctl(_fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq);
+    if (ret < 0) {
+        std::cerr << "cannot create dumb buffer (" << errno << "): " << strerror(errno) << std::endl;
+        rc = false;
+    }
 
     if(rc)
     {
@@ -943,12 +964,12 @@ bool drmHelper::modeset_create_fb(uint32_t drm_format, struct modeset_buf *buf)
         dreq.handle = buf->handle;
         drmIoctl(_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
     }
-	return rc;
+    return rc;
 }
 
 void drmHelper::modeset_destroy_fb(struct modeset_buf *buf)
 {
-	struct drm_mode_destroy_dumb dreq;
+    struct drm_mode_destroy_dumb dreq;
 
     munmap(buf->map, buf->size);
 
@@ -965,20 +986,20 @@ bool drmHelper::modeset_setup_primary_framebuffers(drmModeConnector *conn)
 {
     bool rc = true;
 
-	for (uint32_t i = 0; i < NUM_BUFFERS; i++)
+    for (uint32_t i = 0; i < NUM_BUFFERS; i++)
     {
         _modeset->primary_bufs[i].width = _modeset->mode.hdisplay;
         _modeset->primary_bufs[i].height = _modeset->mode.vdisplay;
 
-		rc = modeset_create_fb( _primary_drm_format, &_modeset->primary_bufs[i]);
-		if (!rc) {
+        rc = modeset_create_fb( _primary_drm_format, &_modeset->primary_bufs[i]);
+        if (!rc) {
             for (uint32_t j = 0; j < i; j++)
             {
                 modeset_destroy_fb(&_modeset->primary_bufs[j]);
             }
             break;
-		}
-	}
+        }
+    }
 
     if(rc)
     {
@@ -987,7 +1008,7 @@ bool drmHelper::modeset_setup_primary_framebuffers(drmModeConnector *conn)
         _modeset->write_fb = 0;
     }
 
-	return rc;
+    return rc;
 }
 
 bool drmHelper::modeset_setup_overlay_framebuffers(drmModeConnector *conn)
@@ -1004,59 +1025,59 @@ bool drmHelper::modeset_setup_overlay_framebuffers(drmModeConnector *conn)
 
     rc = modeset_create_fb( _overlay_drm_format, &_modeset->overlay_buf);
 
-	return rc;
+    return rc;
 }
 
 void drmHelper::modeset_get_object_properties(struct drm_object *obj, uint32_t type)
 {
-	const char *type_str;
-	unsigned int i;
+    const char *type_str;
+    unsigned int i;
 
-	obj->props = drmModeObjectGetProperties(_fd, obj->id, type);
-	if (!obj->props) {
-		switch(type) {
-			case DRM_MODE_OBJECT_CONNECTOR:
-				type_str = "connector";
-				break;
-			case DRM_MODE_OBJECT_PLANE:
-				type_str = "plane";
-				break;
-			case DRM_MODE_OBJECT_CRTC:
-				type_str = "CRTC";
-				break;
-			default:
-				type_str = "unknown type";
-				break;
-		}
-		std::cerr << "cannot get " << type_str << " " << obj->id << " properties: " << strerror(errno) << std::endl;
-		return;
-	}
+    obj->props = drmModeObjectGetProperties(_fd, obj->id, type);
+    if (!obj->props) {
+        switch(type) {
+            case DRM_MODE_OBJECT_CONNECTOR:
+                type_str = "connector";
+                break;
+            case DRM_MODE_OBJECT_PLANE:
+                type_str = "plane";
+                break;
+            case DRM_MODE_OBJECT_CRTC:
+                type_str = "CRTC";
+                break;
+            default:
+                type_str = "unknown type";
+                break;
+        }
+        std::cerr << "cannot get " << type_str << " " << obj->id << " properties: " << strerror(errno) << std::endl;
+        return;
+    }
 
-	obj->props_info = (drmModePropertyRes **)calloc(obj->props->count_props, sizeof(*obj->props_info));
-	for (i = 0; i < obj->props->count_props; i++)
+    obj->props_info = (drmModePropertyRes **)calloc(obj->props->count_props, sizeof(*obj->props_info));
+    for (i = 0; i < obj->props->count_props; i++)
     {
-		obj->props_info[i] = drmModeGetProperty(_fd, obj->props->props[i]);
+        obj->props_info[i] = drmModeGetProperty(_fd, obj->props->props[i]);
     }
 }
 
 bool drmHelper::set_drm_object_property(drmModeAtomicReq *req, drm_object *obj,
-				   const char *name, uint64_t value)
+                   const char *name, uint64_t value)
 {
-	uint32_t prop_id = 0;
+    uint32_t prop_id = 0;
     bool rc = false;
 
-	for (uint32_t i = 0; i < obj->props->count_props; i++) {
-		if ((obj->props_info[i]) && !strcmp(obj->props_info[i]->name, name)) {
-			prop_id = obj->props_info[i]->prop_id;
+    for (uint32_t i = 0; i < obj->props->count_props; i++) {
+        if ((obj->props_info[i]) && !strcmp(obj->props_info[i]->name, name)) {
+            prop_id = obj->props_info[i]->prop_id;
             rc = true;
-			break;
-		}
-	}
+            break;
+        }
+    }
 
-	if (!rc)
+    if (!rc)
     {
-		std::cerr << "no object property: " << name << std::endl;
-	}
+        std::cerr << "no object property: " << name << std::endl;
+    }
 
     if(rc)
     {
@@ -1072,31 +1093,51 @@ bool drmHelper::set_drm_object_property(drmModeAtomicReq *req, drm_object *obj,
 bool drmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
 {
     bool rc = true;
-	drm_object *primary_plane = &_modeset->primary_plane;
-	modeset_buf *primary_buf = &_modeset->primary_bufs[_modeset->read_fb];
-	drm_object *overlay_plane = &_modeset->overlay_plane;
-	modeset_buf *overlay_buf = &_modeset->overlay_buf;
+    drm_object *primary_plane = &_modeset->primary_plane;
+    modeset_buf *primary_buf = &_modeset->primary_bufs[_modeset->read_fb];
+    drm_object *overlay_plane = &_modeset->overlay_plane;
+    modeset_buf *overlay_buf = &_modeset->overlay_buf;
 
-	if (!set_drm_object_property(req, &_modeset->connector, "CRTC_ID", _modeset->crtc.id))
-    {
-		rc = false;
-    }
+    const bool disable_planes = _modeset->cleanup;
 
-	if (!set_drm_object_property(req, &_modeset->crtc, "MODE_ID", _modeset->mode_blob_id))
-    {
-		rc = false;
-    }
+    const uint64_t primary_fb_id = disable_planes ? 0 : primary_buf->fb;
+    const uint64_t primary_crtc_id = disable_planes ? 0 : _modeset->crtc.id;
+    const uint64_t primary_src_w = disable_planes ? 0 : (static_cast<uint64_t>(primary_buf->width) << 16);
+    const uint64_t primary_src_h = disable_planes ? 0 : (static_cast<uint64_t>(primary_buf->height) << 16);
+    const uint64_t primary_crtc_w = disable_planes ? 0 : primary_buf->width;
+    const uint64_t primary_crtc_h = disable_planes ? 0 : primary_buf->height;
 
-	if (!set_drm_object_property(req, &_modeset->crtc, "ACTIVE", 1))
-    {
-		rc = false;
-    }
+    const uint64_t overlay_fb_id = disable_planes ? 0 : overlay_buf->fb;
+    const uint64_t overlay_crtc_id = disable_planes ? 0 : _modeset->crtc.id;
+    const uint64_t overlay_src_w = disable_planes ? 0 : (static_cast<uint64_t>(overlay_buf->width) << 16);
+    const uint64_t overlay_src_h = disable_planes ? 0 : (static_cast<uint64_t>(overlay_buf->height) << 16);
+    const uint64_t overlay_crtc_w = disable_planes ? 0 : overlay_buf->width;
+    const uint64_t overlay_crtc_h = disable_planes ? 0 : overlay_buf->height;
 
-    if (!set_drm_object_property(req, primary_plane, "FB_ID", primary_buf->fb))
+    const uint64_t connector_crtc_id = disable_planes ? 0 : _modeset->crtc.id;
+    const uint64_t crtc_mode_id = disable_planes ? 0 : _modeset->mode_blob_id;
+    const uint64_t crtc_active = disable_planes ? 0 : 1;
+
+    if (!set_drm_object_property(req, &_modeset->connector, "CRTC_ID", connector_crtc_id))
     {
         rc = false;
     }
-    if (!set_drm_object_property(req, primary_plane, "CRTC_ID", _modeset->crtc.id))
+
+    if (!set_drm_object_property(req, &_modeset->crtc, "MODE_ID", crtc_mode_id))
+    {
+        rc = false;
+    }
+
+    if (!set_drm_object_property(req, &_modeset->crtc, "ACTIVE", crtc_active))
+    {
+        rc = false;
+    }
+
+    if (!set_drm_object_property(req, primary_plane, "FB_ID", primary_fb_id))
+    {
+        rc = false;
+    }
+    if (!set_drm_object_property(req, primary_plane, "CRTC_ID", primary_crtc_id))
     {
         rc = false;
     }
@@ -1108,11 +1149,11 @@ bool drmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
     {
         rc = false;
     }
-    if (!set_drm_object_property(req, primary_plane, "SRC_W", static_cast<uint64_t>(primary_buf->width) << 16))
+    if (!set_drm_object_property(req, primary_plane, "SRC_W", primary_src_w))
     {
         rc = false;
     }
-    if (!set_drm_object_property(req, primary_plane, "SRC_H", static_cast<uint64_t>(primary_buf->height) << 16))
+    if (!set_drm_object_property(req, primary_plane, "SRC_H", primary_src_h))
     {
         rc = false;
     }
@@ -1124,22 +1165,22 @@ bool drmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
     {
         rc = false;
     }
-    if (!set_drm_object_property(req, primary_plane, "CRTC_W", primary_buf->width))
+    if (!set_drm_object_property(req, primary_plane, "CRTC_W", primary_crtc_w))
     {
         rc = false;
     }
-    if (!set_drm_object_property(req, primary_plane, "CRTC_H", primary_buf->height))
+    if (!set_drm_object_property(req, primary_plane, "CRTC_H", primary_crtc_h))
     {
         rc = false;
     }
 
     if(_overlay_width > 0)
     {
-        if (!set_drm_object_property(req, overlay_plane, "FB_ID", overlay_buf->fb))
+        if (!set_drm_object_property(req, overlay_plane, "FB_ID", overlay_fb_id))
         {
             rc = false;
         }
-        if (!set_drm_object_property(req, overlay_plane, "CRTC_ID", _modeset->crtc.id))
+        if (!set_drm_object_property(req, overlay_plane, "CRTC_ID", overlay_crtc_id))
         {
             rc = false;
         }
@@ -1151,11 +1192,11 @@ bool drmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
         {
             rc = false;
         }
-        if (!set_drm_object_property(req, overlay_plane, "SRC_W", static_cast<uint64_t>(overlay_buf->width) << 16))
+        if (!set_drm_object_property(req, overlay_plane, "SRC_W", overlay_src_w))
         {
             rc = false;
         }
-        if (!set_drm_object_property(req, overlay_plane, "SRC_H", static_cast<uint64_t>(overlay_buf->height) << 16))
+        if (!set_drm_object_property(req, overlay_plane, "SRC_H", overlay_src_h))
         {
             rc = false;
         }
@@ -1167,45 +1208,123 @@ bool drmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
         {
             rc = false;
         }
-        if (!set_drm_object_property(req, overlay_plane, "CRTC_W", overlay_buf->width))
+        if (!set_drm_object_property(req, overlay_plane, "CRTC_W", overlay_crtc_w))
         {
             rc = false;
         }
-        if (!set_drm_object_property(req, overlay_plane, "CRTC_H", overlay_buf->height))
+        if (!set_drm_object_property(req, overlay_plane, "CRTC_H", overlay_crtc_h))
         {
             rc = false;
         }
     }
 
-	return rc;
+    return rc;
 }
 
 void drmHelper::modeset_page_flip_event(int fd, unsigned int frame,
-				    unsigned int sec, unsigned int usec,
-				    unsigned int crtc_id, void *data)
+                    unsigned int sec, unsigned int usec,
+                    unsigned int crtc_id, void *data)
 {
-	modeset_dev* dev = (modeset_dev *)data;
+    modeset_dev* dev = (modeset_dev *)data;
     if(dev)
     {
         std::lock_guard<std::recursive_mutex> lock(dev->lock_fb);
         //dev->write_fb = (dev->write_fb == 1) ? 0 : 1;
+        dev->pflip_pending = false;
     }
 }
+
+void  drmHelper::modeset_output_destroy()
+{
+    /* destroy connector, crtc and plane objects */
+    modeset_destroy_objects();
+
+    /* destroy front/back framebuffers */
+    for (uint32_t i = 0; i < NUM_BUFFERS; i++)
+    {
+        modeset_destroy_fb(&_modeset->primary_bufs[i]);
+    }
+    modeset_destroy_fb(&_modeset->overlay_buf);
+
+    /* destroy mode blob property */
+    drmModeDestroyPropertyBlob(_fd, _modeset->mode_blob_id);
+}
+
+void drmHelper::modeset_cleanup()
+{
+    drmEventContext ev;
+    int ret;
+
+    /* init variables */
+    memset(&ev, 0, sizeof(ev));
+    ev.version = 3;
+    ev.page_flip_handler2 = modeset_page_flip_event;
+
+    /* if a page-flip is pending, wait for it to complete */
+    _modeset->cleanup = true;
+    std::cerr << "wait for pending page-flip to complete..." << std::endl;
+    while (_modeset->pflip_pending) {
+        ret = drmHandleEvent(_fd, &ev);
+        if (ret)
+            break;
+    }
+
+    int flags = DRM_MODE_ATOMIC_ALLOW_MODESET;
+    bool rc = true;
+    drmModeAtomicReq *req;
+
+    /* prepare modeset on all outputs */
+    req = drmModeAtomicAlloc();
+    if(!req)
+    {
+        std::cerr << "failed to allocate atomic request (" << errno << "): " << strerror(errno) << std::endl;
+        rc = false;
+    }
+    if(rc)
+    {
+        rc = modeset_atomic_prepare_commit(req);
+        if (!rc)
+        {
+            std::cerr << "prepare atomic commit failed (" << errno << "): " << strerror(errno) << std::endl;
+            drmModeAtomicFree(req);
+        }
+    }
+
+    if(rc)
+    {
+        ret = drmModeAtomicCommit(_fd, req, flags, _modeset.get());
+        if (ret)
+        {
+            drmModeAtomicFree(req);
+            std::cerr << "modeset atomic commit failed (" << errno << "): " << strerror(errno) << std::endl;
+            rc = false;
+        }
+        else
+        {
+            drmModeAtomicFree(req);
+        }
+    }
+
+    /* destroy current output */
+    modeset_output_destroy();
+    _modeset->cleanup = false;
+}
+
 
 void drmHelper::RunThread()
 {
     prctl(PR_SET_NAME, _threadName.c_str(),0,0,0);
 
-	int ret;
+    int ret;
     struct pollfd  pfds;
- 	int timeout;
-	drmEventContext ev;
+     int timeout;
+    drmEventContext ev;
 
     timeout = 100;
 
     memset(&ev, 0, sizeof(ev));
     ev.version = 3;
-	ev.page_flip_handler2 = modeset_page_flip_event;
+    ev.page_flip_handler2 = modeset_page_flip_event;
 
     pfds.fd = _fd;
     pfds.events = POLLIN;
@@ -1214,14 +1333,16 @@ void drmHelper::RunThread()
     while (!_shutdownEvent.IsSignalled())
     {
         ret = poll(&pfds, 1, timeout);
-		if (ret < 0) {
-			std::cerr << "poll() failed with " << errno << ": " << strerror(errno) << std::endl;
-			break;
-		} else if (pfds.revents & POLLIN) {
-			drmHandleEvent(_fd, &ev);
+        if (ret < 0) {
+            std::cerr << "poll() failed with " << errno << ": " << strerror(errno) << std::endl;
+            break;
+        } else if (pfds.revents & POLLIN) {
+            drmHandleEvent(_fd, &ev);
             pfds.revents = 0;
-		}
+        }
     }
+
+    modeset_cleanup();
 }
 
 void drmHelper::flush_cb_static(lv_display_t * display, const lv_area_t * area, uint8_t * px_map)

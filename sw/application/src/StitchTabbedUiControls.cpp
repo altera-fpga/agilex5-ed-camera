@@ -408,7 +408,7 @@ void StitchTabbedUiControls::CreateInputConfigTab()
             _ispPipelineInputControls[pipeline_index]._spAutoExposureControls->SetAutoUpdateToggleFunc(autoExposureEnableCB0);
         }
 
-        _spInputConfigTab->AddColumnBreak();
+        _ispPipelineInputControls[pipeline_index]._spISPPipelineInputTab->AddColumnBreak();
 
         auto roi = coreIspPipeline->GetROI();
 
@@ -463,7 +463,6 @@ void StitchTabbedUiControls::CreateInputConfigTab()
             }
         };
         _ispPipelineInputControls[pipeline_index]._spAutoWhiteBalanceControls->SetBypassBLCAndWBCFunctionPointer(awbSetBypassBLCAndWBCCB);
-        _spInputConfigTab->AddColumnBreak();
     }
 }
 

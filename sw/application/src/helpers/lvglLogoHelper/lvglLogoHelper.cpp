@@ -13,28 +13,17 @@ License.
 #include <sys/prctl.h>
 #include <lvgl.h>
 
-lvglLogoHelper::lvglLogoHelper(const std::shared_ptr<ILogoControl>& logoControl, IUIConnection* uiConnection):
+lvglLogoHelper::lvglLogoHelper(const std::weak_ptr<ILogoControl>& logoControl, IUIConnection* uiConnection):
     SwUtils::Thread("lvglLogoHelper"),
-    _logoControl(logoControl),
+    _wspLogoControl(logoControl),
     _uiConnection(uiConnection),
     _drmHelper(IDrmHelper::GetIDrmHelper()),
-    _logo_enabled(true),
     _logo_width(0),
     _logo_height(0),
-    _logo_x(0),
-    _logo_y(0),
     _logo_alpha(0.75),
     _logo_img(nullptr),
     _ip_sting(nullptr),
-    _logoPosition{LogoPosition::Bouncing},
-    _bounceX(0.0),
-    _bounceY(0.0),
-    _bounceXDir(false),
-    _bounceYDir(false),
-    _bounceXItr(0.0018),
-    _bounceYItr(0.0032),
-    _ip_address_enabled(true),
-    _last_ip_address_enabled(false),
+    _ip_address_enabled{std::nullopt},
     _initialized(false),
     _dirty(true)
 {
@@ -67,7 +56,12 @@ void lvglLogoHelper::Draw()
         _initialized = true;
         _logo_width = 300;
         _logo_height = 180;
-        _logoControl->SetOverlayResolution(_logo_width, _logo_height);
+
+        auto spLogoControl = _wspLogoControl.lock();
+        if(spLogoControl)
+        {
+            spLogoControl->SetOverlayResolution(_logo_width, _logo_height);
+        }
         if(!_logo_img)
         {
             _logo_img = lv_image_create(_drmHelper->GetOverlayScreenActive());
@@ -107,12 +101,26 @@ void lvglLogoHelper::Draw()
         }
         _dirty = true;
     }
-    if(_last_ip_address_enabled != _ip_address_enabled)
+
+    bool ip_address_enabled_now = true;
+
+    // Hide IP address if UI has connected
+    if(_uiConnection && _uiConnection->UiConnected())
+        ip_address_enabled_now = false;
+
+    bool ip_address_enabled_changed = false;
+    
+    // If no previous value known or it has actually changed
+    if(!_ip_address_enabled.has_value() || (*_ip_address_enabled != ip_address_enabled_now))
+        ip_address_enabled_changed = true;
+
+    if(ip_address_enabled_changed)
     {
-        _last_ip_address_enabled = _ip_address_enabled;
+        _ip_address_enabled = ip_address_enabled_now;
+
         if(_ip_sting)
         {
-            if(_ip_address_enabled)
+            if(*_ip_address_enabled)
             {
                 lv_obj_clear_flag(_ip_sting, LV_OBJ_FLAG_HIDDEN);
             }
@@ -122,7 +130,8 @@ void lvglLogoHelper::Draw()
             }
         }
         _dirty = true;
-    }   
+    }
+
     if(_dirty)
     {
         if(_logo_img)
@@ -135,102 +144,9 @@ void lvglLogoHelper::Draw()
 }
 
 
-void lvglLogoHelper::SetLogoPositionXY(const uint32_t x, const uint32_t y)
-{
-    _logo_x = x;
-    _logo_y = y;
-}
-
-
-void lvglLogoHelper::SetLogoPosition(const LogoPosition& logoPosition)
-{
-    _logoPosition = logoPosition;
-    UpdateLogoLayer();
-}
-
-
 void lvglLogoHelper::UpdateLogoLayer()
 {
-    bool logo_enable = true;
     std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
-
-    uint32_t logo_width = _logo_width;
-    uint32_t logo_height = _logo_height;
-    
-    if(_uiConnection)
-    {
-        _ip_address_enabled = !_uiConnection->UiConnected();
-    }
-    if(!_ip_address_enabled)
-    {
-        if(_logo_img)
-        {
-            logo_width = lv_obj_get_width(_logo_img);
-            logo_height = lv_obj_get_height(_logo_img);
-        }
-    }
-
-    switch(_logoPosition)
-    {
-        case LogoPosition::LogoDisabled:
-        {
-            logo_enable = false;
-            break;
-        }
-        case LogoPosition::TopLeft:
-        {
-            SetLogoPositionXY(0, 0);
-            break;
-        }
-        case LogoPosition::TopRight:
-        {
-            SetLogoPositionXY(GetOutputWidth() - _logo_width, 0);
-            break;
-        }
-        case LogoPosition::BottomLeft:
-        {
-            SetLogoPositionXY(0, GetOutputHeight() - _logo_height);
-            break;
-        }
-        case LogoPosition::BottomRight:
-        {
-            SetLogoPositionXY(GetOutputWidth() - _logo_width, GetOutputHeight() - _logo_height);            
-            break;
-        }
-        case LogoPosition::Bouncing:
-        {
-            if (_bounceX <= (0.0 + _bounceXItr))
-            {
-                _bounceXDir = true;
-            }
-            if (_bounceY <= (0.0 + _bounceYItr))
-            {
-                _bounceYDir = true;
-            }
-
-            if (_bounceX >= (1.0 - _bounceXItr))
-            {
-                _bounceXDir = false;
-            }
-            if (_bounceY >= (1.0 - _bounceYItr))
-            {
-                _bounceYDir = false;
-            }
-
-            _bounceX += (_bounceXDir) ? (_bounceXItr) : (-_bounceXItr);
-            _bounceY += (_bounceYDir) ? (_bounceYItr) : (-_bounceYItr);
-
-            const uint32_t x = (GetOutputWidth() - _logo_width) * _bounceX;
-            const uint32_t y = (GetOutputHeight() - _logo_height) * _bounceY;
-
-            SetLogoPositionXY(x, y);
-        }
-        default:
-            break;
-    }
-
-    _logo_enabled = logo_enable;
-
     Draw();
 }
 

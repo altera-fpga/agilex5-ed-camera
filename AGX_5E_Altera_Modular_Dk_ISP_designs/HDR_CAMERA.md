@@ -76,10 +76,10 @@ git clone -b rel-26.1-isp_hdr-MDK_RevC_GrpB --recurse-submodules https://github.
 ```
 
 * Define a `./<project>` location of your choice, creating directory structure
-where necessary.
+  where necessary.
 * Navigate to the `agilex5-ed-camera` directory containing the cloned
-repository and create your project, selecting the XML variant based on your
-license and solution requirements:
+  repository and create your project, selecting the XML variant based on your
+  license and solution requirements:
 
 ```bash
 # SOF MDT Flow
@@ -104,13 +104,13 @@ Design:
 
 * Define a `./<project>` location of your choice, creating directory structure
   where necessary.
-* Download [AGX_5E_Modular_Devkit_ISP_RD.tar.gz](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_hdr-MDK_RevC_GrpB/AGX_5E_Modular_Devkit_ISP_RD.tar.gz)
+* Download [AGX_5E_Modular_Devkit_ISP_RD.zip](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/AGX_5E_Modular_Devkit_ISP_RD.zip)
   and copy it to your `./<project>` location.
 * Navigate to the `./<project>` location, extract the project, and load Quartus® GUI:
 
 ```bash
-tar -xvf AGX_5E_Modular_Devkit_ISP_RD.tar.gz
-cd AGX_5E_Modular_Devkit_ISP_RD/quartus
+unzip AGX_5E_Modular_Devkit_ISP_RD.zip
+cd AGX_5E_Modular_Devkit_ISP_RD
 quartus agilex5_modkit_vvpisp.qpf
 ```
 
@@ -164,8 +164,8 @@ MDT flow used:
 * For SOF MDT Flow:
   * `fsbl_agilex5_modkit_vvpisp_time_limited.sof`
 * For RBF MDT Flow:
-  * `agilex5_modkit_vvpisp.hps_first.hps.jic` and
-  `agilex5_modkit_vvpisp.hps_first.core.rbf`.
+  * `agilex5_modkit_vvpisp.hps_first.hps.jic`
+  * `agilex5_modkit_vvpisp.hps_first.core.rbf`
 
 #### Building the pregenerated MDT Quartus® project
 
@@ -175,39 +175,30 @@ GUI to compile the entire design, allowing you to view extra information such
 as resource utilization and timing reports:
 
 ```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_RD/quartus
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_RD
 quartus agilex5_modkit_vvpisp.qpf
 ```
 
 * Click on the `Compile Design` option in the `Compilation Flow` window.
 * Once complete, you can view all the reports.
 
-Note that you can also use the `.sof` according to your license, and if
-permitted, use the final stage of the MDT flow to create an `.rbf`:
+Note that you can also use the `.sof` on Hardware according to your license,
+and if you have a full license, use the MakeFile to create an `.rbf` for the
+microSD Card (note any design modification can cause the Application Software
+to fail to boot/operate correctly):
 
 ```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_RD/scripts
-# SOF MDT Flow
-quartus_sh -t build_shell.tcl -ff_post_agx5e
-```
-
-```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_RD/scripts
-# RBF MDT Flow (not supported with OCP evaluation license)
-quartus_sh -t build_shell.tcl -hps_post_agx5e
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_RD
+make rbf_jic
 ```
 
 <br>
 
-The FPGA programming file/s are located in the
-`./<project>/AGX_5E_Modular_Devkit_ISP_RD/quartus/output_files` directory and
-will differ depending on the MDT flow used:
+The FPGA programming files are located in the
+`./<project>/AGX_5E_Modular_Devkit_ISP_RD/output_files` directory:
 
-* For SOF MDT Flow:
-  * `fsbl_agilex5_modkit_vvpisp_time_limited.sof`
-* For RBF MDT Flow:
-  * `agilex5_modkit_vvpisp.hps_first.hps.jic` and
-`agilex5_modkit_vvpisp.hps_first.core.rbf`.
+  * `agilex5_modkit_vvpisp.hps_first.hps.jic`
+  * `agilex5_modkit_vvpisp.hps_first.core.rbf`
 
 <br>
 

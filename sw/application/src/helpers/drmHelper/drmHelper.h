@@ -81,6 +81,9 @@ private:
         uint32_t mode_blob_id;
         uint32_t crtc_index;
 
+        bool pflip_pending;
+        bool cleanup;
+
         bool pending_modeset;
 
         modeset_buf primary_bufs[NUM_BUFFERS];
@@ -116,10 +119,11 @@ private:
     bool modeset_output_create(drmModeRes *res, drmModeConnector *conn);
     bool modeset_prepare();
     bool modeset_atomic_prepare_commit(drmModeAtomicReq *req);
+    void modeset_cleanup();
 
     static void modeset_page_flip_event(int fd, unsigned int frame,
-				    unsigned int sec, unsigned int usec,
-				    unsigned int crtc_id, void *data);
+                    unsigned int sec, unsigned int usec,
+                    unsigned int crtc_id, void *data);
 
     static void flush_cb_static(lv_display_t * display, const lv_area_t * area, uint8_t * px_map);
 
@@ -144,5 +148,7 @@ private:
 
     lv_display_t * _primary_display;
     lv_display_t * _overlay_display;
+
+    std::shared_ptr<SwUtils::OS> _os;
 };
 

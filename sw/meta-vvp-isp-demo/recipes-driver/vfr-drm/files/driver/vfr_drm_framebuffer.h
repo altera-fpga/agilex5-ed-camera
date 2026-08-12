@@ -5,6 +5,7 @@
 
 #include <linux/fb.h>
 #include <linux/types.h>
+#include <drm/drm_framebuffer.h>
 
 
 struct vfr_drm_framebuffer

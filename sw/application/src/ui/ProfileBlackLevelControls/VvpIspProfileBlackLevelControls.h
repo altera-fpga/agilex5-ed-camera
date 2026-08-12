@@ -22,7 +22,7 @@ License.
 class VvpIspProfileBlackLevelControls : public IpUiControls
 {
 public:
-    VvpIspProfileBlackLevelControls(const std::shared_ptr<IFrameCapture>& spIFrameCapture,
+    VvpIspProfileBlackLevelControls(const std::weak_ptr<IFrameCapture>& spIFrameCapture,
                                     const std::shared_ptr<SensorCalibrationProfile>& spProfile, 
                                     const std::shared_ptr<WhiteBalanceController>& spWBController,
                                     const ICameraPtr& spCamera,
@@ -47,7 +47,7 @@ private:
     void SelectGain(float gain);
     void ResetGainDropdownAndSelectGain(float gain);
 
-    std::shared_ptr<IFrameCapture> _spIFrameCapture;
+    std::weak_ptr<IFrameCapture> _wspIFrameCapture;
     std::shared_ptr<SensorCalibrationProfile> _spProfile;
     std::shared_ptr<WhiteBalanceController> _spWBController;
     ICameraPtr _spCamera;

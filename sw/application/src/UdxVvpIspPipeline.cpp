@@ -1780,8 +1780,8 @@ bool UdxVvpIspPipeline::InitOverlayVfr()
         memset(overlay_fb_ptr, 0, overlay_height*overlay_stride);
     }
     IUIConnection* uiConnection = static_cast<IUIConnection*>(VvpIspDemo::Get());
-    auto self = shared_from_this();
-    _lvglLogoHelper = std::make_shared<lvglLogoHelper>(self, uiConnection);
+    auto weak = weak_from_this();
+    _lvglLogoHelper = std::make_shared<lvglLogoHelper>(weak, uiConnection);
 
     _overlay_mixer_width = 3840;
     _overlay_mixer_height = 2160;

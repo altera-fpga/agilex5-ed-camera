@@ -140,13 +140,13 @@ System Example Design:
 
 * Define a `./<project>` location of your choice, creating directory structure
   where necessary.
-* Download [AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.tar.gz](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.tar.gz)
+* Download [AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.zip](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.zip)
   and copy it to your `./<project>` location.
 * Navigate to the `./<project>` location, extract the project, and load Quartus® GUI:
 
 ```bash
-tar -xvf AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.tar.gz
-cd AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/quartus
+unzip AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.zip
+cd AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
 quartus agilex5_modkit_vvpisp.qpf
 ```
 
@@ -160,10 +160,11 @@ quartus agilex5_modkit_vvpisp.qpf
 
 #### Building the design using the Modular Design Toolkit (MDT)
 
-Follow the next steps to build the 4Kp30 Multi-Sensor Camera with AI Inference Solution System Example Design:
+Follow the next steps to build the 4Kp30 Multi-Sensor Camera with AI Inference
+Solution System Example Design:
 
 * Navigate to the `./<project>/scripts` directory and build your project,
-selecting the post processing step option for your chosen MDT flow:
+  selecting the post processing step option for your chosen MDT flow:
 
 ```bash
 cd ./<project>/scripts 
@@ -180,15 +181,15 @@ quartus_sh -t build_shell.tcl -update_ocs -full_compile -hps_post_agx5e
 The MDT build options (all of which are needed for a working build):
 
 * `-update_ocs` is used to generate the automatic Offset Capability Structure
-(OCS) ROM, which will be built into the project during compilation.
+  (OCS) ROM, which will be built into the project during compilation.
 * `-full_compile` performs not just the full Quartus compilation, but also
-compiles any Nios® V software into `.hex` ROM files built into the project
-during compilation.
+  compiles any Nios® V software into `.hex` ROM files built into the project
+  during compilation.
 * `-ff_post_agx5e` option post processes the FPGA First `.sof` with a first
-stage bootloader from a U-Boot secondary program loader binary file
-`u-boot-spl-dtb_ff.hex`.
+  stage bootloader from a U-Boot secondary program loader binary file
+  `u-boot-spl-dtb_ff.hex`.
 * `-hps_post_agx5e` option post processes the HPS first `.sof` with a U-Boot
-secondary program loader binary file `u-boot-spl-dtb.hex`.
+  secondary program loader binary file `u-boot-spl-dtb.hex`.
 
 <br>
 
@@ -199,8 +200,8 @@ MDT flow used:
 * For SOF MDT Flow:
   * `fsbl_agilex5_modkit_vvpisp_time_limited.sof`
 * For RBF MDT Flow:
-  * `agilex5_modkit_vvpisp.hps_first.hps.jic` and
-`agilex5_modkit_vvpisp.hps_first.core.rbf`.
+  * `agilex5_modkit_vvpisp.hps_first.hps.jic`
+  * `agilex5_modkit_vvpisp.hps_first.core.rbf`
 
 #### Building the pregenerated MDT Quartus® project
 
@@ -210,39 +211,31 @@ using Quartus® GUI to compile the entire design, allowing you to view extra
 information such as resource utilization and timing reports:
 
 ```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/quartus
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
 quartus agilex5_modkit_vvpisp.qpf
 ```
 
 * Click on the `Compile Design` option in the `Compilation Flow` window.
 * Once complete, you can view all the reports.
 
-Note that you can also use the `.sof` according to your license, and if
-permitted, use the final stage of the MDT flow to create an `.rbf`:
+Note that you can also use the `.sof` on Hardware according to your license,
+and if you have a full license, use the MakeFile to create an `.rbf` for the
+microSD Card (note any design modification can cause the Application Software
+to fail to boot/operate correctly):
 
 ```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/scripts
-# SOF MDT Flow
-quartus_sh -t build_shell.tcl -ff_post_agx5e
-```
-
-```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/scripts
-# RBF MDT Flow (not supported with OCP evaluation license)
-quartus_sh -t build_shell.tcl -hps_post_agx5e
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
+make rbf_jic
 ```
 
 <br>
 
-The FPGA programming file/s are located in the
-`./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/quartus/output_files`
-directory and will differ depending on the MDT flow used:
+The FPGA programming files are located in the
+`./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/output_files`
+directory:
 
-* For SOF MDT Flow:
-  * `fsbl_agilex5_modkit_vvpisp_time_limited.sof`
-* For RBF MDT Flow:
-  * `agilex5_modkit_vvpisp.hps_first.hps.jic` and
-`agilex5_modkit_vvpisp.hps_first.core.rbf`.
+  * `agilex5_modkit_vvpisp.hps_first.hps.jic`
+  * `agilex5_modkit_vvpisp.hps_first.core.rbf`
 
 <br>
 

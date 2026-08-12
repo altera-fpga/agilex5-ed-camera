@@ -15,13 +15,13 @@ License.
 
 
 
-VvpIspProfileBlackLevelControls::VvpIspProfileBlackLevelControls(const std::shared_ptr<IFrameCapture>& spIFrameCapture,
+VvpIspProfileBlackLevelControls::VvpIspProfileBlackLevelControls(const std::weak_ptr<IFrameCapture>& spIFrameCapture,
                                                                  const std::shared_ptr<SensorCalibrationProfile>& spProfile,
                                                                  const std::shared_ptr<WhiteBalanceController>& spWBController,
                                                                  const ICameraPtr& spCamera,
                                                                  const std::shared_ptr<SwApi::Bls>& spBlackLevelStats,
                                                                  const std::shared_ptr<SwApi::Anr>& spAnr):
-  _spIFrameCapture{spIFrameCapture},
+  _wspIFrameCapture{spIFrameCapture},
   _spProfile{spProfile},
   _spWBController{spWBController},
   _spCamera{spCamera},
@@ -140,10 +140,11 @@ std::vector<std::shared_ptr<UiControlContainer>> VvpIspProfileBlackLevelControls
 
         auto readDarkFrameCB = [this, bps](uint32_t clientID)
         {
+            auto spIFrameCapture = _wspIFrameCapture.lock();
             // read and store a dark frame
-            if (_spIFrameCapture)
+            if (spIFrameCapture)
             {
-                auto darkFrame = _spIFrameCapture->CaptureRawFrame(bps, false);
+                auto darkFrame = spIFrameCapture->CaptureRawFrame(bps, false);
                 _darkFrame = std::move(darkFrame._data);
             }
         };
@@ -153,19 +154,20 @@ std::vector<std::shared_ptr<UiControlContainer>> VvpIspProfileBlackLevelControls
         auto readSceneFramesCB = [this, bps](uint32_t clientID)
         {
             // read and store two normal frames
-            if (_spIFrameCapture)
+            auto spIFrameCapture = _wspIFrameCapture.lock();
+            if (spIFrameCapture)
             {
                 _sceneFrames.clear();
 
                 {
-                    auto sceneFrame = _spIFrameCapture->CaptureRawFrame(bps, false);
+                    auto sceneFrame = spIFrameCapture->CaptureRawFrame(bps, false);
                     _sceneFrames.emplace_back(std::move(sceneFrame._data));
                 }
                 
                 usleep(1000);
                 
                 {
-                    auto sceneFrame = _spIFrameCapture->CaptureRawFrame(bps, false);
+                    auto sceneFrame = spIFrameCapture->CaptureRawFrame(bps, false);
                     _sceneFrames.emplace_back(std::move(sceneFrame._data));
                 }
             }

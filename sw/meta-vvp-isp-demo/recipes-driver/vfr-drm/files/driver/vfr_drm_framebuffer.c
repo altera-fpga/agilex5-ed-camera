@@ -49,27 +49,32 @@ static void vfr_drm_fb_destroy(struct drm_framebuffer *fb)
 {
     struct drm_device *dev = fb->dev;
     struct vfr_drm_framebuffer *vfr_drm_fb = vfr_drm_framebuffer_of_fb(fb);
-    
-    drm_gem_fb_destroy(fb);
+
+    unsigned int i;
+
+    for (i = 0; i < fb->format->num_planes; i++)
+        drm_gem_object_put(fb->obj[i]);
+
+    drm_framebuffer_cleanup(fb);
     kfree(vfr_drm_fb);
 }
 
 static const struct drm_framebuffer_funcs vfr_drm_fb_funcs = {
-	.destroy	= vfr_drm_fb_destroy,
-	.create_handle	= drm_gem_fb_create_handle,
-	.dirty		= drm_atomic_helper_dirtyfb,
+    .destroy    = vfr_drm_fb_destroy,
+    .create_handle    = drm_gem_fb_create_handle,
+    .dirty        = drm_atomic_helper_dirtyfb,
 };
 
 struct drm_framebuffer *
 vfr_drm_fb_create(struct drm_device *dev, struct drm_file *file,
-			     const struct drm_format_info *info,
-			     const struct drm_mode_fb_cmd2 *mode_cmd)
+                 const struct drm_format_info *info,
+                 const struct drm_mode_fb_cmd2 *mode_cmd)
 {
-	struct vfr_drm_framebuffer *vfr_drm_fb;
+    struct vfr_drm_framebuffer *vfr_drm_fb;
 
-	vfr_drm_fb = kzalloc(sizeof(*vfr_drm_fb), GFP_KERNEL);
-	if (!vfr_drm_fb)
-		return ERR_PTR(-ENOMEM);
+    vfr_drm_fb = kzalloc(sizeof(*vfr_drm_fb), GFP_KERNEL);
+    if (!vfr_drm_fb)
+        return ERR_PTR(-ENOMEM);
     drm_gem_fb_init_with_funcs(dev, &vfr_drm_fb->fb, file, info, mode_cmd, &vfr_drm_fb_funcs);
     return &vfr_drm_fb->fb;
 }

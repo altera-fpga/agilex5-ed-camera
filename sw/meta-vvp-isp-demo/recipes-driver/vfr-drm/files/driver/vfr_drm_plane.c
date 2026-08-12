@@ -118,6 +118,8 @@ static void vfr_drm_plane_helper_atomic_update(struct drm_plane *plane,
     struct drm_atomic_helper_damage_iter iter;
     struct drm_rect damage;
     int ret, idx;
+    
+    (void)vfr_drm_fb; // currently unused
 
     ret = drm_gem_fb_begin_cpu_access(fb, DMA_FROM_DEVICE);
     if (ret)
