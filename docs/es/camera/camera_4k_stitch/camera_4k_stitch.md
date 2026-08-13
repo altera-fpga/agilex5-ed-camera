@@ -92,7 +92,9 @@ section.)
 > **-** If you want to just explore the Quartus® Project, follow [User Flow 4],
         (specifically [Quartus® GUI Create Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#using-the-pregenerated-mdt-quartus-project)). <br/><br/>
 > For more detail on the different user flows refer to the
-  [Recommended user flows](#recommended-user-flows) section.
+  [Recommended user flows](#recommended-user-flows) section. <br/><br/>
+> **Important** <br/>
+> Take note of all [**Known Issues**.](./known_issues.md)
 
 <br/>
 
@@ -205,9 +207,30 @@ Kit.
 <br>
 <center markdown="1">
 
+![som-board-sw](../common/images/som-board-sw.png)
+
+**Modular Development Kit - System On a Module (SOM) Switch Locations**
+
+<br>
+<br>
+
 ![board-1-som](../common/images/board-1-som.png)
 
 **Modular Development Kit - System On a Module (SOM) Default Switch Positions**
+
+<br>
+<br>
+
+![carrier-board-top-sw](../common/images/carrier-board-top-sw.png)
+
+**Modular Development Kit - Carrier Topside Switch Locations**
+
+<br>
+<br>
+
+![carrier-board-bot-sw](../common/images/carrier-board-bot-sw.png)
+
+**Modular Development Kit - Carrier Underside Switch Locations**
 
 <br>
 <br>
@@ -222,7 +245,7 @@ Kit.
 |:----:|:----:|:----:|
 | SW1[1:2] | SOM | ON-ON |
 | SW2[1:2] | SOM | ON-ON |
-| SW2 | Carrier | ON |
+| SW2 (if fitted) | Carrier | ON |
 | SW6[1:4] | Carrier | OFF-ON-OFF-OFF |
 | S1[1:4] | Carrier | OFF-OFF-OFF-ON |
 | SW5 | Carrier | OFF |
@@ -685,6 +708,7 @@ flows that you can explore:
 * [Web GUI Functional Description.](./ui-funct-descr.md)
 * [Design Security Considerations.](./design-security-considerations.md)
 * [Acronyms and Terminology.](./glossary.md)
+* [Known Issues.](./known_issues.md)
 
 ### **References**
 * [Agilex™ 5 FPGA E-Series 065B Modular Development Kit].

@@ -242,9 +242,30 @@ create the microSD card image.
 <br>
 <center markdown="1">
 
+![som-board-sw](../common/images/som-board-sw.png)
+
+**Modular Development Kit - System On a Module (SOM) Switch Locations**
+
+<br>
+<br>
+
 ![board-1-som](../common/images/board-1-som.png)
 
 **Modular Development Kit - System On a Module (SOM) Default Switch Positions**
+
+<br>
+<br>
+
+![carrier-board-top-sw](../common/images/carrier-board-top-sw.png)
+
+**Modular Development Kit - Carrier Topside Switch Locations**
+
+<br>
+<br>
+
+![carrier-board-bot-sw](../common/images/carrier-board-bot-sw.png)
+
+**Modular Development Kit - Carrier Underside Switch Locations**
 
 <br>
 <br>
@@ -259,7 +280,7 @@ create the microSD card image.
 |:----:|:----:|:----:|
 | SW1[1:2] | SOM | ON-ON |
 | SW2[1:2] | SOM | ON-ON |
-| SW2 | Carrier | ON |
+| SW2 (if fitted) | Carrier | ON |
 | SW6[1:4] | Carrier | OFF-ON-OFF-OFF |
 | S1[1:4] | Carrier | OFF-OFF-OFF-ON |
 | SW5 | Carrier | OFF |

@@ -72,8 +72,8 @@ the 4Kp60 Multi-Sensor HDR Camera Solution System Example Design:
 
 ```bash
 cd <workspace> 
-git clone -b rel-26.1-isp_hdr-MDK_RevC_GrpB --recurse-submodules https://github.com/altera-fpga/agilex5-ed-camera.git agilex5-ed-camera
-```
+git clone -b rel/26.1 --recurse_submodules https://github.com/altera-fpga/agilex5-ed-camera.git agilex5-ed-camera
+ ```
 
 * Define a `./<project>` location of your choice, creating directory structure
   where necessary.

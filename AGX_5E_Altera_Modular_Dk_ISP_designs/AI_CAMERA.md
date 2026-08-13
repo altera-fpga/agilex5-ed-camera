@@ -102,7 +102,7 @@ the 4Kp30 Multi-Sensor Camera with AI Inference Solution System Example Design:
 
 ```bash
 cd <workspace>
-git clone -b rel-26.1-isp_ai-MDK_RevC_GrpB --recurse-submodules https://github.com/altera-fpga/agilex5-ed-camera-ai.git agilex5-ed-camera-ai
+git clone -b rel/26.1 --recurse_submodules https://github.com/altera-fpga/agilex5-ed-camera.git agilex5-ed-camera
 ```
 
 * Define a `./<project>` location of your choice, creating directory structure

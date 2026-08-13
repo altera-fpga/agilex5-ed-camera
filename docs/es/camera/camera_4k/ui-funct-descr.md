@@ -51,9 +51,9 @@ This section summarizes the GUI tabs in the Camera Solution System Example
 Design.
 
 * [Input Config Tab](#input-config-tab)
+
 * [ISP Pipeline Tab](#isp-pipeline-tab)
 * [Output Config Tab](#output-config-tab)
-
 * [Pipeline Statistics Tab](#pipeline-statistics-tab)
 
 
@@ -400,6 +400,28 @@ values.
 
 
 
+### ISP Input Pipeline Tab
+
+<br/>
+<center markdown="1">
+
+![ISPInputPipelineTab.](../camera_4k/images/SW/IspInputPipelineTab.png)
+
+**ISP Input Pipeline Tab**
+</center>
+<br/>
+
+The ISP Input Pipeline Tab ToDo: ADD DESCRIPTION HERE
+
+* Paragraph 1
+* Paragraph 2
+<br/>
+<br/>
+
+This section summarizes the GUI controls in the ISP Input Pipeline Tab:
+<br/>
+
+
 ## ISP Pipeline Tab
 
 <br/>
@@ -604,8 +626,6 @@ Clicking the circular arrow on the tile of the UI resets the functionality of
 these controls to their default values.
 
 <br/>
-
-
 
 ## Output Config Tab
 
@@ -931,7 +951,6 @@ This option allows you to test the video connection to the video sink.
 
 <br/>
 
-
 ## Pipeline Statistics Tab
 
 <br/>
@@ -1037,6 +1056,9 @@ Finally, the "Edit ROI" button opens a popup window for adjusting the ROI.
 
 
 <br>
+
+
+
 <br>
 
 ***
