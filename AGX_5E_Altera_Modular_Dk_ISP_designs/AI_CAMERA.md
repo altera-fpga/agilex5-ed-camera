@@ -102,12 +102,12 @@ the 4Kp30 Multi-Sensor Camera with AI Inference Solution System Example Design:
 
 ```bash
 cd <workspace>
-git clone -b rel/26.1 --recurse_submodules https://github.com/altera-fpga/agilex5-ed-camera.git agilex5-ed-camera
+git clone -b rel/26.1 --recurse-submodules https://github.com/altera-fpga/agilex5-ed-camera.git agilex5-ed-camera
 ```
 
 * Define a `./<project>` location of your choice, creating directory structure
   where necessary.
-* Navigate to the `agilex-ed-camera-ai` directory containing the cloned
+* Navigate to the `agilex5-ed-camera` directory containing the cloned
   repository and create your project, selecting the XML variant based on your
   license and solution requirements:
   * (Note that the `LICENSED` variable within the `.xml` must match your FPGA
@@ -118,14 +118,14 @@ git clone -b rel/26.1 --recurse_submodules https://github.com/altera-fpga/agilex
 ```bash
 # SOF MDT Flow (assumes license combination 4 or 6)
 # (For license combination 3 or 5, modify the LICENSED variable in the .xml to 1. You must have a full license otherwise you will get a 10k inference limited design)
-cd agilex-ed-camera-ai/AGX_5E_Altera_Modular_Dk_ISP_designs
+cd agilex5-ed-camera
 quartus_sh -t ./modular-design-toolkit/scripts/create/create_shell.tcl -proj_path <project> -proj_name agilex5_modkit_vvpisp -xml_path ./AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_FF_RD.xml
 ```
 
 ```bash
 # RBF MDT Flow (assumes license combination 1)
 # (For license combination 2, modify the LICENSED variable in the .xml to 0, otherwise you will get a 10k inference limited design)
-cd agilex-ed-camera-ai/AGX_5E_Altera_Modular_Dk_ISP_designs
+cd agilex5-ed-camera
 quartus_sh -t ./modular-design-toolkit/scripts/create/create_shell.tcl -proj_path <project> -proj_name agilex5_modkit_vvpisp -xml_path ./AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.xml
 ```
 
@@ -146,9 +146,31 @@ System Example Design:
 
 ```bash
 unzip AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.zip
+
+    AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/
+    ├── Makefile                              ← Project Make file
+    ├── README.md                             ← Quartus® Example Design Manager info file
+    ├── agilex5_modkit_vvpisp.qpf             ← Quartus® Project File
+    ├── agilex5_modkit_vvpisp.qsf             ← Quartus® Settings File
+    ├── da_drc.dawf                           ← Quartus® Design Rule Check Waiver File
+    ├── quartus.ini                           ← Quartus® ini file
+    ├── sdc/                                  ← Synopsis Design Constraints files (Quartus® timing closure)
+    ├── src/
+    │   ├── custom_ip/                        ← Non-Quartus® IP
+    │   ├── ip/                               ← Quartus® IP
+    │   ├── rtl/                              ← Quartus® IP
+    │   |   ├── agilex5_modkit_vvpisp.v       ← project top level rtl file
+    │   ├── sw/
+    │   |   ├── niosv_subsystem/              ← DisplayPort Nios® V `.hex` software file
+    │   |   ├── niosv_subsystem_ai/           ← AI Stream Controller Nios® V `.hex` software file
+    │   |   ├── u-boot/u-boot-spl-dtb.hex     ← U-boot `.hex` software patch file
+
 cd AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
 quartus agilex5_modkit_vvpisp.qpf
 ```
+
+  Note that the folder structure is no longer consistent with the MDT
+  methodology but Quartus® Example Designs available through Quartus®.
 
 * If you wish to explore the Platform Designer project, first run the IP
   Generation step (ensure you have the suitable licenses):
@@ -197,9 +219,9 @@ The FPGA programming file/s are located in the
 `./<project>/quartus/output_files` directory and will differ depending on the
 MDT flow used:
 
-* For SOF MDT Flow:
+* For SOF MDT Flow [Refer to the main documentation for more details](../docs/camera/camera_4k_ai/flow2-sof-mdt.md):
   * `fsbl_agilex5_modkit_vvpisp_time_limited.sof`
-* For RBF MDT Flow:
+* For RBF MDT Flow [Refer to the main documentation for more details](../docs/camera/camera_4k_ai/flow3-rbf-mdt.md):
   * `agilex5_modkit_vvpisp.hps_first.hps.jic`
   * `agilex5_modkit_vvpisp.hps_first.core.rbf`
 
@@ -207,8 +229,10 @@ MDT flow used:
 
 You can build the pregenerated MDT Quartus® and Platform Designer Project for
 the 4Kp30 Multi-Sensor Camera with AI Inference Solution System Example Design
-using Quartus® GUI to compile the entire design, allowing you to view extra
-information such as resource utilization and timing reports:
+allowing you to view extra information such as resource utilization and timing
+reports:
+
+* Using Quartus® GUI:
 
 ```bash
 cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
@@ -216,19 +240,29 @@ quartus agilex5_modkit_vvpisp.qpf
 ```
 
 * Click on the `Compile Design` option in the `Compilation Flow` window.
-* Once complete, you can view all the reports.
+  Once complete, you can view all the reports.
+* Alternatively, you can use the MakeFile from the command line:
 
-Note that you can also use the `.sof` on Hardware according to your license,
-and if you have a full license, use the MakeFile to create an `.rbf` for the
-microSD Card (note any design modification can cause the Application Software
-to fail to boot/operate correctly):
+```bash
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
+make hw_compile
+```
+
+To use the compiled design with the existing Application Software for the
+Modular Development Kit, you will need to patch the `.sof` with a bootloader to
+start the HPS. The make file command to use depends on your license:
+
+* For full license, the patch will generate a `.jic` for the QSPI flash and an
+  `.rbf` for the microSD Card. Note that the `.jic` typically only needs to be
+  done once. Also note, that any design modification can cause the stock
+  Application Software to fail to boot/operate correctly.
+  The ouptut is equivalent to the RBF MDT Flow
+  [Refer to the main documentation for more details](../docs/camera/camera_4k_ai/flow3-rbf-mdt.md).
 
 ```bash
 cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
 make rbf_jic
 ```
-
-<br>
 
 The FPGA programming files are located in the
 `./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/output_files`
@@ -236,6 +270,21 @@ directory:
 
   * `agilex5_modkit_vvpisp.hps_first.hps.jic`
   * `agilex5_modkit_vvpisp.hps_first.core.rbf`
+
+* For a time limited Open Core Plus license, the `.sof` is patched to create a
+  new `fsbl.sof` that can be put onto the board using JTAG. The ouptut is
+  equivalent to the SOF MDT Flow
+  [Refer to the main documentation for more details](../docs/camera/camera_4k_ai/flow2-sof-mdt.md).
+
+```bash
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
+make uboot_sof
+```
+
+The FPGA programming file is located in the
+`./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/output_files` directory:
+
+  * `fsbl_agilex5_modkit_vvpisp_time_limited.sof`
 
 <br>
 

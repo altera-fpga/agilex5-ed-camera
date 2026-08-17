@@ -175,6 +175,10 @@ the file and reboot the board.
 
 
 
+
+
+
+
 [User flow 1]: ../camera_4k_stitch/camera_4k_stitch.md#pre-requisites
 [User flow 2]: ../camera_4k_stitch/flow2-sof-mdt.md
 [User flow 3]: ../camera_4k_stitch/flow3-rbf-mdt.md

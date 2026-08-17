@@ -10,6 +10,11 @@ The design is compatible with
 [Altera® Quartus® Prime Pro Edition version 26.1 Linux].
 
 > **Important Notes** <br/>
+> **-** Ensure [GIT LFS] is installed prior to cloning this repository. 
+        See [GIT LFS Installing]. <br/>
+> **-** This repository contains a git submodule.
+        Use recurse sbbmodules when cloning.<br/>
+        ```git clone https://github.com/altera-fpga/agilex5-ed-camera.git --recurse-submodules``` <br/>
 > **-** The following text can contain embedded links that aim to assist with
         navigation, pointers to useful references and resources, or to add
         clarity. <br/>
@@ -351,6 +356,10 @@ Kit.
 
 
 
+
+
+
+
 ### **Program the QSPI Flash Memory**
 
 This should only need to be done once. To program the QSPI flash memory:
@@ -533,6 +542,10 @@ connects to MIPI0.
 **Modular Development Kit with Connections**
 </center>
 <br/>
+
+
+
+
 
 
 
@@ -791,6 +804,8 @@ flows that you can explore:
 [Jupyter Notebook]: https://jupyter.org/
 [python]: https://www.python.org/
 [GIMP]: https://www.gimp.org/
+[GIT LFS]: https://git-lfs.com/
+[GIT LFS Installing]: https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing
 
 
 [Framos FSM:GO IMX678C Camera Modules]: https://www.framos.com
