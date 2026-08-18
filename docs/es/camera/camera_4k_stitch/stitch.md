@@ -7,13 +7,13 @@
 Also called Rectilinear or Orthoscopic projection lenses. Used for narrow field
 of view.
 
-<img src="../images/stitch/FTanTheta.svg">
+![](./images/stitch/FTanTheta.png)
 
 ### Equidistant projection F-Theta lens
 
 Used for wide-angle, fish-eye lenses.
 
-<img src="../images/stitch/FTheta.svg">
+![](./images/stitch/FTheta.png)
 
 
 ## Lens distortion F-Theta lens
@@ -63,7 +63,7 @@ Approximate displacement coefficients d(θ) in mm:
     c = 0
     d = 4 x (2.2166/2) x (-0.177/100) x (1/(2.2166/2)⁴) = -0.0052
 
-<img src="../images/stitch/lens_distortion_framos110.svg">
+![](./images/stitch/lens_distortion_framos110.png)
 
 Ideal displacement equation (if the lens had no distortion from F-Theta ideal):
 
@@ -93,7 +93,7 @@ Approximate displacement coefficients d(θ) in mm:
     c = 0
     d = 2.67 x (3.3161/2) x (-18/100) x (1/(3.3161/2)⁴) = -0.1054
 
-<img src="../images/stitch/lens_distortion_sunex190.svg">
+![](./images/stitch/lens_distortion_sunex190.png)
 
 Ideal displacement equation (if the lens had no distortion from F-Theta ideal):
 
@@ -130,7 +130,7 @@ numerical methods such as Newton-Raphson, is also possible.
 
 ### Polar coordinates to cartesian coordinates
 
-<img src="../images/stitch/polar_to_cartesian.svg">
+![](./images/stitch/polar_to_cartesian.png)
 
 Line L in polar coordinates is defined as:
 
@@ -161,7 +161,7 @@ placed a cylindrical projection screen around the camera with its centre at the
 lens focal point, we could calculate the point of intersection between the line
 L and the screen.
 
-<img src="../images/stitch/cylinder_intersection.svg">
+![](./images/stitch/cylinder_intersection.png)
 
 Cylinder C can be defined in cartesian coordinates as:
 
@@ -186,7 +186,7 @@ are mounted in a holder at 90° to each other. Note that it is not physically
 possible to place the two focal points at the same point. But the camera mount
 places them as close as possible.
 
-<img src="../images/stitch/camera_mount_front.png"> <img src="../images/stitch/camera_mount_top.png">
+![](./images/stitch/camera_mount_front.png) ![](./images/stitch/camera_mount_top.png)
 
 This mount places the focal point at about 40 mm from the mount centre. The
 consequence of this offset will be described later.
@@ -236,7 +236,7 @@ We can now calculate the output projection coordinate
 sensor (sx,sy) for both sensors. This allows the generation of a warp mesh per
 camera.
 
-<img src="../images/stitch/warp_mesh.png">
+![](./images/stitch/warp_mesh.png)
 
 
 # Parallax Error
@@ -246,7 +246,7 @@ two cameras at the projected cylinder centre. The example mount shown above has
 an offset (d) of approximately 40 mm. This produces a small error in the
 projection.
 
-<img src="../images/stitch/parallax_error.svg"><img src="../images/stitch/parallax_error_triangle.svg">
+![](./images/stitch/parallax_error.png) ![](./images/stitch/parallax_error_triangle.png)
 
     where:
         a is the angle calculated to the point of interest by the projection.
@@ -291,14 +291,14 @@ The parallax error in b is shown below for a point at the edge of the camera
 field of view. This is using the Framos 110 (FLP-AM-040-02-V-00) and the mount
 shown in the example above.
 
-<img src="../images/stitch/parallax_error_angle.svg">
+![](./images/stitch/parallax_error_angle.png)
 
 Although the error is at its largest very close to the camera, noticeable
 errors exist for sizable distances. Assuming the projected image were displayed
 on a UHD monitor, where 200° equates to 3840 pixels, each ° of error equates to
 an error of 19.2 pixels (px).
 
-<img src="../images/stitch/parallax_error_pixels.svg">
+![](./images/stitch/parallax_error_pixels.png)
 
 The error shown is for one sensor. Since we are stitching two sensors together,
 the total error is effectively doubled.
