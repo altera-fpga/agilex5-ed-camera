@@ -13,8 +13,6 @@ DEPENDS:append:class-target = " protobuf-native"
 SRC_URI = "gitsm://github.com/protocolbuffers/protobuf.git;branch=21.x;protocol=https"
 SRCREV = "f0dc78d7e6e331b8c6bb2d5283e06aa26883ca7c"
 
-S = "${WORKDIR}/git"
-
 inherit cmake
 
 PACKAGECONFIG ??= ""

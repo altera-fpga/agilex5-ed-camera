@@ -13,7 +13,7 @@ Description=ICamera Proxy Application
 
 [Service]
 Type=simple
-ExecStart=/home/root/ICameraProxyServer/start_icamera_proxy.sh
+ExecStart=%ROOT_HOME%/ICameraProxyServer/start_icamera_proxy.sh
 RemainAfterExit=yes
 
 [Install]

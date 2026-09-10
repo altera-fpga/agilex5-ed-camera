@@ -9,9 +9,9 @@
 # *******************************************************************************/
 
 DESCRIPTION = "Builds sd card image"
-LICENSE="MIT"
+LICENSE = "MIT"
 
-IMAGE_NAME_SUFFIX=""
+IMAGE_NAME_SUFFIX = ""
 
 inherit core-image
 
@@ -21,7 +21,7 @@ IMAGE_FEATURES += "empty-root-password allow-empty-password"
 
 VIRTUAL-RUNTIME_dev_manager = "udev"
 VIRTUAL-RUNTIME_init_manager = "systemd"
-VIRTUAL-RUNTIME_initscripts= " "
+VIRTUAL-RUNTIME_initscripts = " "
 VIRTUAL-RUNTIME_login_manager = "busybox shadow"
 
 export IMAGE_BASENAME = "vvp-isp-demo-image"
@@ -71,6 +71,7 @@ IMAGE_INSTALL:append = " \
     ${VIRTUAL-RUNTIME_init_manager} \
     ${VIRTUAL-RUNTIME_initscripts} \
     ${VIRTUAL-RUNTIME_login_manager} \
+    net-tools \
     packagegroup-core-ssh-openssh \
 	mtd-utils-ubifs \
 	i2c-tools \

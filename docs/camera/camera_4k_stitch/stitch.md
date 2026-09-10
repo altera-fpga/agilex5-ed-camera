@@ -1,4 +1,4 @@
-# Lens correction and Projection
+# A Guide to Lens correction and Projection
 
 ## Lens Types
 

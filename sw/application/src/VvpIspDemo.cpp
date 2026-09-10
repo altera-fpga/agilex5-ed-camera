@@ -244,6 +244,36 @@ void VvpIspDemo::StartShutdown()
     CommonApplicationBase::StartShutdown();
 }
 
+bool VvpIspDemo::WebSocketOpened(IWebSocketService* web_socket)
+{
+    bool handled = false; // Return false to indicate that the application did not handle it
+    for (auto& handler : _webSocketHandlers)
+    {
+        if(handler)
+        {
+            handled = handler(web_socket);
+            if (handled)
+            {
+                break;
+            }
+        }
+    }
+    return handled;
+}
+
+size_t VvpIspDemo::RegisterWebSocketHandler(WebSocketOpenedCB web_socket_handler)
+{
+    _webSocketHandlers.push_back(web_socket_handler);
+    return _webSocketHandlers.size() - 1;
+}
+
+void VvpIspDemo::UnRegisterWebSocketHandler(size_t web_socket_handler_handle)
+{
+    if (web_socket_handler_handle < _webSocketHandlers.size())
+    {
+        _webSocketHandlers[web_socket_handler_handle] = nullptr;
+    }
+}
 
 ///////////////////////
 

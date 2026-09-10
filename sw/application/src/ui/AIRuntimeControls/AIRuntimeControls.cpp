@@ -10,6 +10,7 @@ License.
 
 #include "AIRuntimeControls.h"
 #include "UiElements.h"
+#include "IWebSocketHandler.h"
 
 #include <string>
 
@@ -17,17 +18,45 @@ const float AIRuntimeControls::_defaultDetectionThresholdValue = 0.5f;
 const float AIRuntimeControls::_defaultIOUThresholdValue = 0.85f;
 const float AIRuntimeControls::_defaultKeypointThresholdValue = 0.5f;
 
-AIRuntimeControls::AIRuntimeControls(const std::shared_ptr<SwApi::ICoreDlaRuntime>& spCoreDlaRuntime, const std::shared_ptr<SwApi::IAiResultsRenderer>& spIAiResultsRenderer, bool powerUser)
+AIRuntimeControls::AIRuntimeControls(const std::shared_ptr<SwApi::ICoreDlaRuntime>& spCoreDlaRuntime, const std::shared_ptr<SwApi::IAiResultsRenderer>& spIAiResultsRenderer, IWebSocketHandler* webSocketHandler, bool powerUser)
 : _spCoreDlaRuntime(spCoreDlaRuntime)
 , _spIAiResultsRenderer(spIAiResultsRenderer)
+, _webSocketHandler(webSocketHandler)
 , _powerUser(powerUser)
 , _networkType(NetworkType::YOLOV8N)
 , _detectionThreshold(_defaultDetectionThresholdValue)
 , _iouThreshold(_defaultIOUThresholdValue)
 , _keypointThreshold(_defaultKeypointThresholdValue)
-, _displayResults(true)
+, _displayResultsOverlay(true)
+, _displayResultsHere(true)
 , _diagnostics(false)
+, _websocket_handler_handle(-1)
 {
+    if(_webSocketHandler)
+    {
+        _websocket_handler_handle = _webSocketHandler->RegisterWebSocketHandler([this](IWebSocketService* web_socket) -> bool
+        {
+            bool handled = false;
+            std::string subProtocolString = web_socket->GetSubProtocolString();
+            if(subProtocolString == "ai-results")
+            {
+                if(_spIAiResultsRenderer)
+                {
+                    handled = _spIAiResultsRenderer->ConnectWebSocketService(web_socket);
+                }
+            }
+
+            return handled;
+        });
+    }
+}
+
+AIRuntimeControls::~AIRuntimeControls()
+{
+    if(_webSocketHandler)
+    {
+        _webSocketHandler->UnRegisterWebSocketHandler(_websocket_handler_handle);
+    }
 }
 
 std::vector<std::shared_ptr<UiControlContainer>> AIRuntimeControls::AddUiElements() 
@@ -113,39 +142,138 @@ std::vector<std::shared_ptr<UiControlContainer>> AIRuntimeControls::AddUiElement
         _spKeypointThreshold->Enable(false);
     }
     
-    auto displayResultsCB = [this](uint32_t clientID, bool& val)
+    auto displayResultsOverlayCB = [this](uint32_t clientID, bool& val)
     {
-        _displayResults = val;
-        _spIAiResultsRenderer->RenderResults(_displayResults);
+        _displayResultsOverlay = val;
+        _spIAiResultsRenderer->RenderResults(_displayResultsOverlay);
     };
-    _spDisplayResults = spContainer->AddBoolControl("Display Results", true, displayResultsCB);
+    _spDisplayResultsOverlay = spContainer->AddBoolControl("Display Results Overlay", true, displayResultsOverlayCB);
 
-    if(_powerUser)
+    auto displayResultsHereCB = [this](uint32_t clientID, bool& val)
     {
-        auto diagnosticsCB = [this](uint32_t clientID, bool &val)
+        _displayResultsHere = val;
+        if(_spAIResultsControl)
         {
-            if (_spCoreDlaRuntime)
-            {
-                _diagnostics = val;
-                _spCoreDlaRuntime->SetDiagnostics(_diagnostics);
-            }
-        };
+            _spAIResultsControl->UpdateValue(_displayResultsHere, true);
+        }
+    };
+    _spDisplayResultsHere = spContainer->AddBoolControl("Web-UI Display Results", true, displayResultsHereCB);
 
-        _spDiagnosticsControl = spContainer->AddBoolControl("Diagnostics", false, diagnosticsCB);
-    }
+    auto aiResultsControlCB = [this](uint32_t clientId, AIResultsControlsDisplayValue& value)
+    {
+    };
+    _spAIResultsControl = std::make_shared<UiCustomControlWithValue<AIResultsControlsDisplayValue>>("OJAIResultsControl", AIResultsControlsDisplayValue(true), aiResultsControlCB);
+    spContainer->Add(_spAIResultsControl);
+
+    auto diagnosticsCB = [this](uint32_t clientID, bool &val)
+    {
+        if (_spCoreDlaRuntime)
+        {
+            _diagnostics = val;
+            _spCoreDlaRuntime->SetDiagnostics(_diagnostics);
+        }
+    };
+
+    _spDiagnosticsControl = spContainer->AddBoolControl("Display Statistics Terminal", false, diagnosticsCB);
    
     auto defaultsButtonCB = [this](uint32_t clientID) 
     {
         _spDetectionThreshold->UpdateValue(_defaultDetectionThresholdValue, true);
         _spIOUThreshold->UpdateValue(_defaultIOUThresholdValue, true);
         _spKeypointThreshold->UpdateValue(_defaultKeypointThresholdValue, true);
-        _spDisplayResults->UpdateValue(true, true);
+        _spDisplayResultsOverlay->UpdateValue(true, true);
+        _spDisplayResultsHere->UpdateValue(true, true);
         if(_powerUser)
         {
             _spDiagnosticsControl->UpdateValue(false, true);
         }
     };
-    _spDefaultsButton = spContainer->AddButtonControl("Defaults", defaultsButtonCB);
+
+    auto resetCB = [this](uint32_t clientID) 
+    {
+        _spDetectionThreshold->UpdateValue(_defaultDetectionThresholdValue, true);
+        _spIOUThreshold->UpdateValue(_defaultIOUThresholdValue, true);
+        _spKeypointThreshold->UpdateValue(_defaultKeypointThresholdValue, true);
+        _spDisplayResultsOverlay->UpdateValue(true, true);
+        _spDisplayResultsHere->UpdateValue(true, true);
+        if(_powerUser)
+        {
+            _spDiagnosticsControl->UpdateValue(false, true);
+        }
+    };
+    spContainer->AddHeaderButtons( {
+        { "CornerControlsReset", resetCB, "Reset", "OJL/Images/Reset.png" }
+    });
+
 
     return {std::move(spContainer)};
 }
+
+AIResultsControlsDisplayValue::AIResultsControlsDisplayValue(bool display)
+:    _display(display)
+{
+}
+
+AIResultsControlsDisplayValue::AIResultsControlsDisplayValue()
+:    _display(false)
+{
+}
+
+std::string AIResultsControlsDisplayValue::ToString(bool csvFormat, int32_t firstIndex)
+{
+    if (csvFormat)
+    {
+        std::string stringValue = AtUtils::FormatString("%d", _display);
+        return stringValue;
+    }
+    else
+    {
+        auto spJson = AtUtils::IJson::Create();
+        if (!spJson)
+            return {};
+
+        auto spObject = spJson->RootObject();
+        if (!spObject)
+            return {};
+
+        spObject->AddValue("display", (int32_t)_display);
+
+        return spJson->ToString();
+    }
+}
+
+void AIResultsControlsDisplayValue::GetJSON(AtUtils::IJsonObjectPtr& spJsonObject)
+{
+    spJsonObject->AddValue("display", (int32_t)_display);
+}
+
+AIResultsControlsDisplayValue AIResultsControlsDisplayValue::FromString(bool csvFormat, std::string stringValue)
+{
+    AIResultsControlsDisplayValue value;
+    if (csvFormat)
+    {
+        std::string displayStr = UiElement::CsvExtract(stringValue);
+
+        bool display = AtUtils::FromString<bool>(displayStr);
+        value._display = display;
+
+        return value;
+    }
+    else
+    {
+        auto spJson = AtUtils::IJson::Create(stringValue);
+        if (!spJson)
+            return {};
+
+        auto spObject = spJson->Parse();
+        if (!spObject)
+            return {};
+
+        bool display = (bool)spObject->GetValue<bool>("display");
+
+        value._display = display;
+    }
+
+    return value;
+}
+

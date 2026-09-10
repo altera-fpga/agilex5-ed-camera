@@ -16,12 +16,10 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 inherit systemd
 inherit features_check
 
-S = "${WORKDIR}"
-UNPACKDIR = "${S}"
-
 SRC_URI = "file://hostnamemac.sh \
            file://hostnamemac.service \
 	   "
+S = "${UNPACKDIR}"
 
 SYSTEMD_SERVICE:${PN} = "hostnamemac.service"
 SYSTEMD_AUTO_ENABLE = "enable"
@@ -35,4 +33,4 @@ do_install() {
 }
 
 FILES:${PN} += "${systemd_system_unitdir}/hostnamemac.service ${bindir}/hostnamemac.sh"
-REQUIRED_DISTRO_FEATURES="systemd"
+REQUIRED_DISTRO_FEATURES = "systemd"

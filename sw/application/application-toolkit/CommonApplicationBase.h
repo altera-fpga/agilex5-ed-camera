@@ -175,6 +175,7 @@ public:
     uint32_t GetControlID(const std::string& panelName, const std::string& controlLabel) override;
     uint32_t GetButtonID(const std::string& panelName, const std::string& buttonLabel) override;
     void SetControlValue(const std::string& JSON) override;
+    bool WebSocketOpened(IWebSocketService* web_socket) override;
 
     // Constructs a control type, use similar to std::make_shared<>
     template <class CONTROL_TYPE, typename... ARGS>

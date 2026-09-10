@@ -31,19 +31,18 @@ UBOOT_BRANCH ?= "${UBOOT_VERSION_PREFIX}${UBOOT_VERSION}"
 SRCREV ?= "${AUTOREV}"
 PV:append = "+git${SRCPV}"
 
-S = "${WORKDIR}/git"
-B = "${WORKDIR}/build"
+B = "${UNPACKDIR}/build"
 
 RPROVIDES:${PN} = "u-boot"
 
 SRC_URI = "git://${UBOOT_REPO};protocol=https;branch=${UBOOT_BRANCH}"
 
 do_compile:prepend() {
-    # Copy ATF binary if required
+	# Copy ATF binary if required
 	if [ -n "${ATF_PLAT}" ]; then
 		for config in ${UBOOT_MACHINE}; do
-			cp ${DEPLOY_DIR_IMAGE}/bl31.bin ${B}/${config}/bl31.bin
-			cp ${DEPLOY_DIR_IMAGE}/bl31.bin ${S}/bl31.bin
+			cp ${DEPLOY_DIR_IMAGE}/bl31.bin ${B}/${config}-${UBOOT_CONFIG}/bl31.bin
+			cp ${DEPLOY_DIR_IMAGE}/bl31.bin ${UNPACKDIR}/bl31.bin
 		done
 	fi
 }
@@ -51,8 +50,8 @@ do_compile:prepend() {
 do_install:append() {
 	for config in ${UBOOT_MACHINE}; do
 		for type in ${UBOOT_CONFIG}; do
-			cp ${B}/${config}/u-boot.itb ${B}/${config}/u-boot-${type}.itb
-			install -D -m 644 ${B}/${config}/u-boot-${type}.itb ${D}/boot/u-boot-${type}-${PV}-${PR}.itb
+			cp ${B}/${config}-${UBOOT_CONFIG}/u-boot.itb ${B}/${config}-${UBOOT_CONFIG}/u-boot-${type}.itb
+			install -D -m 644 ${B}/${config}-${UBOOT_CONFIG}/u-boot-${type}.itb ${D}/boot/u-boot-${type}-${PV}-${PR}.itb
 			ln -sf u-boot-${type}-${PV}-${PR}.itb ${D}/boot/u-boot.itb-${type}
 			ln -sf u-boot-${type}-${PV}-${PR}.itb ${D}/boot/u-boot.itb
 			rm -rf  ${D}/boot/?*.img*

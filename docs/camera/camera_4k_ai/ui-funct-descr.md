@@ -86,7 +86,6 @@ This section summarizes the GUI controls in the Input Config Tab:
 * [Input Source](#input-source)
 * [Test Pattern Generator](#test-pattern-generator)
 * [Camera Control](#camera-control)
-* [Frame Reader](#frame-reader)
 * [Sensor Profile](#sensor-profile)
 * [Histogram](#histogram)
 * [Auto Exposure](#auto-exposure)
@@ -117,11 +116,6 @@ input. It can be used to verify the system with or without sensor modules.
 the board. The number of sensor modules visible in the dropdown menu depends on
 the camera solution design and the number of sensor modules physically
 connected to the development board.
-* Frame Reader source corresponds to the input [**Frame Reader**](#frame-reader).
-This input source uses either raw images in Color Filter Array (CFA) format
-(also known as Bayer) or standard RGB images pre-converted to CFA by the software.
-This is consistent with the camera input. A single image as well as a sequence can be streamed.
-This input can be used to verify the system with or without sensor modules.
 
 <br/>
 
@@ -202,35 +196,6 @@ scene:
   motion artifacts without increasing graininess.
   * Increase the analog gain. This will increase the graininess of the video
   without changing responsiveness.
-
-<br/>
-
-#### Frame Reader
-
-<br/>
-<center markdown="1">
-
-![FrameReader.](../camera_4k_resources/images/SW/FrameReader.png)
-
-**Frame Reader**
-</center>
-<br/>
-
-The Frame Reader UI allows you to upload a still image or image sequence to the
-input Frame Reader for use as a video source in the ISP pipeline. The following
-image formats are supported:
-
-* BMP, PNG, JPEG - standard RGB images
-* PGM - raw Bayer data in RGGB format.
-
-<br/>
-
-The Import Images button opens your browser's file selection dialog so you can
-choose one or more images. After a successful upload, the image name,
-resolution, and bit depth will be shown in the UI.
-<br/>
-
-The Frame Rate slider allows you to adjust the playback frame rate.
 
 <br/>
 
@@ -402,7 +367,6 @@ functions and are summarized as follows:
 * [Vignette Correction](#vignette-correction)
 * [White Balance Correction](#white-balance-correction)
 * [Demosaic](#demosaic)
-* [Unsharp Mask Filter](#unsharp-mask-filter)
 * [Color Correction Matrix](#color-correction-matrix)
 
 <br/>
@@ -554,28 +518,6 @@ to generate the given output RGB pixel.
 <br/>
 
 
-### Unsharp Mask Filter
-
-<br/>
-<center markdown="1">
-
-![UnsharpMaskFilter.](../camera_4k_resources/images/SW/UnsharpMaskFilter.png)
-
-**Unsharp Mask Filter Controls**
-</center>
-<br/>
-
-The Unsharp Mask Filter UI controls the strength of the sharpening applied to
-the image. Positive strengths will sharpen the image, while negative strengths
-will soften the image.
-<br/>
-
-Clicking the circular arrow on the tile will reset the configuration of the IP
-to its default values.
-
-<br/>
-
-
 ### Color Correction Matrix
 
 <br/>
@@ -610,6 +552,28 @@ these controls to their default values.
 <br/>
 
 
+### Unsharp Mask Filter
+
+<br/>
+<center markdown="1">
+
+![UnsharpMaskFilter.](../camera_4k_resources/images/SW/UnsharpMaskFilter.png)
+
+**Unsharp Mask Filter Controls**
+</center>
+<br/>
+
+The Unsharp Mask Filter UI controls the strength of the sharpening applied to
+the image. Positive strengths will sharpen the image, while negative strengths
+will soften the image.
+<br/>
+
+Clicking the circular arrow on the tile will reset the configuration of the IP
+to its default values.
+
+<br/>
+
+
 ## Output Config Tab
 
 <br/>
@@ -628,9 +592,9 @@ the ISP core pipeline, right up to and including the output.
 
 This section summarizes the GUI controls in the Output Config Tab:
 
+* [Unsharp Mask Filter](#unsharp-mask-filter)
 * [3D LUT](#3d-lut)
 * [Tone Mapping Operator](#tone-mapping-operator)
-* [Warp Engine](#warp)
 * [1D LUT](#1d-lut)
 * [Logo](#logo)
 * [Output](#output)
@@ -685,88 +649,6 @@ mapping feature can use an ROI which can be adjusted from a pop-up panel.
 
 **TMO ROI Editor**
 </center>
-<br/>
-
-
-### Warp
-
-The main Warp UI is a popup interface you open by clicking the Show Controls
-button in the Warp tile.
-
-<br/>
-<center markdown="1">
-
-![WarpControls.](../camera_4k_resources/images/SW/Warp.png)
-
-**Warp Controls**
-</center>
-<br/>
-
-The dialog box that pops up has blue buttons at the center/bottom which
-switch between the warp editing modes: Fixed, Corners, Arbitrary and Fisheye.
-<br/>
-
-If any transformations go outside the warp IP's capability, the mesh will
-change color from blue to red indicating an invalid configuration. When the
-parameterization ranges become valid again, the mesh color will change back to
-blue. The Scale View slider zooms out the Mesh Editor which makes it possible
-to view transforms that could extend outside the target window. The Show
-alignment guide box lets you turn the 16x9 grid of squares on and off.
-
-<br/>
-<center markdown="1">
-
-![WarpFullFixedControls.](../camera_4k_resources/images/SW/WarpFullFixed.png)
-
-**Fixed Warp Controls**
-</center>
-<br/>
-
-The Fixed Controls panel has high-level controls for specifying a warp mesh
-based on various mathematical transforms. Clicking on the 3x3 mesh button on
-Fixed Controls title page snapshots the current mesh and changes the warp
-editing mode to arbitrary mesh control mode. Clicking the circular arrow next
-to it resets the functionality of these controls to their default values.
-
-<br/>
-<center markdown="1">
-
-![WarpFullCorners.](../camera_4k_resources/images/SW/WarpFullCorners.png)
-
-**Corner Warp Controls**
-</center>
-<br/>
-
-Corner Controls mode allows you to drag 4 corners of the transformation mesh
-rectangle. There is also a control to apply additional radial distortion.
-
-<br/>
-<center markdown="1">
-
-![WarpFullArbitrary.](../camera_4k_resources/images/SW/WarpFullArbitrary.png)
-
-**Arbitrary Warp Controls**
-</center>
-<br/>
-
-The mesh editor in Arbitrary Controls mode lets you manually adjust the mesh
-by dragging any control points. The number of control points can be changed
-with the slider. The interface also allows you to export and import mesh files
-to and from your host device.
-
-<br/>
-<center markdown="1">
-
-![WarpFullFisheye.](../camera_4k_resources/images/SW/WarpFullFisheye.png)
-
-**Fisheye Lens Warp Controls**
-</center>
-<br/>
-
-Fisheye Lens Controls mode lets you configure Fisheye to Panorama or Fisheye to
-Equirectangular image mapping. The outline in the Mesh Editor shows which area
-of the input image will be mapped to the output.
-
 <br/>
 
 
@@ -977,11 +859,11 @@ The Network drop box allows selection between the AI networks on the microSD car
 * YOLO 8n Detect. This network is the YOLO v8 nano detection model with an
   input image size of 640x384. This option performs bounding box estimation and
   classification from the eighty items in the COCO dataset. This model has an
-  inference rate of 30 FPS.
+  inference rate up to 30 FPS.
 * YOLO 8n Pose. This network is the YOLO v8 nano pose estimation model with an
   input image size of 640x384. This option performs bounding box estimation for
   the ‘person’ category with seventeen skeletal key-point estimations. This
-  model has an inference rate of 30 FPS.
+  model has an inference rate up to 30 FPS.
 
 The Detection Threshold slider controls the confidence threshold, where a valid
 detection requires the candidate’s confidence value to be greater than the
@@ -1005,9 +887,80 @@ of each of the skeletal keypoints and the application software only draws the
 pose-lines (bones) between linked keypoints when both keypoint confidence
 values are above the keypoint threshold.
 
-The Display Results checkbox controls whether the application software renders
-the results over the video output. Disabling rendering is useful for
+The Display Results Overlay checkbox controls whether the application software
+renders the results over the video output. Disabling rendering is useful for
 decluttering the image during scene setup and fine-tuning the ISP components.
+Disabling the Overlay can also decrease CPU and FPGA DDR loading, which can
+lead to a higher overall inference rate.
+
+The Display Results UI checkbox allows the application software to render the
+results to the UI. Enabling UI rendering is useful when the Display Results
+Overlay is disabled. An example of results rendering in the UI is shown below.
+
+<br/>
+<center markdown="1">
+
+![AIRuntime.](../camera_4k_resources/images/SW/AIRuntimePose.png)
+
+**An example of rendering Pose Estimation in the UI**
+</center>
+<br/>
+
+> **Notes** <br/>
+> **-** The Display Results rendering performance can only ever be as high as
+        the actual inference rate, or lower depending on CPU and DDR4 SDRAM
+        loading. Examples of CPU and DDR4 SDRAM loading include scene
+        complexity, as well as influences from the Detection Threshold, IOU,
+        and Keypoint Threshold settings. <br/>
+> **-** The inference results can only ever be as high as the
+        [Camera Frame Rate](#camera-control) setting.
+
+<br/>
+
+The Display Statistics Terminal checkbox allows the application software to
+display AI performance figures in the terminal output. The performance figures
+are updated every few seconds and include:
+
+* inference_rate
+  * AI Suite IP Core inference rate
+* low_res_rate
+  * The rate at which the downscaled AI input image is being buffered
+* full_res_rate
+  * The rate at which the full sized 4k image is being buffered
+* osd_rate
+  * The overall rate at which:
+    * Inference results memcopy (FPGA to HPS DDR4 SDRAM)
+    * Inference results processing (Non-Maximum Suppression algorithm)
+    * Results overlay image generation (HPS DDR4 SDRAM)
+    * Results overlay image memcopy (HPS to FPGA DDR4 SDRAM)
+    * VVP Frame Reader IP reads results overlay image from FPGA DDR4 SDRAM
+
+An example terminal output is shown below:
+
+```
+_processing_time = 100 ms
+_rendering_time = 4800 ms
+YOLO 8n Detect 640x384
+inference_rate 30.3045 ips
+low_res_rate 30.3045 fps
+full_res_rate 30.3045 fps
+osd_rate 20.304 fps
+_processing_time = 100 ms
+_rendering_time = 4800 ms
+YOLO 8n Detect 640x384
+inference_rate 30.3036 ips
+low_res_rate 30.3036 fps
+full_res_rate 30.3036 fps
+osd_rate 20.3034 fps
+YOLO 8n Detect 640x384
+inference_rate 30.3031 ips
+low_res_rate 30.3031 fps
+full_res_rate 30.3031 fps
+osd_rate 20 fps
+```
+
+<br/>
+The `Defaults` button is used to reset the AI Runtime to default values.
 
 <br/>
 <br/>
@@ -1055,6 +1008,7 @@ decluttering the image during scene setup and fine-tuning the ISP components.
 [openSCAD File - Fixed Camera Mount Adapter for Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/gmsl_bracket_framos.scad
 [openSCAD File - Multi-Camera Tripod Mount Adapter for Framos]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/stitch_camera_mount.scad
 
+
 [ultralytics YOLO]: https://docs.ultralytics.com
 [ONNX]: https://onnx.ai/
 [OpenVINO™ Toolkit]: https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.6/linux
@@ -1064,11 +1018,13 @@ decluttering the image during scene setup and fine-tuning the ISP components.
 
 
 [Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
 
 
 [Agilex™ 5 SoC FPGA]: https://www.altera.com/products/fpga/agilex/5
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (25.1)]: https://docs.altera.com/r/docs/814346/25.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/download-document
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1)]:https://docs.altera.com/r/docs/814346/26.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
+[Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1.1)]:https://docs.altera.com/r/docs/814346/26.1.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [NiosV Processor for Altera® FPGA]: https://www.altera.com/design/guidance/nios-v-developer
 [Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3274/agilex-5-fpga-and-soc-e-series-065b-modular-development-kit
 [Agilex™ 5 FPGA E-Series Modular Development Kits - Product Brief]: https://docs.altera.com/v/u/docs/815178/agilex-5-fpga-e-series-065b-and-065a-modular-development-kit-product-brief
@@ -1095,6 +1051,12 @@ decluttering the image during scene setup and fine-tuning the ISP components.
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-windows
 [Altera® Quartus® Prime Pro Edition version 26.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.0.110-linux.run
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.0.110-windows.exe
+
+
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-linux
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-windows
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.1.110-linux.run
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.1.110-windows.exe
 
 
 
@@ -1139,7 +1101,7 @@ decluttering the image during scene setup and fine-tuning the ISP components.
 [MSGDMA IP]: https://docs.altera.com/r/docs/683130/26.1/embedded-peripherals-ip-user-guide/modular-scatter-gather-dma-core
 [Broadcaster IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/axi-stream-broadcaster-ip
 [Video and Vision Monitor IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-and-vision-monitor-ip
-[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_interest_basic_guide.pdf
+[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_Interest_basic_guide.pdf
 [Remoasaic IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Remosaic_basic_guide.pdf
 [Throttle IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Throttle_basic_guide.pdf
 [Alpha Channel IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Alpha_Channel_basic_guide.pdf
@@ -1159,7 +1121,7 @@ decluttering the image during scene setup and fine-tuning the ISP components.
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
 
 
 
@@ -1171,14 +1133,19 @@ decluttering the image during scene setup and fine-tuning the ISP components.
 [top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/top.core.jic
 [top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/top.core.rbf
 [model_compiler]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel-26.1/yolo_cnn
+[FPGA AI Suite Prerequisites]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/fpga_ai_suite_prerequisite.tcl
 
 
 
-[AGX_5E_Modular_Devkit_ISP_AI_WARP_FF_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_FF_RD.xml
-[AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.xml
+[AGX_5E_Modular_Devkit_ISP_AI_FF_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_FF_RD.xml
+[AGX_5E_Modular_Devkit_ISP_AI_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_RD.xml
 [Create microSD card image (.wic.gz) using YOCTO/KAS]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md
 [SOF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [RBF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [Quartus® GUI Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#using-the-pregenerated-mdt-quartus-project
 [Quartus® GUI Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#building-the-pregenerated-mdt-quartus-project
 

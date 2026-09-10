@@ -3,7 +3,7 @@
 ## Overview
 
 The repository contains the necessary files and collateral to create and build
-the Camera with AI Inference Solution System Example Design.
+the 4Kp30 Multi-Sensor Camera with AI Inference Solution System Example Design.
 
 The products of this repository are generated using Software flow, Hardware
 flow, and YOLO v8 Nano detection and pose graph compilation are:
@@ -78,15 +78,16 @@ generates the compiled graphs to be copied to microSD card.
 The Hardware flow uses the Modular Design Toolkit (MDT) to create and build the
 Quartus® project for the 4Kp30 Multi-Sensor Camera with AI Inference Solution
 System Example Design. Note, a pregenerated Quartus® project (using the MDT
-flow) is also provided for reference and exploration.
+flow) is also provided for standard compilation flow.
 
 <br>
 
 ### Software Requirements
 
-The MDT requires the following Linux versions of software tools:
+The MDT requires the following Linux versions of Altera® software tools:
 
-* Quartus® Prime Pro 26.1.
+* Quartus® Prime Pro Edition 26.1
+* FPGA AI Suite 26.1.1.
 * Nios® V Open-Source Tools 26.1 (installed with Quartus® Prime).
 
 <br>
@@ -98,11 +99,22 @@ The MDT requires the following Linux versions of software tools:
 Follow the next steps to create the Quartus® and Platform Designer Project for
 the 4Kp30 Multi-Sensor Camera with AI Inference Solution System Example Design:
 
-* Create your workspace and clone the repository using `--recurse-submodules`:
+* Create your workspace and clone the repository using `--recurse-submodules`.
+  Ensure [GIT LFS](https://git-lfs.com/) is
+  [installed](https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing)
+  prior to cloning this repository:
 
 ```bash
-cd <workspace>
+cd ./<workspace>
 git clone -b rel/26.1 --recurse-submodules https://github.com/altera-fpga/agilex5-ed-camera.git agilex5-ed-camera
+```
+
+A script has been provided to simplify OpenVINO™ and Altera® FPGA AI Suite installation:
+
+```bash
+cd ./<workspace>/agilex5-ed-camera
+source quartus_sh -t fpga_ai_suite_prerequisite.tcl
+. setenv.sh
 ```
 
 * Define a `./<project>` location of your choice, creating directory structure
@@ -118,15 +130,15 @@ git clone -b rel/26.1 --recurse-submodules https://github.com/altera-fpga/agilex
 ```bash
 # SOF MDT Flow (assumes license combination 4 or 6)
 # (For license combination 3 or 5, modify the LICENSED variable in the .xml to 1. You must have a full license otherwise you will get a 10k inference limited design)
-cd agilex5-ed-camera
-quartus_sh -t ./modular-design-toolkit/scripts/create/create_shell.tcl -proj_path <project> -proj_name agilex5_modkit_vvpisp -xml_path ./AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_FF_RD.xml
+cd ./<workspace>/agilex5-ed-camera
+quartus_sh -t ./modular-design-toolkit/scripts/create/create_shell.tcl -proj_path <project> -proj_name agilex5_modkit_vvpisp -xml_path ./AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_FF_RD.xml
 ```
 
 ```bash
 # RBF MDT Flow (assumes license combination 1)
 # (For license combination 2, modify the LICENSED variable in the .xml to 0, otherwise you will get a 10k inference limited design)
-cd agilex5-ed-camera
-quartus_sh -t ./modular-design-toolkit/scripts/create/create_shell.tcl -proj_path <project> -proj_name agilex5_modkit_vvpisp -xml_path ./AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.xml
+cd ./<workspace>/agilex5-ed-camera
+quartus_sh -t ./modular-design-toolkit/scripts/create/create_shell.tcl -proj_path <project> -proj_name agilex5_modkit_vvpisp -xml_path ./AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_RD.xml
 ```
 
 This will create your Quartus® Prime and Platform Designer Project in
@@ -140,14 +152,14 @@ System Example Design:
 
 * Define a `./<project>` location of your choice, creating directory structure
   where necessary.
-* Download [AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.zip](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.zip)
+* Download [AGX_5E_Modular_Devkit_ISP_AI_RD.zip](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/AGX_5E_Modular_Devkit_ISP_AI_RD.zip)
   and copy it to your `./<project>` location.
 * Navigate to the `./<project>` location, extract the project, and load Quartus® GUI:
 
 ```bash
-unzip AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.zip
+unzip AGX_5E_Modular_Devkit_ISP_AI_RD.zip
 
-    AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/
+    AGX_5E_Modular_Devkit_ISP_AI_RD/
     ├── Makefile                              ← Project Make file
     ├── README.md                             ← Quartus® Example Design Manager info file
     ├── agilex5_modkit_vvpisp.qpf             ← Quartus® Project File
@@ -165,7 +177,7 @@ unzip AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.zip
     │   |   ├── niosv_subsystem_ai/           ← AI Stream Controller Nios® V `.hex` software file
     │   |   ├── u-boot/u-boot-spl-dtb.hex     ← U-boot `.hex` software patch file
 
-cd AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
+cd AGX_5E_Modular_Devkit_ISP_AI_RD
 quartus agilex5_modkit_vvpisp.qpf
 ```
 
@@ -189,13 +201,13 @@ Solution System Example Design:
   selecting the post processing step option for your chosen MDT flow:
 
 ```bash
-cd ./<project>/scripts 
+cd ./<project>/scripts
 # SOF MDT Flow
 quartus_sh -t build_shell.tcl -update_ocs -full_compile -ff_post_agx5e
 ```
 
 ```bash
-cd ./<project>/scripts 
+cd ./<project>/scripts
 # RBF MDT Flow (not supported with OCP evaluation license)
 quartus_sh -t build_shell.tcl -update_ocs -full_compile -hps_post_agx5e
 ```
@@ -235,16 +247,17 @@ reports:
 * Using Quartus® GUI:
 
 ```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_RD
 quartus agilex5_modkit_vvpisp.qpf
 ```
 
-* Click on the `Compile Design` option in the `Compilation Flow` window.
-  Once complete, you can view all the reports.
+* Click on the `Compile Design` option in the `Compilation Flow` window. Once
+  complete, you can view all the reports.
+
 * Alternatively, you can use the MakeFile from the command line:
 
 ```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_RD
 make hw_compile
 ```
 
@@ -260,13 +273,12 @@ start the HPS. The make file command to use depends on your license:
   [Refer to the main documentation for more details](../docs/camera/camera_4k_ai/flow3-rbf-mdt.md).
 
 ```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_RD
 make rbf_jic
 ```
 
 The FPGA programming files are located in the
-`./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/output_files`
-directory:
+`./<project>/AGX_5E_Modular_Devkit_ISP_AI_RD/output_files` directory:
 
   * `agilex5_modkit_vvpisp.hps_first.hps.jic`
   * `agilex5_modkit_vvpisp.hps_first.core.rbf`
@@ -277,14 +289,24 @@ directory:
   [Refer to the main documentation for more details](../docs/camera/camera_4k_ai/flow2-sof-mdt.md).
 
 ```bash
-cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_RD
 make uboot_sof
 ```
 
 The FPGA programming file is located in the
-`./<project>/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD/output_files` directory:
+`./<project>/AGX_5E_Modular_Devkit_ISP_AI_RD/output_files` directory:
 
   * `fsbl_agilex5_modkit_vvpisp_time_limited.sof`
+
+<br>
+
+An additional MakeFile switch can be used from the command line that will
+perform both the compile and bootloader build steps in one go:
+
+```bash
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_RD
+make gen_build
+```
 
 <br>
 

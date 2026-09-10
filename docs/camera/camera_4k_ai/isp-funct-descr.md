@@ -34,7 +34,7 @@ time camera functions like auto white balance (AWB) and auto exposure (AE).
 The following block diagram shows the main components and subsystems of the
 Camera Solution System Example Design. Note that the IP instance number is
 shown (bottom right corner of the IP) and is used by the Application Software
-to indentify the unique instance.
+to identify the unique instance.
 
 <br/>
 <center markdown="1">
@@ -80,7 +80,6 @@ they are Red, Green1, Green2, and Blue). Therefore, it can be seen that any
 given pixel belongs to just one of these color channels when processing. Each
 color channel is sometimes referred to as a CFA phase.
 
-
 The Altera® MIPI D-PHY IP interfaces the FPGA directly to 2 Framos optical
 sensor modules via Framos connectors on the Modular Development Kit Carrier
 Board and PixelMate CSI-2 Flex-Cables. The design showcases a 4K (3840x2160)
@@ -99,7 +98,6 @@ The FPGA AI Suite IP resource has been limited to achieve a maximum inference
 rate of 30 FPS. Therefore, the sensor module output is configured to limit it to
 30 FPS.
 
-
 The design connects an Altera® MIPI CSI-2 IP to each of the MIPI D-PHY IP Rx
 links using a 4-lane 16-bit PHY Protocol Interface (PPI) bus. The design
 configures each CSI-2 IP output at 4 Pixels In Parallel (PiP) using a 297MHz
@@ -108,7 +106,6 @@ determine if the sensor is passing valid video. The SW will not allow a switch
 to an invalid sensor input. Since all ISP IP only support VVP AXI4-S
 Lite protocol, A VVP Protocol Converter IP is used on each CSI-2 IP output.
 
-
 To reduce FPGA resources, a VVP PIP Converter IP is then used to reduce the PIP
 from 4 to 1 (which still provides sufficient bandwidth to process the video
 image). The sensor modules cannot be stalled. So the PIP Converter contains 2
@@ -116,9 +113,9 @@ lines of video buffer to accommodate small amounts of back-pressure from
 downstream IPs.
 
 > **Related Information** <br/>
-> [Video and Vision Monitor IP] <br/>
-> [Protocol Converter IP] <br/>
-> [Pixels in Parallel Converter IP]
+> [Video and Vision Monitor IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-and-vision-monitor-ip) <br/>
+> [Protocol Converter IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/protocol-converter-ip) <br/>
+> [Pixels in Parallel Converter IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/pixels-in-parallel-converter-ip)
 
 <br/>
 
@@ -142,26 +139,14 @@ images). So the RMS is used to convert the RGB image to a CFA image (with the
 same phase as the sensor input), by simply discarding color information. The
 TPG features several modes, including color bars and solid colors.
 
-
-The Frame Reader function allows Bayer images to be uploaded via the GUI to the
-FPGA DDR SDRAM and used as an input source. The VVP Frame Reader IP reads from
-the DDR SDRAM and continuously outputs the image (or stream of images). The
-Frame Reader only outputs the active picture pixels and so an additional
-Throttle IP is used to set the required FPS rate.
-
 The Bayer Switch (a VVP Switch IP) is then used to select the Input source for
 a given output.
 
-
-
 > **Related Information** <br/>
-> [Test Pattern Generator IP] <br/>
-> [Throttle IP] <br/>
-> [Remoasaic IP] <br/>
-> [Video Frame Reader IP] <br/>
-> [Switch IP]
-
-
+> [Test Pattern Generator IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/test-pattern-generator-ip) <br/>
+> [Throttle IP](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Throttle_basic_guide.pdf) <br/>
+> [Remoasaic IP](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Remosaic_basic_guide.pdf) <br/>
+> [Switch IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/switch-ip)
 
 <br/>
 
@@ -172,7 +157,6 @@ Camera Solution System Example Design:
 
 * [Black Level Statistics](#black-level-statistics)
 * [Clipper](#clipper)
-  
 * [Defective Pixel Correction](#defective-pixel-correction)
 * [Adaptive Noise Reduction](#adaptive-noise-reduction)
 * [Black Level Correction](#black-level-correction)
@@ -182,13 +166,10 @@ Camera Solution System Example Design:
 * [Demosaic](#demosaic)
 * [Histogram Statistics](#histogram-statistics)
 * [Color Correction Matrix](#color-correction-matrix)
-  
 * [3D LUT](#3d-lut)
 * [Tone Mapping Operator](#tone-mapping-operator)
 * [Unsharp Mask Filter](#unsharp-mask-filter)
 * [Region Of Interest](#region-of-interest)
-* [Warp](#warp)
-  
 
 <br/>
 
@@ -225,7 +206,7 @@ calibration flow.
 Note that this IP is optional and may not be part of the design.
 
 > **Related Information** <br/>
-> [Black Level Statistics IP]
+> [Black Level Statistics IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/black-level-statistics-ip)
 
 <br/>
 
@@ -241,12 +222,9 @@ configures the Clipper IP to bypass the input image.
 Note that this IP is optional and may not be part of the design.
 
 > **Related Information** <br/>
-> [Clipper IP]
+> [Clipper IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/clipper-ip)
 
 <br/>
-
-
-
 
 
 ### Defective Pixel Correction
@@ -256,8 +234,8 @@ defective pixels in the sensor image. Such impulse noise is usually the result
 of defective pixel circuitry within image sensor for a given pixel, and it
 manifests itself in those pixels to respond to light drastically differently
 compared to their neighboring pixels. The DPC IP operates on 2x2 Bayer CFA
-images, identifying defective pixels using a configurable non-linear filter, and
-then corrects them.
+images, identifying defective pixels using a configurable non-linear filter,
+and then corrects them.
 
 <br/>
 <center markdown="1">
@@ -293,7 +271,7 @@ neighborhood. As the sensitivity increases the IP approximates a class of
 median filter.
 
 > **Related Information** <br/>
-> [Defective Pixel Correction IP]
+> [Defective Pixel Correction IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/defective-pixel-correction-ip)
 
 <br/>
 
@@ -337,7 +315,7 @@ for a rectangular distribution to maximize denoising capability. By default,
 the software configures a Gaussian distribution into the spatial distance LUT.
 
 > **Related Information** <br/>
-> [Adaptive Noise Reduction IP]
+> [Adaptive Noise Reduction IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/adaptive-noise-reduction-ip)
 
 <br/>
 
@@ -399,7 +377,7 @@ read the OBR of the sensor and relies on pre-calibrated coefficients as a
 function of analog gain of the sensor.
 
 > **Related Information** <br/>
-> [Black Level Correction IP]
+> [Black Level Correction IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/black-level-correction-ip)
 
 <br/>
 
@@ -451,7 +429,7 @@ coefficients.
 <br/>
 
 > **Related Information** <br/>
-> [Vignette Correction IP]
+> [Vignette Correction IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/vignette-correction-ip)
 
 <br/>
 
@@ -511,12 +489,16 @@ pixels is too low, it indicates a zone with mixed content and is therefore
 unsuitable for inclusion in calculating white imbalance of the image. The Auto
 White Balance (AWB) algorithm is a feedback loop inside the SW App that
 continuously reads the white balance statistics and guesses the color
-temperature of the image scene.
+temperature of the image scene. The algorithm uses the white balance statistics
+pre white balance correction. However in the UI, the white balance statistics
+are taken post white balance correction. To facilitate both modes, a VVP Switch
+IP is used.
 
 The WBS IP passes its input image to its output unchanged.
 
 > **Related Information** <br/>
-> [White Balance Statistics IP]
+> [White Balance Statistics IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/white-balance-statistics-ip) <br/>
+> [Switch IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/switch-ip)
 
 <br/>
 
@@ -551,7 +533,7 @@ interface. The SW App uses AWB to guess the color temperature in automatic
 mode. The SW App also supports many fixed color temperature options.
 
 > **Related Information** <br/>
-> [White Balance Correction IP]
+> [White Balance Correction IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/white-balance-correction-ip)
 
 <br/>
 
@@ -588,7 +570,7 @@ the neighborhood depending on the position on the 2x2 CFA pattern, and
 interpolates missing colors to calculate the RGB output.
 
 > **Related Information** <br/>
-> [Demosaic IP]
+> [Demosaic IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/demosaic-ip)
 
 <br/>
 
@@ -620,7 +602,7 @@ sensor exposure settings accordingly.
 The HS IP passes its input to its output unmodified.
 
 > **Related Information** <br/>
-> [Histogram Statistics IP]
+> [Histogram Statistics IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/histogram-statistics-ip)
 
 <br/>
 
@@ -648,10 +630,9 @@ coefficients for adding an artistic effect on top of the pre-calibrated
 accurate representation of the scene.
 
 > **Related Information** <br/>
-> [Color Space Converter IP]
+> [Color Space Converter IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/color-space-converter-ip)
 
 <br/>
-
 
 
 ### 3D LUT
@@ -689,8 +670,6 @@ inputs to retrieve data values from the LUT and the least significant bits
 (LSBs) to interpolate the final output value. The SW App connected to the
 Avalon® memory-mapped interface handles runtime control and LUT programming.
 
-
-
 #### Generating LUT Files
 
 You are responsible for sourcing or generating LUTs for the example design.
@@ -725,9 +704,9 @@ formatting conventions:
 * The data type must be the same for the whole file
 
 > **Related Information** <br/>
-> [3D LUT] <br/>
-> [3D LUT IP] <br/>
-> [LUTCalc GitHub page]
+> [3D LUT](https://www.altera.com/products/ip/po-3152/3d-lut-altera-fpga-ip) <br/>
+> [3D LUT IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/d-lut-ip?tocId=AMpTCaguLedw3wZdHM_3Bg) <br/>
+> [LUTCalc GitHub page](https://github.com/cameramanben/LUTCalc)
 
 <br/>
 
@@ -771,8 +750,8 @@ the previous image are used to enhance the current image.
 The SW App configures the TMO IP over the Avalon® memory-mapped interface.
 
 > **Related Information** <br/>
-> [Tone Mapping Operator] <br/>
-> [Tone Mapping Operator IP]
+> [Tone Mapping Operator](https://www.altera.com/products/ip/po-3151/tone-mapping-operator-fpga-ip) <br/>
+> [Tone Mapping Operator IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/tone-mapping-operator-ip)
 
 <br/>
 
@@ -795,7 +774,7 @@ strength to 0 is equivalent to bypass i.e. passing the input to the output
 unmodified.
 
 > **Related Information** <br/>
-> [Unsharp Mask IP]
+> [Unsharp Mask IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/unsharp-mask-ip)
 
 <br/>
 
@@ -809,73 +788,9 @@ highlighting a ROI. The ROI is used in the GUI for Users to highlight areas of
 interest for controls like Auto White Balance and Auto Exposure.
 
 > **Related Information** <br/>
-> [Region Of Interest IP]
+> [Region Of Interest IP](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_Interest_basic_guide.pdf)
 
 <br/>
-
-
-
-### Warp
-
-The Warp IP applies an arbitrary warp (or image transform) to an input image.
-It allows for lens distortion corrections (fisheye for instance) and the
-ability to scale, rotate, and mirror the image.
-
-<br/>
-
-![Warp_transform_examples_diagram.](../camera_4k_resources/images/ISP/Warp_transform_examples_diagram.png)
-<center markdown="1">
-
-**Warp Transform Examples**
-(From left: arbitrary warp with a 5x5 array of control points, four corner warp with some radial distortion.)
-
-<br/>
-<br/>
-
-![Warp_rotation_examples_diagram.](../camera_4k_resources/images/ISP/Warp_rotation_examples_diagram.png)
-
-**Warp Mirror and Rotation Examples**
-(From top left clockwise: original image, mirrored, 90° rotate and 180° rotate.)
-
-<br/>
-<br/>
-
-![Warp_diagram.](../camera_4k_resources/images/ISP/Warp_diagram.png)
-
-**Warp Block Diagram**
-</center>
-
-<br/>
-
-The block diagram shows an external memory which is used to buffer the incoming
-and outgoing image data. The external memory also stores the coefficient tables
-used to control the Warp IPs operation and define the required image transform.
-
-The IP uses its Warp engines to operate on the input images stored in the input
-buffers and to construct warped, output images from the output buffers.
-
-Depending on the Camera Solution, the Warp IP can be configured for 1 or 2 PiP
-(using 1 or 2 engines), single or double bounce (single bounce has less latency
-and less DDR SDRAM bandwidth requirements than double bounce, but requires
-on-chip cache memory - which can limit the transforms available), and Mipmap
-support (to perform 2:1, 4:1, 8:1 downscale ratios and allow more bandwidth for
-transforms). Warp is also used to produce lower output resolutions like Full HD
-and HD Ready, as well as support UHD. However some Camera Solutions always
-require the output to be a scaled version of the input. In this instance, and
-depending on the required scaling ratio, using a pair of VVP Scaler IPs to
-perform scaling firstly in the Horizontal domain then the Vertical domain
-before a reduced configuration Warp IP, can consume less overall logic
-resources.
-
-> **Related Information** <br/>
-> [Warp] <br/>
-> [Warp IP] <br/>
-> [Scaler IP]
-
-<br/>
-
-
-
 
 
 ## AI Processing
@@ -920,11 +835,11 @@ The [AI Stream Controller](#ai-stream-controller) is used to control the Main
 Frame Buffer.
 
 > **Related Information** <br/>
-> [Throttle IP] <br/>
-> [Broadcaster IP] <br/>
-> [Video Frame Writer IP] <br/>
-> [Video Frame Reader IP] <br/>
-> [EMIF]
+> [Throttle IP](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Throttle_basic_guide.pdf) <br/>
+> [Broadcaster IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/axi-stream-broadcaster-ip) <br/>
+> [Video Frame Writer IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-frame-writer-ip) <br/>
+> [Video Frame Reader IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-frame-reader-ip) <br/>
+> [EMIF](https://www.altera.com/design/guidance/emif-support)
 
 <br/>
 
@@ -1038,9 +953,9 @@ The [AI Stream Controller](#ai-stream-controller) is used to control the AI
 Input.
 
 > **Related Information** <br/>
-> [Scaler IP] <br/>
-> [Video Frame Writer IP] <br/>
-> [EMIF]
+> [Scaler IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/scaler-ip) <br/>
+> [Video Frame Writer IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-frame-writer-ip) <br/>
+> [EMIF](https://www.altera.com/design/guidance/emif-support)
 
 <br/>
 
@@ -1108,8 +1023,8 @@ results for further processing.
 > **Related Information** <br/>
 > [Altera® FPGA AI Suite] <br/>
 > [Ultralytics YOLO] <br/>
-> [ONNX] <br/>
-> [OpenVINO™ Toolkit]
+> [ONNX](https://onnx.ai/) <br/>
+> [OpenVINO™ Toolkit](https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.6/linux)
 
 <br/>
 
@@ -1136,7 +1051,6 @@ overlays, and track images through the different buffers.
 <br/>
 
 
-
 ## Output Processing
 
 <br/>
@@ -1153,7 +1067,6 @@ Camera Solutions:
 
 * [Video Mixer](#video-mixer)
 * [1D LUT](#1d-lut)
-  
 * [DP Egress](#dp-egress)
 
 
@@ -1161,7 +1074,7 @@ Camera Solutions:
 
 The Video Mixer is used to combine the different input images into a single
 output image. It uses a VVP Test Pattern Generator IP, a VVP Mixer IP, VVP
-Frame Reader IP, a VVP Scaler IP, and a VVP Pixel Adapter IP.
+Frame Reader IPs, a VVP Scaler IP, and a VVP Pixel Adapter IP.
 
 The TPG is the base layer for the Mixer IP and is configured to match the
 required output resolution. By default it produces a solid black image which
@@ -1172,30 +1085,40 @@ The ISP output layer is mixed over the base layer. It can also be positioned
 anywhere over the base layer when the ISP image is a lower resolution than the
 output.
 
-The Frame Reader IP reads an HPS generated ARGB888 (Alpha+RGB 8-bit color
-channels) overlay image from the HPS DDR SDRAM (via the HPS F2SDRAM interface).
-The Scaler can be used to upscale the overlay image if required. Since the ISP
-image is 10-bit color, a Pixel Adapter (VVP Bits per Color Sample Adapter IP)
-is used to convert to ARGB10101010 format. Limiting the overlay image in size
-and to 8-bit values in the HPS domain helps achieve higher overlay FPS. The
-final overlay image is mixed over the base and ISP image. The opacity of the
-overlay image is controlled by the Alpha channel itself, which can also be
-changed at runtime by the SW App. The Mixer can also position the overlay image
-anywhere over the mixed base and ISP image therefore supporting any size
-overlay images.
+The HPS generates both an AI output overlay image and a Logo overlay image in
+its own HPS DDR SDRAM. Dual MSGDMA IPs are used to memcopy the images from HPS
+DDR SDRAM to FPGA DDR SDRAM. Frame Reader IPs are then used to read the overlay
+images from the FPGA DDR SDRAM. It has been found that this produces better
+overlay performance (FPS) than interfacing the Frame Reader IPs direct to the
+HPS DDR SDRAM via the HPS F2SDRAM interface.
 
+The AI output mixes over the base and ISP layers (using layer 2). Its video
+pipeline supports a 960x540 (quarter HD) sized ARGB2222 inference result
+overlay image. A Frame Reader IP reads the image and passes it on to a VVP
+Scaler IP which up scales it to 4K ARGB2222 before being converted to an
+ARGB10101010 format image suitable for the Mixer. Limiting the AI overlay image
+in size and to 8-bit values in the HPS domain helps achieve higher overlay FPS.
+
+The Logo output mixes over the AI output layer using layer 3. Its video
+pipeline supports native resolution sized ARGB8888 overlay images which are
+converted using a VVP Pixel Adapter IP to an ARGB10101010 format image
+suitable for the Mixer.
+
+The opacity of both the overlay images are controlled by their respective Alpha
+channels, which can also be changed at runtime by the SW App. The Mixer can
+also position the overlay images anywhere over the mixed layers therefore
+supporting any size overlay images.
 
 For the 4Kp30 Multi-Sensor Camera with AI Inference Solution System Example Design for Agilex™ 5 Devices, the HPS generates an inference result
 overlay image. Original images must be delayed through the AI Main Frame Buffer
 to match the final inference result overlay image.
 
-
 > **Related Information** <br/>
-> [Test Pattern Generator IP] <br/>
-> [Mixer IP] <br/>
-> [Video Frame Reader IP] <br/>
-> [Scaler IP] <br/>
-> [Bits per Color Sample Adapter IP]
+> [Test Pattern Generator IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/test-pattern-generator-ip) <br/>
+> [Mixer IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/mixer-ip) <br/>
+> [Video Frame Reader IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-frame-reader-ip) <br/>
+> [Scaler IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/scaler-ip) <br/>
+> [Bits per Color Sample Adapter IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/bits-per-color-sample-adapter-ip)
 
 <br/>
 
@@ -1207,7 +1130,6 @@ function to the image. You may use it to implement OOTF, OETF, and EOTF
 transfer functions defined for video standards and legacy gamma compression or
 decompression. You may also change the LUT content arbitrarily for other
 transfer functions or to apply an artistic effect to the image.
-
 
 <br/>
 <center markdown="1">
@@ -1224,19 +1146,13 @@ fractional differences between LUT values to generate output pixel values. The
 IP uses an independent LUT for each color plane. The SW App uses the Avalon®
 memory-mapped interface to configure the LUTs.
 
-
-
-
 The 1D LUT is used for traditional Gamma, High Dynamic Range Perceptual
 Quantizer (HDR PQ) and Hybrid Log-Gamma (HDR HLG) correction.
 
-
-
 > **Related Information** <br/>
-> [1D LUT IP]
+> [1D LUT IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/d-lut-ip?tocId=aPezyn4lPf1RdBu%7EAlXEEQ)
 
 <br/>
-
 
 
 ### ISP Egress
@@ -1249,20 +1165,13 @@ the Camera Solution System Example Design:
 * 1080p60 @ 8/10-bit RGB color
 * 720p60 @ 8/10-bit RGB color
 
-
-
-
 Since the DP IP does not support 1 PiP or the VVP AXI4-S Lite protocol, the
 output is passed through a VVP PiP Converter IP followed by a VVP Protocol
 Converter IP.
 
-
-
-
 > **Related Information** <br/>
-> [Pixels in Parallel Converter IP] <br/>
-> [Protocol Converter IP]
-
+> [Pixels in Parallel Converter IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/pixels-in-parallel-converter-ip) <br/>
+> [Protocol Converter IP](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/protocol-converter-ip)
 
 <br/>
 
@@ -1270,12 +1179,9 @@ Converter IP.
 ## DP Egress
 
 The DP Tx function is provided by the Altera® DisplayPort connectivity IP.
-
-
 It is configured to support DisplayPort 1.4 (x4 lanes of 8.1 Gbps, sufficient for
 4Kp30 10-bit RGB). The DP IP also supports the VVP AXI4-S Full
 protocol interface.
-
 
 <br/>
 
@@ -1289,15 +1195,10 @@ it runs a web server that allows you to interact with the design demonstration
 via an Ethernet connection. The HPS has its own external DDR4 SDRAM that is
 used exclusively by the software stack.
 
-In addition, the HPS has access to the Modular Scatter-Gather Direct
-Memory Access IP (mSGDMA). This IP can be programmed by the HPS to offload
-memory copy functions between HPS and FPGA external DDR4 SDRAM/s.
-
-
-Memory copy functions include the Frame Reader function as well as the AI and
-Warp IP processing functions.
-
-
+In addition, the HPS has access to a pair of Modular Scatter-Gather Direct
+Memory Access IPs (mSGDMA). These IPs can be programmed by the HPS to offload
+memory copy functions between the HPS and FPGA external DDR4 SDRAMs. Memory
+copy functions include the AI processing functions and AI overlay.
 
 > **Related Information** <br/>
 > [mSGDMA IP]
@@ -1306,10 +1207,10 @@ Warp IP processing functions.
 
 
 ## Additional Reference Information
-* [Video and Vision Processing Suite Altera® FPGA IP User Guide]
-* [Altera® FPGA Streaming Video Protocol Specification]
-* [AMBA 4 AXI4-Stream Protocol Specification]
-* [Avalon® Interface Specifications – Avalon® Streaming Interfaces]
+* [Video and Vision Processing Suite Altera® FPGA IP User Guide](https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/about-the-video-and-vision-processing-suite)
+* [Altera® FPGA Streaming Video Protocol Specification](https://docs.altera.com/r/docs/683397/current/altera-streaming-video-protocol-specification/about-the-altera-streaming-video-protocol)
+* [AMBA 4 AXI4-Stream Protocol Specification](https://developer.arm.com/documentation/ihi0051/a/)
+* [Avalon® Interface Specifications – Avalon® Streaming Interfaces](https://docs.altera.com/r/docs/683091/22.3/avalon-interface-specifications/introduction-to-the-avalon-interface-specifications)
 
 <br>
 <br>
@@ -1327,129 +1228,6 @@ Warp IP processing functions.
 
 
 
-
-[Win32DiskImager]: https://sourceforge.net/projects/win32diskimager
-[7-Zip]: https://www.7-zip.org
-[TeraTerm]: https://github.com/TeraTermProject/teraterm/releases
-[PuTTY]: https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
-[Jupyter Notebook]: https://jupyter.org/
-[python]: https://www.python.org/
-[GIMP]: https://www.gimp.org/
-[GIT LFS]: https://git-lfs.com/
-[GIT LFS Installing]: https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing
-
-
-[Framos FSM:GO IMX678C Camera Modules]: https://www.framos.com
-[Wide 110deg HFOV Lens]: https://www.mouser.co.uk/ProductDetail/FRAMOS/FSMGO-IMX678C-M12-L110A-PM-A1Q1?qs=%252BHhoWzUJg4KQkNyKsCEDHw%3D%3D
-[Medium 100deg HFOV Lens]: https://www.mouser.co.uk/ProductDetail/FRAMOS/FSMGO-IMX678C-M12-L100A-PM-A1Q1?qs=%252BHhoWzUJg4IesSwD2ACIBQ%3D%3D
-[Narrow 54deg HFOV Lens]: https://www.mouser.co.uk/ProductDetail/FRAMOS/FSMGO-IMX678C-M12-L54A-PM-A1Q1?qs=%252BHhoWzUJg4L5yHZulKgVGA%3D%3D
-[Framos Tripod Mount Adapter]: https://www.framos.com/en/products/fma-mnt-trp1-4-v1c-26333
-[openSCAD File - Camera Tripod Mount Adapter for Framos FSM:GO IMX678C]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/camera_mount_framos_imx678.scad
-[Tripod]: https://thepihut.com/products/small-tripod-for-raspberry-pi-hq-camera
-[Alternative Tripod]: https://www.amazon.co.uk/dp/B0DXDQVN73?ref=ppx_yo2ov_dt_b_fed_asin_title
-[150mm flex-cable]: https://www.mouser.co.uk/ProductDetail/FRAMOS/FMA-FC-150-60-V1A?qs=GedFDFLaBXGCmWApKt5QIQ%3D%3D&_gl=1*d93qim*_ga*MTkyOTE4MjMxNy4xNzQxMTcwMzQy*_ga_15W4STQT4T*MTc0MTE3MDM0Mi4xLjEuMTc0MTE3MDQ5OS40NS4wLjA
-[300mm micro-coax cable]: https://www.mouser.co.uk/ProductDetail/FRAMOS/FFA-MC50-Kit-0.3m?qs=%252BHhoWzUJg4K3LtaE207mhw%3D%3D
-[DP to HDMI Adapter]: https://www.amazon.co.uk/gp/product/B01M6WK3KU/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&psc=1
-[Framos GMSL3]: https://framos.com/news/framos-makes-next-generation-gmsl3-accessible-for-any-embedded-vision-application/
-[Framos GMSL3 5m]: https://www.mouser.co.uk/ProductDetail/FRAMOS/FFA-GMSL3-Kit-5m?qs=%252BHhoWzUJg4IkLHv%2F6fzsXQ%3D%3D
-[Framos FFA-GMSL-SER-V2A Serializer]: https://www.framos.com/en/products/ffa-gmsl-ser-v2a-27617
-[Framos FFA-GMSL-DES-V2A Deserializer]: https://www.framos.com/en/products/ffa-gmsl-des-v2a-27240
-[openSCAD File - Fixed Camera Mount Adapter for Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/gmsl_bracket_framos.scad
-[openSCAD File - Multi-Camera Tripod Mount Adapter for Framos]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/stitch_camera_mount.scad
-
-[ultralytics YOLO]: https://docs.ultralytics.com
-[ONNX]: https://onnx.ai/
-[OpenVINO™ Toolkit]: https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.6/linux
-[openSCAD]: https://openscad.org/
-
-
-
-
-[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
-
-
-[Agilex™ 5 SoC FPGA]: https://www.altera.com/products/fpga/agilex/5
-[Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (25.1)]: https://docs.altera.com/r/docs/814346/25.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/download-document
-[Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1)]:https://docs.altera.com/r/docs/814346/26.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
-[NiosV Processor for Altera® FPGA]: https://www.altera.com/design/guidance/nios-v-developer
-[Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3274/agilex-5-fpga-and-soc-e-series-065b-modular-development-kit
-[Agilex™ 5 FPGA E-Series Modular Development Kits - Product Brief]: https://docs.altera.com/v/u/docs/815178/agilex-5-fpga-e-series-065b-and-065a-modular-development-kit-product-brief
-[Altera® FPGA AI Suite]: https://www.altera.com/products/development-tools/fpga-ai-suite
-
-
-[altera-fpga GitHub site]: https://github.com/altera-fpga
-[Software Development]: https://www.altera.com/design/agilex-5/design-hub/software-development#d1e387
-
-
-[VVP IP Suite]: https://www.altera.com/products/ip/po-3150/video-and-vision-processing-suite
-[High-performance Image Signal Processing and Camera Sensor Pipeline Design on FPGAs]:https://docs.altera.com/v/u/docs/827445/high-performance-image-signal-processing-and-camera-sensor-pipeline-design-on-fpgas-white-paper
-[MIPI DPHY IP and MIPI CSI-2 IP]: https://www.altera.com/products/ip/po-3062/mipi-d-phy-ip
-[DisplayPort IP]: https://www.altera.com/design/fpga-ip/displayport-support
-
-
-[Altera® Quartus® Prime Pro Edition version 25.1 Linux]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-25-1-linux
-[Altera® Quartus® Prime Pro Edition version 25.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-25-1-windows
-[Altera® Quartus® Prime Pro Edition version 25.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/78566/a80f03fa51b274d2f439004f9f9120f1b867d2ac?filename=QuartusProProgrammerSetup-25.1.0.129-linux.run
-[Altera® Quartus® Prime Pro Edition version 25.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/78351/af4088c123ab95ef1fa4d00cf30254f1d588cfda?filename=QuartusProProgrammerSetup-25.1.0.129-windows.exe
-
-
-[Altera® Quartus® Prime Pro Edition version 26.1 Linux]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-linux
-[Altera® Quartus® Prime Pro Edition version 26.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-windows
-[Altera® Quartus® Prime Pro Edition version 26.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.0.110-linux.run
-[Altera® Quartus® Prime Pro Edition version 26.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.0.110-windows.exe
-
-
-
-
-[Test Pattern Generator IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/test-pattern-generator-ip
-[Switch IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/switch-ip
-[Black Level Statistics IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/black-level-statistics-ip
-[Clipper IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/clipper-ip
-[Defective Pixel Correction IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/defective-pixel-correction-ip
-[Adaptive Noise Reduction IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/adaptive-noise-reduction-ip
-[Black Level Correction IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/black-level-correction-ip
-[Vignette Correction IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/vignette-correction-ip
-[White Balance Statistics IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/white-balance-statistics-ip
-[White Balance Correction IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/white-balance-correction-ip
-[Demosaic IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/demosaic-ip
-[Histogram Statistics IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/histogram-statistics-ip
-[Color Space Converter IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/color-space-converter-ip
-[1D LUT]: https://www.altera.com/products/ip/a1jui000004r4gnmas/1d-lut-altera-fpga-ip
-[1D LUT IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/d-lut-ip?tocId=aPezyn4lPf1RdBu%7EAlXEEQ
-[3D LUT]: https://www.altera.com/products/ip/po-3152/3d-lut-altera-fpga-ip
-[3D LUT IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/d-lut-ip?tocId=AMpTCaguLedw3wZdHM_3Bg
-[LUTCalc GitHub page]: https://github.com/cameramanben/LUTCalc
-[Tone Mapping Operator]: https://www.altera.com/products/ip/po-3151/tone-mapping-operator-fpga-ip
-[Tone Mapping Operator IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/tone-mapping-operator-ip
-[Unsharp Mask IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/unsharp-mask-ip
-[Warp]: https://www.altera.com/products/ip/po-3156/warp-fpga-ip
-[Warp IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/warp-ip
-[Mixer IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/mixer-ip
-[Video Frame Writer IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-frame-writer-ip
-[Video Frame Reader IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-frame-reader-ip
-[Color Plane Manager IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/color-plane-manager-ip
-[Bits per Color Sample Adapter IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/bits-per-color-sample-adapter-ip
-[Protocol Converter IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/protocol-converter-ip
-[Pixels in Parallel Converter IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/pixels-in-parallel-converter-ip
-[Video and Vision Processing Suite Altera® FPGA IP User Guide]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/about-the-video-and-vision-processing-suite
-[Altera® FPGA Streaming Video Protocol Specification]: https://docs.altera.com/r/docs/683397/current/altera-streaming-video-protocol-specification/about-the-altera-streaming-video-protocol
-[AMBA 4 AXI4-Stream Protocol Specification]: https://developer.arm.com/documentation/ihi0051/a/
-[Avalon® Interface Specifications – Avalon® Streaming Interfaces]: https://docs.altera.com/r/docs/683091/22.3/avalon-interface-specifications/introduction-to-the-avalon-interface-specifications
-[KAS]: https://kas.readthedocs.io/en/latest/
-[EMIF]: https://www.altera.com/design/guidance/emif-support
-[Scaler IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/scaler-ip
-[MSGDMA IP]: https://docs.altera.com/r/docs/683130/26.1/embedded-peripherals-ip-user-guide/modular-scatter-gather-dma-core
-[Broadcaster IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/axi-stream-broadcaster-ip
-[Video and Vision Monitor IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-and-vision-monitor-ip
-[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_interest_basic_guide.pdf
-[Remoasaic IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Remosaic_basic_guide.pdf
-[Throttle IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Throttle_basic_guide.pdf
-[Alpha Channel IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Alpha_Channel_basic_guide.pdf
-
-
-
-
-
 [User flow 1]: ../camera_4k_ai/camera_4k_ai.md#pre-requisites
 [User flow 2]: ../camera_4k_ai/flow2-sof-mdt.md
 [User flow 3]: ../camera_4k_ai/flow3-rbf-mdt.md
@@ -1462,7 +1240,7 @@ Warp IP processing functions.
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
 
 
 
@@ -1474,14 +1252,19 @@ Warp IP processing functions.
 [top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/top.core.jic
 [top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/top.core.rbf
 [model_compiler]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel-26.1/yolo_cnn
+[FPGA AI Suite Prerequisites]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/fpga_ai_suite_prerequisite.tcl
 
 
 
-[AGX_5E_Modular_Devkit_ISP_AI_WARP_FF_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_FF_RD.xml
-[AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.xml
+[AGX_5E_Modular_Devkit_ISP_AI_FF_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_FF_RD.xml
+[AGX_5E_Modular_Devkit_ISP_AI_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_RD.xml
 [Create microSD card image (.wic.gz) using YOCTO/KAS]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md
 [SOF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [RBF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [Quartus® GUI Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#using-the-pregenerated-mdt-quartus-project
 [Quartus® GUI Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#building-the-pregenerated-mdt-quartus-project
 
@@ -1518,6 +1301,7 @@ Warp IP processing functions.
 [openSCAD File - Fixed Camera Mount Adapter for Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/gmsl_bracket_framos.scad
 [openSCAD File - Multi-Camera Tripod Mount Adapter for Framos]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/stitch_camera_mount.scad
 
+
 [ultralytics YOLO]: https://docs.ultralytics.com
 [ONNX]: https://onnx.ai/
 [OpenVINO™ Toolkit]: https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.6/linux
@@ -1527,11 +1311,13 @@ Warp IP processing functions.
 
 
 [Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
 
 
 [Agilex™ 5 SoC FPGA]: https://www.altera.com/products/fpga/agilex/5
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (25.1)]: https://docs.altera.com/r/docs/814346/25.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/download-document
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1)]:https://docs.altera.com/r/docs/814346/26.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
+[Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1.1)]:https://docs.altera.com/r/docs/814346/26.1.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [NiosV Processor for Altera® FPGA]: https://www.altera.com/design/guidance/nios-v-developer
 [Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3274/agilex-5-fpga-and-soc-e-series-065b-modular-development-kit
 [Agilex™ 5 FPGA E-Series Modular Development Kits - Product Brief]: https://docs.altera.com/v/u/docs/815178/agilex-5-fpga-e-series-065b-and-065a-modular-development-kit-product-brief
@@ -1558,6 +1344,12 @@ Warp IP processing functions.
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-windows
 [Altera® Quartus® Prime Pro Edition version 26.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.0.110-linux.run
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.0.110-windows.exe
+
+
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-linux
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-windows
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.1.110-linux.run
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.1.110-windows.exe
 
 
 
@@ -1602,7 +1394,7 @@ Warp IP processing functions.
 [MSGDMA IP]: https://docs.altera.com/r/docs/683130/26.1/embedded-peripherals-ip-user-guide/modular-scatter-gather-dma-core
 [Broadcaster IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/axi-stream-broadcaster-ip
 [Video and Vision Monitor IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-and-vision-monitor-ip
-[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_interest_basic_guide.pdf
+[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_Interest_basic_guide.pdf
 [Remoasaic IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Remosaic_basic_guide.pdf
 [Throttle IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Throttle_basic_guide.pdf
 [Alpha Channel IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Alpha_Channel_basic_guide.pdf

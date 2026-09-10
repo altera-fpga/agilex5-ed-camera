@@ -16,13 +16,11 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda
 inherit systemd
 inherit features_check
 
-S = "${WORKDIR}"
-UNPACKDIR = "${S}"
-
 SRC_URI = "file://setmacaddress.sh \
            file://setmacaddress.rules \
            file://setmacaddress.service \
            "
+S = "${UNPACKDIR}"
 
 SYSTEMD_SERVICE:${PN} = "setmacaddress.service"
 SYSTEMD_AUTO_ENABLE = "enable"
@@ -41,4 +39,4 @@ do_install() {
 }
 
 FILES:${PN} += "${systemd_system_unitdir}/setmacaddress.service ${bindir}/setmacaddress.sh"
-REQUIRED_DISTRO_FEATURES="systemd"
+REQUIRED_DISTRO_FEATURES = "systemd"

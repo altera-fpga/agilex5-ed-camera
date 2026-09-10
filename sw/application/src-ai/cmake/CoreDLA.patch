@@ -312,6 +312,15 @@ diff -rupN mycoredla-src-orig/opt/altera/fpga_ai_suite_2026.1.1/dla/dla_plugin/s
        DLIAPlugin::properties::streaming_input_pipe.name(),
        DLIAPlugin::properties::online_reconfig.name()
        #ifdef EMULATOR_DLA_PLUGIN
+@@ -460,7 +461,7 @@ std::shared_ptr<DLIAPlugin::Dev> DLIAPlugin::Engine::getDevice(const std::shared_ptr<const arch_params>& arch) const {
+   std::unique_lock<std::mutex> lock{devicesMutex_};
+   this->coredla_device_ = std::make_shared<DLIAPlugin::Dev>();
+   assert(this->coredla_device_ != nullptr);
+-  assert(arch != nullptr);
++  //assert(arch != nullptr);
+   this->coredla_device_->fpga_arch = arch;
+   try {
+     // Init runtime - inference only members to device struct
 @@ -516,10 +517,26 @@ void DLIAPlugin::Engine::generateModelAn
  }
  

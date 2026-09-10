@@ -72,9 +72,6 @@ target_compile_definitions(${TARGET_NAME} PRIVATE "${compile_definitions}")
 target_compile_options(${TARGET_NAME} PRIVATE "${common_compile_options}")
 target_compile_options(${TARGET_NAME} PRIVATE "-Wno-pedantic")
 target_compile_definitions(${TARGET_NAME} PRIVATE "${common_compile_definitions}")
-if(SUPPORT_DMA)
-target_compile_definitions(${TARGET_NAME} PRIVATE SUPPORT_DMA)
-endif()
 
 target_link_libraries(${TARGET_NAME} HapiIntelCoreDLA)
 

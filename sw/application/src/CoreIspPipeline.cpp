@@ -151,7 +151,6 @@ bool CoreIspPipeline::InitCoreIspPipeline()
 
     _coreIspOutputCore = _postFbCore;
 
-
     return rc;
 }
 
@@ -1326,7 +1325,14 @@ void CoreIspPipeline::LinkCoreIspPipelineCores()
     while (_coreIspOutputStack.size() > 0)
     {
         auto core = _coreIspOutputStack.top();
-        lastCore->ConnectInput(core);
+        if(lastCore)
+        {
+            lastCore->ConnectInput(core);
+        }
+        else
+        {
+            _coreIspOutputCore = core;
+        }
         lastCore = std::move(core);
         _coreIspOutputStack.pop();
     };
@@ -1334,7 +1340,14 @@ void CoreIspPipeline::LinkCoreIspPipelineCores()
     while (_coreIspStack.size() > 0)
     {
         auto core = _coreIspStack.top();
-        lastCore->ConnectInput(core);
+        if(lastCore)
+        {
+            lastCore->ConnectInput(core);
+        }
+        else
+        {
+            _coreIspOutputCore = core;
+        }
         lastCore = std::move(core);
         _coreIspStack.pop();
     };

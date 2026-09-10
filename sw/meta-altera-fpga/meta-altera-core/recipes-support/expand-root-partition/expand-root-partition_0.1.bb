@@ -2,7 +2,7 @@ SUMMARY = "Expand root partition on first boot"
 DESCRIPTION = "Service to expand root partition on first boot to fill remaining disk space"
 SECTION = "devel"
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://expand-root-partition;beginline=2;endline=19;md5=4e4fe90fdb9d3df550dac049197f0cdc"
+LIC_FILES_CHKSUM = "file://${UNPACKDIR}/expand-root-partition;beginline=2;endline=19;md5=4e4fe90fdb9d3df550dac049197f0cdc"
 
 inherit systemd allarch
 
@@ -10,7 +10,7 @@ SRC_URI = "\
     file://expand-root-partition \
     file://expand-root-partition.service"
 
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
 
 do_install () {
     install -d ${D}${systemd_unitdir}/system

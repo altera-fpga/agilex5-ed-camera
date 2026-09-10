@@ -21,6 +21,9 @@
 #ifdef CAMERA_FramosGMSL
 #include "FramosGMSL.h"
 #endif
+#ifdef CAMERA_FramosIMX676
+#include "FramosIMX676.h"
+#endif
 #ifdef CAMERA_FramosIMX678
 #include "FramosIMX678.h"
 #endif
@@ -46,6 +49,14 @@ static const DeviceClass devices[] = {
             devInstanceMap.emplace(0, nullptr);
         if(auto gmslDev = SwApi::FramosGMSL::Create(1))
             devInstanceMap.emplace(1, nullptr);
+    }},
+#endif
+#ifdef CAMERA_FramosIMX676
+    {"framos-imx676", [](tICameraMap& devInstanceMap){
+        if(auto camera = SwApi::FramosImx676::Create(0, 3000U))
+                devInstanceMap.emplace(0, camera);
+        if(auto camera = SwApi::FramosImx676::Create(1, 3000U))
+                devInstanceMap.emplace(1, camera);
     }},
 #endif
 #ifdef CAMERA_FramosIMX678

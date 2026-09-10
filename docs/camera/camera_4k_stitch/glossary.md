@@ -7,6 +7,7 @@
 | **Term**  | **Description**                                           |
 | :------:  | :-------------------------------------------------------- |
 | AE        | Auto Exposure                                             |
+| AI        | Artificial Intelligence                                   |
 | ANR       | Adaptive Noise Reduction                                  |
 | API       | Application Programming Interface                         |
 | AWB       | Auto White Balance                                        |
@@ -17,6 +18,7 @@
 | BSP       | Board Support Package                                     |
 | CCM       | Color Correction Matrix                                   |
 | CFA       | Color Filter Array                                        |
+| CNN       | Convolutional Neural Network                              |
 | CPU       | Central processing unit                                   |
 | CSC       | Color Space Converter                                     |
 | CSR       | Control/Status Registers                                  |
@@ -67,8 +69,10 @@
 | MSB       | Most Significant Bit                                      |
 | MSGDMA    | Modular Scatter-Gather DMA                                |
 | NGPD      | Next Generation Platform Designer                         |
+| NMS       | Non-Maximum Suppression                                   |
 | OBR       | Optical Black Region                                      |
 | OETF      | Opto-Electrical Transfer Function                         |
+| ONNX      | Open Neural Network Exchange                              |
 | OOTF      | Opto-Optical Transfer Function                            |
 | PD        | Usually used to refer to "Platform Designer"              |
 | PIP       | Pixels In Parallel                                        |
@@ -99,6 +103,7 @@
 | USM       | Unsharp Mask                                              |
 | VC        | Vignette Correction                                       |
 | VVP       | Video and Vision Processing                               |
+| YOLO      | You Only Look Once                                        |
 
 **Acronyms and Terminology**
 
@@ -133,7 +138,7 @@
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
@@ -151,7 +156,11 @@
 [AGX_5E_Modular_Devkit_ISP_Stitch_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_Stitch_RD.xml
 [Create microSD card image (.wic.gz) using YOCTO/KAS]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md
 [SOF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [RBF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [Quartus® GUI Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#using-the-pregenerated-mdt-quartus-project
 [Quartus® GUI Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/STITCH_CAMERA.md#building-the-pregenerated-mdt-quartus-project
 

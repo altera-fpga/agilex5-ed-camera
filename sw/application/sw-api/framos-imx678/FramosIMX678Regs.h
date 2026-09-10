@@ -543,6 +543,10 @@ namespace SwApi
     static constexpr uint16_t IMX678_TABLE_END      = 1;
     static constexpr uint16_t IMX678_TABLE_WAIT_MS  = 0;
     static constexpr uint16_t IMX678_WAIT_MS        = 10;
+    // Wait time for the internal regulator to stabilize after
+    // getting out of standby mode.
+    // The docs state 24ms, but we've seen it take longer
+    static constexpr uint16_t IMX678_INT_REGULATOR_WAIT_MS = 30;
 
     static const img678_reg imx678_stop[] = {
 

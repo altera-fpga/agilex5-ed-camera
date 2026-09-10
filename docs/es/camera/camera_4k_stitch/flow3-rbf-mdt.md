@@ -1,6 +1,6 @@
 
 
-# 4Kp60 Multi-Sensor HDR Camera Solution System Example Design for Agilex™ 5 Devices - RBF Modular Design Toolkit (MDT) Flow
+# 4Kp60 Multi-Sensor Camera Stitch Solution System Example Design for Agilex™ 5 Devices - RBF Modular Design Toolkit (MDT) Flow
 
 ## Pre-requisites
 
@@ -54,31 +54,27 @@ Note licenses must be downloaded and installed where needed.
 </center>
 <br/>
 
-
-* 1 or 2 [Framos FSM:GO IMX678C Camera Modules], with:
-  * [Wide 110deg HFOV Lens], or
-  * [Medium 100deg HFOV Lens], or
-  * [Narrow 54deg HFOV Lens].
-* Mount/Tripod:
-  * [Framos Tripod Mount Adapter].
-  * Alternative Framos Tripod Mount: [openSCAD File - Camera Tripod Mount Adapter for Framos FSM:GO IMX678C].
+* 2 [Framos FSM:GO IMX678C Camera Modules], with [Wide 110deg HFOV Lens].
+* Ideal Mount/Tripod Option (for accurate setup):
+  * [openSCAD File - Multi-Camera Tripod Mount Adapter for Framos].
   * [Tripod].
   * [Alternative Tripod].
-* A Framos cable for PixelMate MIPI-CSI-2 for each Camera Module:
-  * [150mm flex-cable], or
-  * [300mm micro-coax cable].
-* (Optional):
-  * [Framos GMSL3 5m].
-  * (Optional):
+* Alternative Mount Option:
+  * 2 [Framos Tripod Mount Adapter]s.
+  * Alternative Framos Tripod Mounts: [openSCAD File - Camera Tripod Mount Adapter for Framos FSM:GO IMX678C].
+  * 2 [Tripod]s.
+  * 2 [Alternative Tripod]s.
+* 2 Framos [150mm flex-cable]s for PixelMate MIPI-CSI-2 (for Modular Development Kit connection).
+* (Optional) 2 [Framos GMSL3 5m] of which 1 requires [GMSL Modification](../common/gmsl-mod.md)
+  * If using the Multi-Camera Tripod Mount Adapter:
+    * 2 extra Framos [150mm flex-cable]s for PixelMate MIPI-CSI-2 (between Camera Module and GMSL Serializer).
+  * (Ideally, but optional):
     * [openSCAD File - Fixed Camera Mount Adapter for Agilex™ 5 FPGA E-Series 065B Modular Development Kit].
-    * [openSCAD File - Multi-Camera Tripod Mount Adapter for Framos].
 * MicroSD card (minimum 8Gb).
 * DP cable or HDMI cable with [DP to HDMI Adapter] (recommend 4Kp60 capable).
 * USB Micro B cable x2 (for QSPI programming and HPS serial console access).
 * Ethernet cable (for HPS network connection).
-* PC monitor or TV: 4Kp60 recommended.
-
-
+* PC monitor or TV: 4Kp60 Recommended.
 
 <br/>
 
@@ -128,22 +124,27 @@ You can use the pre-built binaries for reference:
 </center>
 
 ## HW Compilation
-Use the **[RBF Modular Design Toolkit (MDT) Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt)** to create and build the
-FPGA Design.
+
+Use the **[SOF Modular Design Toolkit (MDT) Create Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt)** to create and the
+**[SOF Modular Design Toolkit (MDT) Build Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt)** to build the FPGA Design.
 
 ## SW Compilation
+
 Use the **[Create microSD card image (.wic.gz) using YOCTO/KAS](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md)** flow to
 create the microSD card image.
 
+<br/>
+
 > **Note** <br/>
-> use **KAS_MACHINE=agilex5_mk_a5e065bb32aes1** and **kas/agilex_camera.yml**
-  configuration. <br/>
-    <br/>
+> **-** use **KAS_MACHINE=agilex5_mk_a5e065bb32aes1** and **kas/agilex_camera.yml**
+        configuration. <br/>
 > **-** You can copy and rename your generated [`.rbf`](#hw-compilation) to 
         sw/meta-vvp-isp-demo/recipes-bsp/u-boot/files/top.core.rbf to build it
         into the microSD Card image during the YOCTO flow. <br/>
 > **-** There are [alternative methods](#alternate-rbf-download) to get your
         [`.rbf`](#hw-compilation) onto the microSD Card.
+
+<br/>
 
 ## Programming
 
@@ -384,14 +385,16 @@ This should only need to be done once. To program the QSPI flash memory:
 ### **Setting Up the Camera Solution**
 
 > **Warning** <br/>
-> Handle ESD-sensitive equipment (boards, microSD cards, camera sensors, etc.)
-  only when properly grounded and at an ESD-safe workstation.
+> **-** Handle ESD-sensitive equipment (boards, microSD cards, camera sensors, etc.)
+        only when properly grounded and at an ESD-safe workstation. <br/>
+> **-** Failing to ensure the MIPI connections are aligned pin 1 to pin 1 can cause
+        equipment damage.
 
 <br/>
 
 * Make the required connections between the Host PC and the
-[Agilex™ 5 FPGA E-Series 065B Modular Development Kit] as detailed in the
-  **Setting Up the Modular Development Kit** section.
+  [Agilex™ 5 FPGA E-Series 065B Modular Development Kit] as detailed in
+  [**Setting Up the Modular Development Kit**](../camera_4k_stitch/camera_4k_stitch.md#programming).
 * Connect the Framos cable(s) between the Framos Camera Module(s) and the MIPI
   connector(s) on the Modular Development Kit Carrier Board taking care to
   align the cable(s) correctly with the connector(s) (pin 1 to pin 1). When
@@ -456,7 +459,26 @@ This should only need to be done once. To program the QSPI flash memory:
 > **-** [openSCAD models](../common/scad-models.md) exist to improve GMSL
         solution robustness.
 
+<br/>
 
+* If using the Multi-Camera Tripod Mount Adapter:
+  * Mount the Framos Camera module and GMSL Serializer opposite each other on
+    the mount and use an additional Framos flex-cable to connect them.
+  * Use the Fixed Camera Mount Adapter for the Modular Devkit to aid robustness.
+
+Note that if you do not use the Multi-Camera Tripod Mount Adapter, then you
+will need to manually set up the position of the Cameras. The left view Camera
+connects to MIPI0.
+
+<br/>
+<center markdown="1">
+
+![dual-gmsl](../common/images/GMSL_2.png)
+
+**Dual GMSL Solution using openSCAD Mounts**
+
+(Each Framos Camera connects to a GMSL Serializer on the opposite side via a Flex Cable in the multi-camera tripod mount)
+</center>
 <br/>
 
 * Connect the Modular Development Kit Carrier Board DisplayPort Tx connector to
@@ -482,9 +504,7 @@ This should only need to be done once. To program the QSPI flash memory:
 
 * Power up the Modular Development Kit (if not already powered) and set up the
   serial terminal emulator (minicom, [TeraTerm], [PuTTY], etc.):
-  * Select the correct `COMx` port. (The Modular Development Kit presents 4
-    serial COM ports over a single connection and the Linux system uses the 3rd
-    port in order). Set the port configuration as follows:
+  * Select the correct `COMx` port. Set the port configuration as follows:
     * 115200 baud rate, 8 Data bits, 1 Stop bit, CRC and Hardware flow control
       disabled.
 * The Linux OS will boot and the Camera Solution System Example Design Software
@@ -607,7 +627,7 @@ require the microSD Card to be rebuilt and updated:
 
 <center markdown="1">
 
-[BACK](../camera_4k/camera_4k.md#recommended-user-flows)
+[BACK](../camera_4k_stitch/camera_4k_stitch.md#recommended-user-flows)
 </center>
 
 ***
@@ -646,6 +666,7 @@ require the microSD Card to be rebuilt and updated:
 [openSCAD File - Fixed Camera Mount Adapter for Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/gmsl_bracket_framos.scad
 [openSCAD File - Multi-Camera Tripod Mount Adapter for Framos]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/stitch_camera_mount.scad
 
+
 [ultralytics YOLO]: https://docs.ultralytics.com
 [ONNX]: https://onnx.ai/
 [OpenVINO™ Toolkit]: https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.6/linux
@@ -655,11 +676,13 @@ require the microSD Card to be rebuilt and updated:
 
 [Agilex™ 5 E-Series Modular Development Board GSRD User Guide (25.1)]: https://altera-fpga.github.io/rel-25.1/gsrd/ug-gsrd-agx5e-modular/
 [Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/gsrd/ug-gsrd-agx5e-modular/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/gsrd/ug-gsrd-agx5e-modular/
 
 
 [Agilex™ 5 SoC FPGA]: https://www.altera.com/products/fpga/agilex/5
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (25.1)]: https://docs.altera.com/r/docs/814346/25.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/download-document
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1)]:https://docs.altera.com/r/docs/814346/26.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
+[Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1.1)]:https://docs.altera.com/r/docs/814346/26.1.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [NiosV Processor for Altera® FPGA]: https://www.altera.com/design/guidance/nios-v-developer
 [Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3001/agilex-5-fpga-and-soc-e-series-modular-development-kit-es
 [Agilex™ 5 FPGA E-Series Modular Development Kits - Product Brief]: https://docs.altera.com/v/u/docs/815178/agilex-5-fpga-e-series-065b-and-065a-modular-development-kit-product-brief
@@ -686,6 +709,12 @@ require the microSD Card to be rebuilt and updated:
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-windows
 [Altera® Quartus® Prime Pro Edition version 26.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.0.110-linux.run
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.0.110-windows.exe
+
+
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-linux
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-windows
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.1.110-linux.run
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.1.110-windows.exe
 
 
 
@@ -731,20 +760,18 @@ require the microSD Card to be rebuilt and updated:
 [MSGDMA IP]: https://docs.altera.com/r/docs/683130/26.1/embedded-peripherals-ip-user-guide/modular-scatter-gather-dma-core
 [Broadcaster IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/axi-stream-broadcaster-ip
 [Video and Vision Monitor IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-and-vision-monitor-ip
-[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_interest_basic_guide.pdf
+[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_Interest_basic_guide.pdf
 [Remoasaic IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Remosaic_basic_guide.pdf
 [Throttle IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Throttle_basic_guide.pdf
 [Alpha Channel IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Alpha_Channel_basic_guide.pdf
 
 
-<br/>
 
 
-
-[User flow 1]: ../camera_4k/camera_4k.md#pre-requisites
-[User flow 2]: ../camera_4k/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k/flow4.md
+[User flow 1]: ../camera_4k_stitch/camera_4k_stitch.md#pre-requisites
+[User flow 2]: ../camera_4k_stitch/flow2-sof-mdt.md
+[User flow 3]: ../camera_4k_stitch/flow3-rbf-mdt.md
+[User flow 4]: ../camera_4k_stitch/flow4.md
 
 
 
@@ -753,7 +780,7 @@ require the microSD Card to be rebuilt and updated:
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
@@ -771,7 +798,11 @@ require the microSD Card to be rebuilt and updated:
 [AGX_5E_Modular_Devkit_ISP_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_RD.xml
 [Create microSD card image (.wic.gz) using YOCTO/KAS]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md
 [SOF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [RBF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [Quartus® GUI Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#using-the-pregenerated-mdt-quartus-project
 [Quartus® GUI Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#building-the-pregenerated-mdt-quartus-project
 

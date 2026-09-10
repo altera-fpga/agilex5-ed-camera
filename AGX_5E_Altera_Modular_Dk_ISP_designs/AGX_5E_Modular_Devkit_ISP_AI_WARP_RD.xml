@@ -13,9 +13,9 @@
 ###################################################################################
 
 ###################################################################################
-# Design: AGX_5E_Modular_Devkit_ISP_AI_RD
+# Design: AGX_5E_Modular_Devkit_ISP_AI_WARP_RD
 #
-# Description: 4Kp30 Multi-Sensor Camera with AI Inference Solution Reference
+# Description: 4K Multi-Sensor Fisheye Camera with AI Inference Solution Reference
 # Design Demo
 ###################################################################################
 -->
@@ -32,8 +32,6 @@
   <MULTI_SENSOR>1</MULTI_SENSOR>
   <EXP_FUSION_EN>0</EXP_FUSION_EN>
   <EN_DEBUG>1</EN_DEBUG>
-  <HPS_DMA_ENABLE>1</HPS_DMA_ENABLE>
-  <HPS_DMA_NUM_OF_CHANNELS>2</HPS_DMA_NUM_OF_CHANNELS>
   <SUBSYSTEM type="clock" name="clock_subsystem">
     <NUM_GEN_CLOCKS>5</NUM_GEN_CLOCKS>
     <GEN_CLK0_NAME>clk_0</GEN_CLK0_NAME>
@@ -55,6 +53,7 @@
     <I2C0_EXT_EN>1</I2C0_EXT_EN>
     <I2C1_EXT_EN>1</I2C1_EXT_EN>
     <MSGDMA_ENABLED>1</MSGDMA_ENABLED>
+    <MSGDMA_NUM_OF_INSTANCES>2</MSGDMA_NUM_OF_INSTANCES>
     <MSGDMA_AGENT_1>emif</MSGDMA_AGENT_1>
     <MSGDMA_AGENT_1_CLK_FREQ>200000000</MSGDMA_AGENT_1_CLK_FREQ>
     <MSGDMA_AGENT_1_ADDR_WIDTH>33</MSGDMA_AGENT_1_ADDR_WIDTH>
@@ -151,6 +150,8 @@
     <INST_ID>40</INST_ID>
     <EMIF_AGENT>emif_2</EMIF_AGENT>
     <EMIF_AGENT_CLK_FREQ>200000000</EMIF_AGENT_CLK_FREQ>
+    <EMIF_AGENT_2>emif_2</EMIF_AGENT_2>
+    <EMIF_AGENT_2_CLK_FREQ>200000000</EMIF_AGENT_2_CLK_FREQ>
     <FRES_VFW_IRQ_PRIORITY>2</FRES_VFW_IRQ_PRIORITY>
     <FRES_VFW_IRQ_HOST>niosv_subsystem_ai</FRES_VFW_IRQ_HOST>
     <FRES_VFR_IRQ_PRIORITY>3</FRES_VFR_IRQ_PRIORITY>
@@ -190,6 +191,11 @@
   <SUBSYSTEM type="user" name="vid_out_subsystem" script="./../custom_user_subsystems/isp_subsystems/subsystems/vid_fr4k_out_subsystem/vid_fr4k_out_create.tcl">
     <INST_ID>50</INST_ID>
     <OCS_ENTRY_BASE>0x00500000</OCS_ENTRY_BASE>
+    <OVERLAY_ARGB2222>1</OVERLAY_ARGB2222>
+    <OVERLAY_USE_MEM_COPY>1</OVERLAY_USE_MEM_COPY>
+    <LOGO_USE_MEM_COPY>1</LOGO_USE_MEM_COPY>
+    <EMIF_AGENT>emif_2</EMIF_AGENT>
+    <EMIF_AGENT_CLK_FREQ>200000000</EMIF_AGENT_CLK_FREQ>
     <LOGO_IRQ_PRIORITY>2</LOGO_IRQ_PRIORITY>
     <LOGO_IRQ_HOST>hps_subsystem</LOGO_IRQ_HOST>
     <OVERLAY_IRQ_PRIORITY>3</OVERLAY_IRQ_PRIORITY>

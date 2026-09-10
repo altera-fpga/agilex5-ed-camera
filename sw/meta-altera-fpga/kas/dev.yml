@@ -1,16 +1,18 @@
 header:
   version: 17
+
 repos:
   meta-oe:
     url: "https://git.openembedded.org/meta-openembedded"
-    commit: 4d3e2639dec542b58708244662d5ce36810fc510
-    branch: scarthgap
+    branch: wrynose
     path: layers/meta-openembedded
+    commit: 420222862f5a6d95023b8f5f3b7e1808b2264ef9
     layers:
       meta-oe:
+
 local_conf_header:
   meta-altera-fpga-dev: |
-    EXTRA_IMAGE_FEATURES:append = " debug-tweaks ssh-server-openssh"
+    EXTRA_IMAGE_FEATURES:append = " allow-empty-password allow-root-login empty-root-password ssh-server-openssh"
     IMAGE_INSTALL:append = " \
         packagegroup-fpga-embedded-tools \
         git \

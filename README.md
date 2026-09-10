@@ -18,7 +18,7 @@ development.
 
 <br/>
 
-|<center markdown="1">Sensor Output (ISP Input)</center>|<center markdown="1">ISP Output</center>|
+|<center markdown="1">Sensor Output (ISP Input) - shown as grayscale RGB</center>|<center markdown="1">ISP Output</center>|
 |-|-|
 | ![Input Capture](docs/camera/camera_4k/images/Input_Capture.png) | ![Output Capture](docs/camera/camera_4k/images/Output_Capture.png) |
 
@@ -49,6 +49,20 @@ development.
 |<center markdown="1">An example of Image Stitching|
 |-|
 | ![stitch-overview](docs/camera/camera_4k_stitch/images/Stitch_Overview.png) |
+
+<br/>
+
+---
+
+## [4K Multi-Sensor Fisheye Camera with AI Inference Solution System Example Design for Agilex™ 5 Devices](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/camera_4k_ai_warp/camera_4k_ai_warp.md)
+
+### [Repo Quick Start](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_WARP_CAMERA.md)
+
+<br/>
+
+|<center markdown="1">An example of AI Detect</center>|<center markdown="1">An example of AI Pose</center>|
+|-|-|
+| ![Detect example](docs/camera/camera_4k_ai_warp/images/AI/detect_hd.png) | ![POSE example](docs/camera/camera_4k_ai_warp/images/AI/pose_hd.png) |
 
 <br/>
 

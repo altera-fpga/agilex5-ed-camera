@@ -28,10 +28,14 @@ License.
 #include "AiTabbedUiControls.h"
 #endif
 
+#include "IWebSocketHandler.h"
+#include <vector>
+
 
 class VvpIspDemo : public CommonApplicationBase,
                    public Hapi::ILogCallback,
-                   public IUIConnection
+                   public IUIConnection,
+                   public IWebSocketHandler
 {
 public:
     VvpIspDemo(int argument_count, char* argument_array[]);
@@ -54,6 +58,10 @@ public:
     void LogMessage(std::string& message) override;
     void HandleCommandLineArgs();
     static std::ostream& PrintUsage(std::ostream& out = std::cout);
+
+    bool WebSocketOpened(IWebSocketService* web_socket) override;
+    size_t RegisterWebSocketHandler(WebSocketOpenedCB web_socket_handler) override;
+    void UnRegisterWebSocketHandler(size_t web_socket_handler_handle) override;
 
     void CaptureWarpOutput(uint32_t pipeline_index);
     bool ErrorMessage(const std::string& errorString);
@@ -93,4 +101,6 @@ private:
     std::shared_ptr<AiPipeline> _spAiPipeline;
     std::shared_ptr<AiTabbedUiControls> _spAiTabbedUi;
 #endif
+
+    std::vector<WebSocketOpenedCB> _webSocketHandlers;
 };

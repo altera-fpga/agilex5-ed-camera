@@ -1,0 +1,19 @@
+#!/bin/bash
+# *******************************************************************************
+# Copyright (C) Altera Corporation
+#
+# This code and the related documents are Altera copyrighted materials and your
+# use of them is governed by the express license under which they were provided to
+# you ("License"). This code and the related documents are provided as is, with no
+# express or implied warranties other than those that are expressly stated in the 
+# License.
+# *******************************************************************************/
+
+export RESOLUTION_W=$1
+export RESOLUTION_H=$2
+if [ ! -z "@HTTPS_PROXY_STR@" ]; then
+    export @HTTPS_PROXY_STR@
+fi
+source python_env/bin/activate
+python3 @CMAKE_CURRENT_SOURCE_DIR@/yolov8n_onnx.py ${RESOLUTION_W} ${RESOLUTION_H}
+cp *categories.txt @INSTALL_PREFIX@

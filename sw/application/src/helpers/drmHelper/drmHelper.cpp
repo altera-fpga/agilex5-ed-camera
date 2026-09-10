@@ -19,24 +19,13 @@ License.
 #include <src/misc/lv_timer_private.h>
 #include <src/core/lv_refr_private.h>
 
-std::shared_ptr<IDrmHelper> IDrmHelper::_spDrmHelper = nullptr;
-std::recursive_mutex IDrmHelper::_lvglMutex;
-
-std::shared_ptr<IDrmHelper> IDrmHelper::GetIDrmHelper()
+void DrmHelper::Create()
 {
-    if(_spDrmHelper == nullptr)
-    {
-        _spDrmHelper = std::make_shared<drmHelper>();
-    }
-    return _spDrmHelper;
+    std::shared_ptr<DrmHelper> spOverlayHelper = std::make_shared<DrmHelper>();
+    IOverlayHelper::SetIOverlayHelperInst(spOverlayHelper);
 }
 
-std::recursive_mutex& IDrmHelper::GetLVGLMutex()
-{
-    return _lvglMutex;
-}
-
-drmHelper::modeset_dev::modeset_dev()
+DrmHelper::modeset_dev::modeset_dev()
     : mode_blob_id(0)
     , crtc_index(0)
     , pflip_pending(false)
@@ -55,56 +44,49 @@ drmHelper::modeset_dev::modeset_dev()
     memset(&overlay_buf, 0, sizeof(overlay_buf));
 }
 
-drmHelper::drmHelper()
-    : SwUtils::Thread("drmHelper")
+DrmHelper::DrmHelper()
+    : SwUtils::Thread("DrmHelper")
     , _fd(-1)
-    , _primary_height(0)
-    , _primary_width(0)
-    , _primary_lvgl_format(LV_COLOR_FORMAT_UNKNOWN)
-    , _primary_drm_format(DRM_FORMAT_XRGB8888)
     , _primary_stride(0)
     , _primary_fb_size(0)
-    , _overlay_height(0)
-    , _overlay_width(0)
-    , _overlay_lvgl_format(LV_COLOR_FORMAT_UNKNOWN)
-    , _overlay_drm_format(DRM_FORMAT_XRGB8888)
     , _overlay_stride(0)
     , _overlay_fb_size(0)
-    , _primary_display(nullptr)
-    , _overlay_display(nullptr)
 {
 
     _os = SwUtils::OS::Get();
     lv_init();
 }
 
-drmHelper::~drmHelper()
+DrmHelper::~DrmHelper()
 {
     StopThread();
-    if(_primary_display)
-    {
-        lv_display_delete(_primary_display);
-    }
-    if(_overlay_display)
-    {
-        lv_display_delete(_overlay_display);
-    }
-    lv_deinit();
 }
 
-bool drmHelper::Open(const char* const card, uint32_t width, uint32_t height, lv_color_format_t format)
+bool DrmHelper::Open(const char* const card, uint32_t width, uint32_t height, lv_color_format_t format)
 {
     bool rc = false;
 
-    _primary_width = width;
-    _primary_height = height;
-    if(_primary_width == 0 || _primary_height == 0)
+    /* open the DRM device */
+	rc = modeset_open(card);
+
+    if (rc)
     {
-        _primary_width = 16;
-        _primary_height = 16;
+        /* prepare all connectors and CRTCs */
+        rc = modeset_prepare();
     }
-    _primary_lvgl_format = format;
-    switch(_primary_lvgl_format)
+
+    if (rc)
+    {
+        SetPrimaryResolution(width, height, format);
+        StartThread();
+    }
+    return rc;
+}
+
+bool DrmHelper::SetPrimaryResolutionLow(uint32_t width, uint32_t height, lv_color_format_t format)
+{
+    bool rc = true;
+    switch(format)
     {
         case LV_COLOR_FORMAT_ARGB8888:
             _primary_drm_format = DRM_FORMAT_ARGB8888;
@@ -124,83 +106,61 @@ bool drmHelper::Open(const char* const card, uint32_t width, uint32_t height, lv
             _primary_drm_format = DRM_FORMAT_XRGB8888;
             break;
         default:
-            std::cerr << "Unsupported color format " << _overlay_lvgl_format << std::endl;
+            std::cerr << "Unsupported color format " << format << std::endl;
             return false;
-    }
-    _overlay_width = 256;
-    _overlay_height = 256;
-    _overlay_lvgl_format = LV_COLOR_FORMAT_ARGB8888;
-    _overlay_drm_format = DRM_FORMAT_ARGB8888;
-
-    /* open the DRM device */
-    rc = modeset_open(card);
-
-    if (rc)
-    {
-        /* prepare all connectors and CRTCs */
-        rc = modeset_prepare();
-    }
-
-    if (rc)
-    {
-        /* perform actual modesetting on each found connector+CRTC */
-        if(_modeset)
-        {
-            _primary_height = _modeset->primary_bufs[0].height;
-            _primary_width = _modeset->primary_bufs[0].width;
-            _primary_stride = _modeset->primary_bufs[0].stride;
-            _primary_fb_size = _primary_height * _primary_stride;
-
-            _overlay_height = _modeset->overlay_buf.height;
-            _overlay_width = _modeset->overlay_buf.width;
-            _overlay_stride = _modeset->overlay_buf.stride;
-            _overlay_fb_size = _overlay_height * _overlay_stride;
-
-            StartThread();
-
-            if(_primary_lvgl_format != LV_COLOR_FORMAT_UNKNOWN)
-            {
-                _primary_display = lv_display_create(_primary_width, _primary_height);
-                if(_primary_display)
-                {
-                    lv_display_set_user_data(_primary_display, this);
-                    lv_display_set_color_format(_primary_display, _primary_lvgl_format);
-                    lv_display_set_flush_cb(_primary_display, drmHelper::flush_cb_static);
-                    lv_display_delete_refr_timer(_primary_display);
-                    lv_obj_set_style_bg_opa(lv_display_get_screen_active(_primary_display), LV_OPA_TRANSP, 0);
-                    lv_obj_set_style_bg_color(lv_display_get_screen_active(_primary_display), lv_color_make(0, 0, 0), 0);
-                    lv_obj_set_scrollbar_mode(lv_display_get_screen_active(_primary_display), LV_SCROLLBAR_MODE_OFF);
-
-                    lv_display_set_buffers(_primary_display, _modeset->primary_bufs[0].map, _modeset->primary_bufs[1].map, _primary_fb_size, LV_DISPLAY_RENDER_MODE_DIRECT);
-                    lv_display_set_default(_primary_display);
-                }
-            }
-       }
-    }
-
-    if(rc)
-    {
-        std::cout << "Primary " << _primary_width << "x" << _primary_height << " stride " << _primary_stride << std::endl << std::flush;
-    }
-    return rc;
-}
-
-void drmHelper::SetOverlayResolution(uint32_t width, uint32_t height)
-{
-    bool rc = true;
-    _overlay_width = width;
-    _overlay_height = height;
-    _overlay_lvgl_format = LV_COLOR_FORMAT_ARGB8888;
-    _overlay_drm_format = DRM_FORMAT_ARGB8888;
-
-    if(_overlay_display)
-    {
-        lv_display_delete(_overlay_display);
-        _overlay_display = nullptr;
     }
 
     drmModeConnector *conn;
     conn = drmModeGetConnector(_fd, _modeset->connector.id);
+
+    if (rc && !modeset_find_primary_plane()) {
+        std::cerr << "no valid plane for crtc " << _modeset->crtc.id << std::endl;
+    }
+
+    if(rc && (_modeset->primary_plane.valid))
+    {
+        modeset_get_object_properties(&_modeset->primary_plane, DRM_MODE_OBJECT_PLANE);
+        if (!_modeset->primary_plane.props)
+        {
+            rc = false;
+        }
+    }
+
+    if (rc && !modeset_setup_primary_framebuffers(conn)) {
+        std::cerr << "cannot create primary framebuffers for connector " << _modeset->connector.id << std::endl;
+        modeset_destroy_objects();
+        rc = false;
+    }
+
+    if(rc)
+    {
+        _primary_stride = _modeset->primary_bufs[0].stride;
+        _primary_fb_size = GetPrimaryHeight() * _primary_stride;
+        _modeset->pending_modeset = true;
+    }
+
+    return rc;
+}
+
+uint8_t* DrmHelper::GetPrimaryBuffer(int32_t index)
+{
+    if (index < 0 || index >= 2) {
+        return nullptr;
+    }
+    return _modeset->primary_bufs[index].map;
+}
+
+bool DrmHelper::SetOverlayResolutionLow(uint32_t width, uint32_t height)
+{
+    bool rc = true;
+    _overlay_drm_format = DRM_FORMAT_ARGB8888;
+
+    drmModeConnector *conn;
+    conn = drmModeGetConnector(_fd, _modeset->connector.id);
+
+    if (rc && !modeset_find_overlay_plane()) {
+        std::cerr << "no valid plane for crtc " << _modeset->crtc.id << std::endl;
+    }
 
     if (rc && !modeset_setup_overlay_framebuffers(conn)) {
         std::cerr << "cannot create overlay framebuffers for connector " << _modeset->connector.id << std::endl;
@@ -208,40 +168,34 @@ void drmHelper::SetOverlayResolution(uint32_t width, uint32_t height)
         rc = false;
     }
 
+    if(rc && (_modeset->overlay_plane.valid))
+    {
+        modeset_get_object_properties(&_modeset->overlay_plane, DRM_MODE_OBJECT_PLANE);
+        if (!_modeset->overlay_plane.props)
+        {
+            rc = false;
+        }
+    }
+
     if(rc)
     {
-        _overlay_height = _modeset->overlay_buf.height;
-        _overlay_width = _modeset->overlay_buf.width;
         _overlay_stride = _modeset->overlay_buf.stride;
-        _overlay_fb_size = _overlay_height * _overlay_stride;
+        _overlay_fb_size = GetOverlayHeight() * _overlay_stride;
+        _modeset->pending_modeset = true;
     }
 
-    _overlay_display = lv_display_create(_overlay_width, _overlay_height);
-    if(_overlay_display)
-    {
-        lv_display_set_user_data(_overlay_display, this);
-        lv_display_set_color_format(_overlay_display, _overlay_lvgl_format);
-        lv_display_set_flush_cb(_overlay_display, drmHelper::flush_cb_static);
-        lv_display_delete_refr_timer(_overlay_display);
-        lv_obj_set_style_bg_opa(lv_display_get_screen_active(_overlay_display), LV_OPA_TRANSP, 0);
-        lv_obj_set_style_bg_color(lv_display_get_screen_active(_overlay_display), lv_color_make(0, 0, 0), 0);
-        lv_obj_set_scrollbar_mode(lv_display_get_screen_active(_overlay_display), LV_SCROLLBAR_MODE_OFF);
+    return rc;
+}
 
-        lv_display_set_buffers(_overlay_display, _modeset->overlay_buf.map, nullptr, _overlay_fb_size, LV_DISPLAY_RENDER_MODE_DIRECT);
-    }
-    std::cout << "Overlay " << _overlay_width << "x" << _overlay_height << " stride " << _overlay_stride << std::endl << std::flush;
-}   
+uint8_t* DrmHelper::GetOverlayBuffer()
+{
+    return _modeset->overlay_buf.map;
+}
 
-bool drmHelper::FlushPrimary()
+bool DrmHelper::FlushPrimaryLow()
 {
     bool rc = true;
 
-    std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
-
-    // This will swap the buffers
-    lv_timer_t disp_timer;
-    disp_timer.user_data = _primary_display;
-    lv_display_refr_timer(&disp_timer);
     if(_modeset->write_fb == 0)
     {
         _modeset->read_fb = 0;
@@ -258,17 +212,19 @@ bool drmHelper::FlushPrimary()
     return rc;
 }
 
-bool drmHelper::FlushOverlay()
+bool DrmHelper::FlushOverlayLow()
 {
     bool rc = true;
 
+    if((std::chrono::steady_clock::now() - _modeset->timeLastFlush) > std::chrono::milliseconds(40))
     {
-        std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
+        std::lock_guard<std::recursive_mutex> lock(IOverlayHelper::GetLVGLMutex());
 
         // This will swap the buffers
         lv_timer_t disp_timer;
         disp_timer.user_data = _overlay_display;
         lv_display_refr_timer(&disp_timer);
+        _modeset->overlay_dirty = true;
     }
 
     {
@@ -282,11 +238,11 @@ bool drmHelper::FlushOverlay()
     return rc;
 }
 
-bool drmHelper::FlushModeset()
+bool DrmHelper::FlushModeset()
 {
     bool rc = true;
 
-    std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
+    std::lock_guard<std::recursive_mutex> lock(IOverlayHelper::GetLVGLMutex());
 
     /* perform actual modesetting on each found connector+CRTC */
     if(_modeset)
@@ -300,7 +256,7 @@ bool drmHelper::FlushModeset()
         }
         if(_modeset->pflip_pending)
         {
-            std::cerr << "FlushModeset: page flip pending, skipping flush" << std::endl;
+            //std::cerr << "FlushModeset: page flip pending, skipping flush" << std::endl;
             return false;
         }
 
@@ -346,6 +302,10 @@ bool drmHelper::FlushModeset()
                 flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
                 _modeset->pending_modeset = false;
             }
+            else
+            {
+                flags |= DRM_MODE_ATOMIC_NONBLOCK;
+            }
             ret = drmModeAtomicCommit(_fd, req, flags, _modeset.get());
             if (ret)
             {
@@ -366,7 +326,7 @@ bool drmHelper::FlushModeset()
     return rc;
 }
 
-bool drmHelper::modeset_open(const char *const node)
+bool DrmHelper::modeset_open(const char *const node)
 {
     int ret = 0;
     bool rc = true;
@@ -412,7 +372,7 @@ bool drmHelper::modeset_open(const char *const node)
     return rc;
 }
 
-int64_t drmHelper::get_property_value(drmModeObjectPropertiesPtr props, const char *name)
+int64_t DrmHelper::get_property_value(drmModeObjectPropertiesPtr props, const char *name)
 {
     drmModePropertyPtr prop;
     uint64_t value;
@@ -442,7 +402,7 @@ int64_t drmHelper::get_property_value(drmModeObjectPropertiesPtr props, const ch
 }
 
 
-bool drmHelper::modeset_output_create(drmModeRes *res, drmModeConnector *conn)
+bool DrmHelper::modeset_output_create(drmModeRes *res, drmModeConnector *conn)
 {
     bool rc = true;
 
@@ -484,27 +444,10 @@ bool drmHelper::modeset_output_create(drmModeRes *res, drmModeConnector *conn)
                 rc = false;
             }
 
-            if (rc && !modeset_find_primary_plane()) {
-                std::cerr << "no valid plane for crtc " << _modeset->crtc.id << std::endl;
-            }
-            else
-            {
-                if (rc && !modeset_setup_primary_framebuffers(conn)) {
-                    std::cerr << "cannot create primary framebuffers for connector " << conn->connector_id << std::endl;
-                    modeset_destroy_objects();
-                    rc = false;
-                }
-            }
-
-            if (rc && !modeset_find_overlay_plane()) {
-                std::cerr << "no valid plane for crtc " << _modeset->crtc.id << std::endl;
-            }
-
             if (rc && !modeset_setup_objects()) {
                 std::cerr << "cannot get plane properties" << std::endl;
                 rc = false;
             }
-
 
             if(!rc)
             {
@@ -518,7 +461,7 @@ bool drmHelper::modeset_output_create(drmModeRes *res, drmModeConnector *conn)
     return rc;
 }
 
-bool drmHelper::modeset_prepare()
+bool DrmHelper::modeset_prepare()
 {
     drmModeRes *res;
     drmModeConnector *conn;
@@ -556,7 +499,7 @@ bool drmHelper::modeset_prepare()
     return rc;
 }
 
-bool drmHelper::modeset_find_crtc(drmModeRes *res, drmModeConnector *conn)
+bool DrmHelper::modeset_find_crtc(drmModeRes *res, drmModeConnector *conn)
 {
     drmModeEncoder *enc;
     uint32_t crtc;
@@ -649,7 +592,7 @@ bool drmHelper::modeset_find_crtc(drmModeRes *res, drmModeConnector *conn)
     return rc;
 }
 
-bool drmHelper::modeset_find_primary_plane()
+bool DrmHelper::modeset_find_primary_plane()
 {
     drmModePlaneResPtr plane_res;
     bool rc = true;
@@ -697,6 +640,7 @@ bool drmHelper::modeset_find_primary_plane()
 
                 if (get_property_value(props, "type") == DRM_PLANE_TYPE_PRIMARY)
                 {
+                    _modeset->primary_plane.valid = true;
                     _modeset->primary_plane.id = plane_id;
                     rc = true;
                 }
@@ -721,7 +665,7 @@ bool drmHelper::modeset_find_primary_plane()
     return rc;
 }
 
-bool drmHelper::modeset_find_overlay_plane()
+bool DrmHelper::modeset_find_overlay_plane()
 {
     drmModePlaneResPtr plane_res;
     bool rc = true;
@@ -769,6 +713,7 @@ bool drmHelper::modeset_find_overlay_plane()
 
                 if (get_property_value(props, "type") == DRM_PLANE_TYPE_OVERLAY)
                 {
+                    _modeset->overlay_plane.valid = true;
                     _modeset->overlay_plane.id = plane_id;
                     rc = true;
                 }
@@ -793,7 +738,7 @@ bool drmHelper::modeset_find_overlay_plane()
     return rc;
 }
 
-void drmHelper::modeset_drm_object_fini(struct drm_object *obj)
+void DrmHelper::modeset_drm_object_fini(struct drm_object *obj)
 {
     for (uint32_t i = 0; i < obj->props->count_props; i++)
     {
@@ -805,7 +750,7 @@ void drmHelper::modeset_drm_object_fini(struct drm_object *obj)
     obj->props = nullptr;
 }
 
-bool drmHelper::modeset_setup_objects()
+bool DrmHelper::modeset_setup_objects()
 {
     bool rc = true;
     struct drm_object *connector = &_modeset->connector;
@@ -855,7 +800,7 @@ bool drmHelper::modeset_setup_objects()
     return rc;
 }
 
-void drmHelper::modeset_destroy_objects()
+void DrmHelper::modeset_destroy_objects()
 {
     modeset_drm_object_fini(&_modeset->connector);
     modeset_drm_object_fini(&_modeset->crtc);
@@ -863,7 +808,7 @@ void drmHelper::modeset_destroy_objects()
     modeset_drm_object_fini(&_modeset->overlay_plane);
 }
 
-bool drmHelper::modeset_create_fb(uint32_t drm_format, struct modeset_buf *buf)
+bool DrmHelper::modeset_create_fb(uint32_t drm_format, struct modeset_buf *buf)
 {
     struct drm_mode_create_dumb creq;
     struct drm_mode_destroy_dumb dreq;
@@ -898,6 +843,7 @@ bool drmHelper::modeset_create_fb(uint32_t drm_format, struct modeset_buf *buf)
         creq.bpp = 32;
         break;
     }
+
     ret = drmIoctl(_fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq);
     if (ret < 0) {
         std::cerr << "cannot create dumb buffer (" << errno << "): " << strerror(errno) << std::endl;
@@ -967,7 +913,7 @@ bool drmHelper::modeset_create_fb(uint32_t drm_format, struct modeset_buf *buf)
     return rc;
 }
 
-void drmHelper::modeset_destroy_fb(struct modeset_buf *buf)
+void DrmHelper::modeset_destroy_fb(struct modeset_buf *buf)
 {
     struct drm_mode_destroy_dumb dreq;
 
@@ -982,7 +928,7 @@ void drmHelper::modeset_destroy_fb(struct modeset_buf *buf)
     drmIoctl(_fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
 }
 
-bool drmHelper::modeset_setup_primary_framebuffers(drmModeConnector *conn)
+bool DrmHelper::modeset_setup_primary_framebuffers(drmModeConnector *conn)
 {
     bool rc = true;
 
@@ -1011,12 +957,12 @@ bool drmHelper::modeset_setup_primary_framebuffers(drmModeConnector *conn)
     return rc;
 }
 
-bool drmHelper::modeset_setup_overlay_framebuffers(drmModeConnector *conn)
+bool DrmHelper::modeset_setup_overlay_framebuffers(drmModeConnector *conn)
 {
     bool rc = true;
 
-    _modeset->overlay_buf.width = _overlay_width;
-    _modeset->overlay_buf.height = _overlay_height;
+    _modeset->overlay_buf.width = GetOverlayWidth();
+    _modeset->overlay_buf.height = GetOverlayHeight();
 
     if(_modeset->overlay_buf.fb)
     {
@@ -1028,7 +974,7 @@ bool drmHelper::modeset_setup_overlay_framebuffers(drmModeConnector *conn)
     return rc;
 }
 
-void drmHelper::modeset_get_object_properties(struct drm_object *obj, uint32_t type)
+void DrmHelper::modeset_get_object_properties(struct drm_object *obj, uint32_t type)
 {
     const char *type_str;
     unsigned int i;
@@ -1060,7 +1006,7 @@ void drmHelper::modeset_get_object_properties(struct drm_object *obj, uint32_t t
     }
 }
 
-bool drmHelper::set_drm_object_property(drmModeAtomicReq *req, drm_object *obj,
+bool DrmHelper::set_drm_object_property(drmModeAtomicReq *req, drm_object *obj,
                    const char *name, uint64_t value)
 {
     uint32_t prop_id = 0;
@@ -1090,7 +1036,7 @@ bool drmHelper::set_drm_object_property(drmModeAtomicReq *req, drm_object *obj,
     return rc;
 }
 
-bool drmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
+bool DrmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
 {
     bool rc = true;
     drm_object *primary_plane = &_modeset->primary_plane;
@@ -1174,7 +1120,24 @@ bool drmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
         rc = false;
     }
 
-    if(_overlay_width > 0)
+    {
+        uint32_t damage_blob_id = 0;
+        struct drm_mode_rect rects[1];
+        rects[0].x1 = 0;
+        rects[0].y1 = 0;
+        rects[0].x2 = primary_buf->width;
+        rects[0].y2 = primary_buf->height;
+        uint32_t num_rects = 1;
+
+        drmModeCreatePropertyBlob(_fd, &rects, sizeof(struct drm_mode_rect) * num_rects, &damage_blob_id);
+
+        if (!set_drm_object_property(req, primary_plane, "FB_DAMAGE_CLIPS", damage_blob_id))
+        {
+            rc = false;
+        }
+    }
+
+    if(_modeset->overlay_plane.valid)
     {
         if (!set_drm_object_property(req, overlay_plane, "FB_ID", overlay_fb_id))
         {
@@ -1216,12 +1179,39 @@ bool drmHelper::modeset_atomic_prepare_commit(drmModeAtomicReq *req)
         {
             rc = false;
         }
+
+        {
+            uint32_t damage_blob_id = 0;
+            struct drm_mode_rect rects[1];
+            uint32_t num_rects = 1;
+            if(_modeset->overlay_dirty)
+            {
+                _modeset->overlay_dirty = false;
+                rects[0].x1 = 0;
+                rects[0].y1 = 0;
+                rects[0].x2 = overlay_buf->width;
+                rects[0].y2 = overlay_buf->height;
+            }
+            else
+            {
+                // special case for when the overlay is not dirty, we need to set a valid rectangle to avoid drmModeAtomicCommit() failing with EINVAL
+                rects[0].x1 = 0;
+                rects[0].y1 = 0;
+                rects[0].x2 = 2;
+                rects[0].y2 = 2;
+            }
+            drmModeCreatePropertyBlob(_fd, &rects, sizeof(struct drm_mode_rect) * num_rects, &damage_blob_id);
+            if (!set_drm_object_property(req, overlay_plane, "FB_DAMAGE_CLIPS", damage_blob_id))
+            {
+                rc = false;
+            }
+        }
     }
 
     return rc;
 }
 
-void drmHelper::modeset_page_flip_event(int fd, unsigned int frame,
+void DrmHelper::modeset_page_flip_event(int fd, unsigned int frame,
                     unsigned int sec, unsigned int usec,
                     unsigned int crtc_id, void *data)
 {
@@ -1234,7 +1224,7 @@ void drmHelper::modeset_page_flip_event(int fd, unsigned int frame,
     }
 }
 
-void  drmHelper::modeset_output_destroy()
+void  DrmHelper::modeset_output_destroy()
 {
     /* destroy connector, crtc and plane objects */
     modeset_destroy_objects();
@@ -1250,7 +1240,7 @@ void  drmHelper::modeset_output_destroy()
     drmModeDestroyPropertyBlob(_fd, _modeset->mode_blob_id);
 }
 
-void drmHelper::modeset_cleanup()
+void DrmHelper::modeset_cleanup()
 {
     drmEventContext ev;
     int ret;
@@ -1311,7 +1301,7 @@ void drmHelper::modeset_cleanup()
 }
 
 
-void drmHelper::RunThread()
+void DrmHelper::RunThread()
 {
     prctl(PR_SET_NAME, _threadName.c_str(),0,0,0);
 
@@ -1343,20 +1333,4 @@ void drmHelper::RunThread()
     }
 
     modeset_cleanup();
-}
-
-void drmHelper::flush_cb_static(lv_display_t * display, const lv_area_t * area, uint8_t * px_map)
-{
-    drmHelper* self = reinterpret_cast<drmHelper*>(lv_display_get_user_data(display));
-    if(self)
-    {
-        self->flush_cb(display, area, px_map);
-    }
-}
-
-void drmHelper::flush_cb(lv_display_t * display, const lv_area_t * area, uint8_t * px_map)
-{
-    /* IMPORTANT!!!
-    * Inform LVGL that flushing is complete so buffer can be modified again. */
-    lv_display_flush_ready(display);
 }

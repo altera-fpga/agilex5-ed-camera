@@ -9,5 +9,5 @@
 # License.
 # *******************************************************************************/
 
-cd /home/root/ICameraProxyServer
+cd %ROOT_HOME%/ICameraProxyServer
 (./ICameraProxyServer | tee /dev/console /tmp/icamera-proxy.log > /dev/null) &

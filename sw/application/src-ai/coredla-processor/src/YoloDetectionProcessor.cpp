@@ -143,35 +143,36 @@ void YoloDetectionProcessor::ParseYOLOOutput(const std::vector<ov::Tensor>& outp
 {
     int prediction = 0;
     
-    for(size_t ot = 0; ot < output_tensors.size(); ++ot)
+    for(size_t ot = 0; ot < output_tensors.size()/2; ++ot)
     {
-        const ov::Tensor& output_tensor = output_tensors.at(ot);
+        const ov::Tensor& output_tensor_boxes = output_tensors.at(ot);
+        const ov::Tensor& output_tensor_predictions = output_tensors.at(ot + output_tensors.size()/2);
         if(_bypass_output_layout_transform)
         {
-            ParseYOLOOutputTensorCvec(output_tensor, prediction);
+            ParseYOLOOutputTensorCvec(output_tensor_boxes, output_tensor_predictions, prediction);
         }
         else
         {
-            ParseYOLOOutputTensor(output_tensor, prediction);
+            ParseYOLOOutputTensor(output_tensor_boxes, output_tensor_predictions, prediction);
         }
-        const int out_blob_predictions = static_cast<int>(output_tensor.get_shape()[2]) * static_cast<int>(output_tensor.get_shape()[3]);
+        const int out_blob_predictions = static_cast<int>(output_tensor_predictions.get_shape()[2]) * static_cast<int>(output_tensor_predictions.get_shape()[3]);
         prediction += out_blob_predictions;
     }
 }
 
-void YoloDetectionProcessor::ParseYOLOOutputTensor(const ov::Tensor& output_tensor, int prediction)
+void YoloDetectionProcessor::ParseYOLOOutputTensor(const ov::Tensor& output_tensor_boxes, const ov::Tensor& output_tensor_predictions, int prediction)
 {
     float scale = (float)_params._original_im_w / (float)_params._input_tensor_w;
     float yolo_h = _params._input_tensor_h * scale;
     float offset_y = (yolo_h - _params._original_im_h) / (2.0f * scale);
     float inv_detection_threshold = - logf((1.0f - _detection_threshold) / _detection_threshold);
 
-    const int out_blob_predictions = static_cast<int>(output_tensor.get_shape()[2]) * static_cast<int>(output_tensor.get_shape()[3]);
-    const float *output_blob =  output_tensor.data<const float>();
-    const float *output_blob_i = output_blob;
+    const int out_blob_predictions = static_cast<int>(output_tensor_predictions.get_shape()[2]) * static_cast<int>(output_tensor_predictions.get_shape()[3]);
+    const float* p_boxes =  (const float *)output_tensor_boxes.data<float>();
+    const float* p_prediction =  (const float *)output_tensor_predictions.data<float>();
 
     //// For each prediction find the class with the highest probability
-    const float* pc0 = output_blob_i + out_blob_predictions * 64;
+    const float* pc0 = p_prediction;
     const float* pc1 = pc0 + out_blob_predictions;
 
     std::vector<int32_t> max_prob_class(out_blob_predictions, 0);
@@ -244,7 +245,7 @@ void YoloDetectionProcessor::ParseYOLOOutputTensor(const ov::Tensor& output_tens
             max_prob = 1.0f / (1.0f + expf(-max_prob));
 
             float coord[4];
-            const float *output_blob_a = output_blob_i;           
+            const float *output_blob_a = p_boxes + i;
             
             // for each coordinate
             for(int a = 0; a < 4; a++)
@@ -288,24 +289,22 @@ void YoloDetectionProcessor::ParseYOLOOutputTensor(const ov::Tensor& output_tens
             _objects[prediction].Set(x, y, height, width, max_prob_index, max_prob, nullptr, static_cast<int>(offset_y), scale, scale);
             _confidenceMap.emplace(max_prob, prediction);
         }
-
-        output_blob_i++;
     }
 }
 
 
-void YoloDetectionProcessor::ParseYOLOOutputTensorCvec(const ov::Tensor& output_tensor, int prediction)
+void YoloDetectionProcessor::ParseYOLOOutputTensorCvec(const ov::Tensor& output_tensor_boxes, const ov::Tensor& output_tensor_predictions, int prediction)
 {
     float scale = (float)_params._original_im_w / (float)_params._input_tensor_w;
     float yolo_h = _params._input_tensor_h * scale;
     float offset_y = (yolo_h - _params._original_im_h)/(2.0f * scale);
     float inv_detection_threshold = - logf((1.0f - _detection_threshold)/_detection_threshold);
 
-    const int out_blob_predictions = static_cast<int>(output_tensor.get_shape()[2]) * static_cast<int>(output_tensor.get_shape()[3]);
+    const int out_blob_predictions = static_cast<int>(output_tensor_predictions.get_shape()[2]) * static_cast<int>(output_tensor_predictions.get_shape()[3]);
     const size_t c_stride = 16 * out_blob_predictions;
 
-    const __fp16* p_prediction =  (const __fp16 *)output_tensor.data<ov::float16>();
-    const size_t prob_class_offset = out_blob_predictions * 64;
+    const __fp16* p_boxes = (const __fp16 *)output_tensor_boxes.data<ov::float16>();
+    const __fp16* p_prediction = (const __fp16 *)output_tensor_predictions.data<ov::float16>();
 
     const size_t total_classes = _params._classes;
 
@@ -315,7 +314,7 @@ void YoloDetectionProcessor::ParseYOLOOutputTensorCvec(const ov::Tensor& output_
         int max_prob_index = 0;
         size_t class_index = 0;
 
-        const __fp16* p = p_prediction + prob_class_offset;
+        const __fp16* p = p_prediction;
 
 #ifdef USE_SIMD
         // Max probability values
@@ -402,7 +401,7 @@ void YoloDetectionProcessor::ParseYOLOOutputTensorCvec(const ov::Tensor& output_
             // sigmoid
             max_prob = 1.0f/(1.0f+expf(-max_prob));
             float coord[4];
-            const __fp16* p_coord = p_prediction;
+            const __fp16* p_coord = p_boxes;
 
             // for each coordinate
             for(size_t a = 0; a < 4; a++)
@@ -447,5 +446,6 @@ void YoloDetectionProcessor::ParseYOLOOutputTensorCvec(const ov::Tensor& output_
         }
         
         p_prediction += 16;
+        p_boxes += 16;
     }
 }

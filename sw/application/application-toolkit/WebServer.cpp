@@ -147,7 +147,15 @@ bool WebServer::WebSocketOpened(IWebSocketService* web_socket)
 {
     // The client has created a new web socket.
     // We can get the protocol request from the IWebSocketService
-    bool haveHandler = WebSocketCommandHandler::Create(web_socket);
+    bool haveHandler = false;
+    if(_pIWebAPI)
+    {
+        haveHandler = _pIWebAPI->WebSocketOpened(web_socket);
+    }
+    if(!haveHandler)
+    {
+        haveHandler = WebSocketCommandHandler::Create(web_socket);
+    }
     return haveHandler;
 }
 

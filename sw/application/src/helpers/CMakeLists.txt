@@ -8,7 +8,9 @@
 # License.
 # *******************************************************************************/
 
+add_subdirectory(dmaOverlayHelper)
 add_subdirectory(drmHelper)
+add_subdirectory(IOverlayHelper)
 add_subdirectory(MultiChannelAutoExposure)
 add_subdirectory(MultiChannelWhiteBalance)
 add_subdirectory(IspMixerHelper)

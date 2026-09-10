@@ -1,5 +1,5 @@
 KERNEL_IMAGETYPE ?= "Image"
-KERNEL_CLASSES:append = " kernel-fitimage"
+KERNEL_CLASSES:append = " kernel-fit-extra-artifacts"
 SOCFPGA_FEATURES ?= "jffs2 gpio_sys usb_adapter"
 
 KBUILD_DEFCONFIG ?= "defconfig"

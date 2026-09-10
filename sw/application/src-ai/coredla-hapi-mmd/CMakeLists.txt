@@ -50,9 +50,6 @@ target_link_libraries(${TARGET_NAME}
 
 set_target_properties(${TARGET_NAME} PROPERTIES INSTALL_RPATH "./lib")
 target_compile_options(${TARGET_NAME} PRIVATE ${common_compile_options} -Wno-stringop-overread)
-if(SUPPORT_DMA)
-target_compile_definitions(${TARGET_NAME} PRIVATE SUPPORT_DMA)
-endif()
 
 install(TARGETS ${TARGET_NAME} DESTINATION lib COMPONENT deploy)
 

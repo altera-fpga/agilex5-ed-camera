@@ -9,5 +9,14 @@
 # License.
 # *******************************************************************************/
 
-cd /home/root
+cd %ROOT_HOME%
+
+# wait 5 secondsffor network to acquie ip address
+i=5
+while [ "$i" -gt 0 ]; do
+    printf "\rStarting in: %d" "$i" | tee /dev/console
+    sleep 1
+    i=$((i - 1))
+done
+
 (./VvpIspDemo | tee /dev/console /tmp/vvp-isp-demo.log > /dev/null) &

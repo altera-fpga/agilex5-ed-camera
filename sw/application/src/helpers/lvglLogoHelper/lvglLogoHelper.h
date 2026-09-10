@@ -13,7 +13,7 @@ License.
 #include <optional>
 #include "SwUtilsThread.h"
 #include <lvgl.h>
-#include "IDrmHelper.h"
+#include "IOverlayHelper.h"
 #include "IUIConnection.h"
 #include "ILogoControl.h"
 
@@ -27,17 +27,9 @@ public:
     lvglLogoHelper(lvglLogoHelper&& other) = delete;
     lvglLogoHelper& operator=(lvglLogoHelper&& other) = delete;
 
-    enum LogoPosition
-    {
-        LogoDisabled = 0,
-        TopLeft,
-        TopRight,
-        BottomLeft,
-        BottomRight,
-        Bouncing
-    };    
-
     void SetLogoOpacity(const float v);
+
+    void Start();
 
     virtual void RunThread() override;
 
@@ -50,7 +42,7 @@ private:
 
     std::weak_ptr<ILogoControl> _wspLogoControl;
     IUIConnection* _uiConnection;
-    std::shared_ptr<IDrmHelper> _drmHelper;
+    std::shared_ptr<IOverlayHelper> _overlayHelper;
     uint32_t _logo_width;
     uint32_t _logo_height;
     float _logo_alpha;

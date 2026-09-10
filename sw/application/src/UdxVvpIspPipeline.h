@@ -235,7 +235,7 @@ private:
     bool InitVfwCaptureIsp();
     bool InitHdrComponents();
     bool InitOutputMixerTpg();
-    bool InitOverlayVfr();
+    bool InitOverlay();
     bool InitOutputMixer();
     bool InitDpTxMultirate();
     bool IsDpTxMultirateEnabled() const { return _dpTxMultirateEnabled; }    
@@ -353,7 +353,7 @@ private:
     Hapi::VvpProtocolConverterPtr _spProtocolConverter;
 
     // Overlay related
-    std::shared_ptr<IDrmHelper> _drmHelper;
+    std::shared_ptr<IOverlayHelper> _overlayHelper;
     std::shared_ptr<SwApi::Scaler> _spOverlayScaler;
     uint32_t _overlay_mixer_width = 0;
     uint32_t _overlay_mixer_height = 0;

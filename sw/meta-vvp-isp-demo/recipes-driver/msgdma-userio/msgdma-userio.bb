@@ -21,6 +21,4 @@ SRC_URI = "file://Makefile;subdir=${S} \
            file://msgdma_userio_platform.c;subdir=${S} \
            "
 
-S = "${WORKDIR}/src"
-
 RPROVIDES_${PN}:append = "module-msgdma-userio"

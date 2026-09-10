@@ -607,6 +607,13 @@ void CommonApplicationBase::SetControlValue(const std::string& JSON)
     }
 }
 
+bool CommonApplicationBase::WebSocketOpened(IWebSocketService* web_socket)
+{
+    // default websocket is not handled by the application, so return false to indicate that the application did not handle it
+    return false;
+}
+
+
 std::shared_ptr<TopLevelUiTab> CommonApplicationBase::AddUiTab(const std::string& title,
                                                                BooleanControlCB enabledCB,
                                                                const std::string& tooltip)

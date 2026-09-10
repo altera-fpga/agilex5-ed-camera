@@ -38,10 +38,6 @@ add_library(${PROJECT_NAME} STATIC ${allFiles})
 target_compile_definitions(${PROJECT_NAME} PRIVATE "${common_compile_definitions}")
 #endregion
 
-if(SUPPORT_DMA)
-target_compile_definitions(${PROJECT_NAME} PRIVATE SUPPORT_DMA)
-endif()
-
 #region Compile options
 target_compile_options(${PROJECT_NAME} PRIVATE "${common_compile_options}")
 

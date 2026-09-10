@@ -40,9 +40,17 @@ License.
 #include "HapiVvpThrottle.h"
 #include "VideoThrottle.h"
 #include "IUIConnection.h"
+#ifdef USE_DRM
+#include "drmHelper.h"
+#else
+#include "dmaOverlayHelper.h"
+#endif
 
 #ifdef CAMERA_FramosGMSL
 #include "FramosGMSL.h"
+#endif
+#ifdef CAMERA_FramosIMX676
+#include "FramosIMX676.h"
 #endif
 #ifdef CAMERA_FramosIMX678
 #include "FramosIMX678.h"
@@ -63,6 +71,9 @@ typedef struct _tCameraData
 } tCameraData;
 
 static tCameraData cameraList[] = {
+#ifdef CAMERA_FramosIMX676
+    {"framos-imx676", SwApi::FramosImx676::Create},
+#endif
 #ifdef CAMERA_FramosIMX678
     {"framos-imx678", SwApi::FramosImx678::Create},
 #endif
@@ -250,7 +261,7 @@ void UdxVvpIspPipeline::Initialize(std::shared_ptr<Hapi::IHapi> spHapi)
         ERR << "Failed to initialise Output TPG Mixer.\n";
     }
 
-    bool overlayFound = InitOverlayVfr();
+    bool overlayFound = InitOverlay();
     if (!overlayFound)
     {
         ERR << "Failed to initialise Overlay.\n";
@@ -271,6 +282,11 @@ void UdxVvpIspPipeline::Initialize(std::shared_ptr<Hapi::IHapi> spHapi)
     if(_spOutputMixer)
     {
         _spOutputMixer->EnableIsp(true);
+    }
+
+    if(_lvglLogoHelper)
+    {
+        _lvglLogoHelper->Start();
     }
 
 
@@ -1740,14 +1756,17 @@ bool UdxVvpIspPipeline::InitOutputMixerTpg()
     return true;
 }
 
-bool UdxVvpIspPipeline::InitOverlayVfr()
+bool UdxVvpIspPipeline::InitOverlay()
 {
     uint32_t primary_width = 0;
     uint32_t primary_height = 0;
-    uint32_t overlay_width = 0;
-    uint32_t overlay_height = 0;
 
-    _drmHelper = IDrmHelper::GetIDrmHelper();
+#ifdef USE_DRM
+    DrmHelper::Create();
+#else
+    DmaOverlayHelper::Create(_spHapi, PipelineBaseUID(PipelineSubsystem::Output));
+#endif
+    _overlayHelper = IOverlayHelper::GetIOverlayHelper();
 
 	/* open the DRM device */
     const char* card = "/dev/dri/card0";
@@ -1762,22 +1781,11 @@ bool UdxVvpIspPipeline::InitOverlayVfr()
     primary_height = 540;
     lv_color_format_t primary_format = LV_COLOR_FORMAT_ARGB2222;
 #endif
-	if(_drmHelper->Open(card, primary_width, primary_height, primary_format))
+	if(!_overlayHelper->Open(card, primary_width, primary_height, primary_format))
     {
-        primary_height = _drmHelper->GetPrimaryHeight();
-        primary_width = _drmHelper->GetPrimaryWidth();
-        uint32_t primary_stride = _drmHelper->GetPrimaryStride();
-        uint8_t * primary_fb_ptr = _drmHelper->GetPrimaryBuffer();
-        memset(primary_fb_ptr, 0, primary_height*primary_stride);
-
-        overlay_height = _drmHelper->GetOverlayHeight();
-        overlay_width = _drmHelper->GetOverlayWidth();
-        uint32_t overlay_stride = _drmHelper->GetOverlayStride();
-        uint8_t * overlay_fb_ptr = _drmHelper->GetOverlayBuffer();
-
-        (void)overlay_width; // Unused, kept for debugging purposes
-
-        memset(overlay_fb_ptr, 0, overlay_height*overlay_stride);
+            TRACE
+                << "Failed to open DRM card\n" << std::flush;
+        return false;
     }
     IUIConnection* uiConnection = static_cast<IUIConnection*>(VvpIspDemo::Get());
     auto weak = weak_from_this();
@@ -2298,7 +2306,7 @@ void UdxVvpIspPipeline::LinkPipelineCores()
 
 void UdxVvpIspPipeline::SetOverlayResolution(uint32_t width, uint32_t height)
 {
-    _drmHelper->SetOverlayResolution(width, height);
+    _overlayHelper->SetOverlayResolution(width, height);
     _spOutputMixer->SetLogoResolution(width, height);
 }
 
@@ -2307,6 +2315,7 @@ bool UdxVvpIspPipeline::ValidateVideoStandard(const VideoStandard& vs)
     const auto check_resolution = [](const VideoStandard& vs)->bool {
         static constexpr uint32_t supported_resolutions[][2] = {
             {3840, 2160},
+            {3536, 3536},
             {1920, 1080}
         };
 
@@ -2347,6 +2356,8 @@ void UdxVvpIspPipeline::WatchInput()
                         auto instance = inputSnoop->GetInstance();
                         const uint32_t width = intel_vvp_snoop_get_last_max_width(instance);
                         const uint32_t height = intel_vvp_snoop_get_last_num_lines(instance);
+
+                        //printf("CAM: %d %dx%d\n", cam_idx, width, height);
 
                         vs.SetWidth(width + 1);
                         vs.SetHeight(height);

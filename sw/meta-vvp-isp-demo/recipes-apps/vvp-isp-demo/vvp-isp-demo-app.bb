@@ -11,9 +11,6 @@
 DESCRIPTION = "Builds the VVP ISP demo application"
 LICENSE = "CLOSED"
 
-S = "${WORKDIR}"
-UNPACKDIR = "${S}"
-
 FILESEXTRAPATHS:prepend := "${THISDIR}/../../../:"
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI += " \
@@ -35,6 +32,8 @@ SRC_URI += "${@bb.utils.contains('APP_FEATURES', 'ISP_AI', ' \
              https://downloads.intel.com/akdlm/software/fpga_ai_suite/2026.1.1/altera-fpga-ai-suite-ubuntu-2026.1.1_amd64.deb;name=altera-fpga-ai-suite;subdir=altera-fpga-ai-suite \
             ', '', d)}"
 
+S = "${UNPACKDIR}"
+
 SRC_URI[lvgl.sha256sum] = "494f08dbe53b63e1a9891f8c3f535762eacb0b3318086951daf747c4f493bfea"
 SRC_URI[openvino_x86_64.sha256sum] = "c57bc759a04bf316d66dc42d644433cf3bd590ad640933630a0616efb380a630"
 SRC_URI[openvino_arm64.sha256sum] = "d51ed6eb38933ad5e6424debe734568b758d0fd9b9df1b21098cfb3f20d20cd3"
@@ -45,7 +44,7 @@ SRCREV_lvgl = "59a6b61c9580b65089010c5273f2fcdd6c4d2aae"
 
 inherit cmake systemd pkgconfig
 
-OECMAKE_SOURCEPATH = "${S}/application"
+OECMAKE_SOURCEPATH = "${UNPACKDIR}/application"
 
 BUILDDIR = "${WORKDIR}/build"
 
@@ -59,16 +58,16 @@ IMAGE_BOOT_ARGS:append = " fbcon=map:1"
 
 do_configure:prepend() {
     cd ${S}/lvgl
-    ${S}/application/src/helpers/drmHelper/patches/lvglPatchCommand.sh ${S}/lvgl
+    ${S}/application/src/helpers/IOverlayHelper/patches/lvglPatchCommand.sh ${S}/lvgl
 
     if [ "${@bb.utils.contains('APP_FEATURES', 'ISP_AI', 'true', 'false', d)}" = "true" ]; then
-        cd ${S}/altera-fpga-ai-suite
+        cd ${UNPACKDIR}/altera-fpga-ai-suite
         patch -p 1 < ${S}/application/src-ai/cmake/CoreDLA.patch
         patch -p 1 < ${S}/application/src-ai/cmake/CoreDLAPerformance.patch
         patch -p 1 < ${S}/application/src-ai/cmake/CoreDLABypassOLT.patch
     fi
 
-    cd ${S}/build
+    cd ${BUILDDIR}
     export NATIVE_SYSROOT=${STAGING_DIR_NATIVE}
 }
 
@@ -80,7 +79,7 @@ python do_proxyenv () {
             if not env_val is None:
                 f.write(f"export {env_var}={env_val}\n")
 }
-do_proxyenv[vardepsexclude]="BB_ORIGENV"
+do_proxyenv[vardepsexclude] = "BB_ORIGENV"
 addtask proxyenv after do_configure before do_compile
 
 do_compile:prepend() {
@@ -89,7 +88,7 @@ do_compile:prepend() {
 
 EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release \
                  -DProtobuf_HOST_PROTOC_EXECUTABLE=${RECIPE_SYSROOT_NATIVE}/usr/bin/protoc \
-                 -DCMAKE_INSTALL_PREFIX=/home/root \
+                 -DCMAKE_INSTALL_PREFIX=${ROOT_HOME} \
                  -DMACHINE:STRING=${MACHINE} \
                  -DFETCHCONTENT_SOURCE_DIR_LVGL='${S}/lvgl' \
                  \"
@@ -106,26 +105,31 @@ EXTRA_OECMAKE:append = "${@bb.utils.contains('APP_FEATURES', 'ISP_AI', ' \
 OECMAKE_TARGET_INSTALL = "install_deploy"
 do_install:append() {
     install -d ${D}${sysconfdir}/ld.so.conf.d/
-    echo /home/root/lib > ${D}${sysconfdir}/ld.so.conf.d/VvpIdpDemo.conf
+    echo ${ROOT_HOME}/lib > ${D}${sysconfdir}/ld.so.conf.d/VvpIdpDemo.conf
     install -d ${D}${sysconfdir}/local.d
     install -m 0644 ${S}/21-vvp-isp ${D}${sysconfdir}/local.d
+    sed -i "s|%ROOT_HOME%|${ROOT_HOME}|g" ${D}${sysconfdir}/local.d/21-vvp-isp
 
-    install -m 0755 ${WORKDIR}/start.sh ${D}/home/root
+    install -m 0755 ${S}/start.sh ${D}${ROOT_HOME}
+    sed -i "s|%ROOT_HOME%|${ROOT_HOME}|g" ${D}${ROOT_HOME}/start.sh
 
     install -d ${D}${sysconfdir}/modprobe.d
-    install -m 0755 ${WORKDIR}/uio_pdrv_genirq.conf ${D}${sysconfdir}/modprobe.d/
+    install -m 0755 ${S}/uio_pdrv_genirq.conf ${D}${sysconfdir}/modprobe.d/
 
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d ${D}${systemd_system_unitdir}
-        install -m 644 ${WORKDIR}/vvp-isp.service ${D}${systemd_system_unitdir}/vvp-isp.service
+        install -m 644 ${S}/vvp-isp.service ${D}${systemd_system_unitdir}/vvp-isp.service
+        sed -i "s|%ROOT_HOME%|${ROOT_HOME}|g" ${D}${systemd_system_unitdir}/vvp-isp.service
     fi
 
-    install -d ${D}/home/root/ICameraProxyServer
-    install -m 0755 ${WORKDIR}/start_icamera_proxy.sh ${D}/home/root/ICameraProxyServer
+    install -d ${D}${ROOT_HOME}/ICameraProxyServer
+    install -m 0755 ${S}/start_icamera_proxy.sh ${D}${ROOT_HOME}/ICameraProxyServer
+    sed -i "s|%ROOT_HOME%|${ROOT_HOME}|g" ${D}${ROOT_HOME}/ICameraProxyServer/start_icamera_proxy.sh
 
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d ${D}${systemd_system_unitdir}
-        install -m 644 ${WORKDIR}/icamera-proxy.service ${D}${systemd_system_unitdir}/icamera-proxy.service
+        install -m 644 ${S}/icamera-proxy.service ${D}${systemd_system_unitdir}/icamera-proxy.service
+        sed -i "s|%ROOT_HOME%|${ROOT_HOME}|g" ${D}${systemd_system_unitdir}/icamera-proxy.service
     fi
 }
 
@@ -134,7 +138,7 @@ RDEPENDS_${PN} = " fuse3 protobuf "
 
 FILES:${PN} += " \
     ${sysconfdir} \
-    /home/root \
+    ${ROOT_HOME} \
     /etc/local.d \
         ${@bb.utils.contains('DISTRO_FEATURES','systemd','${systemd_system_unitdir}/vvp-isp.service ${systemd_system_unitdir}/icamera-proxy.service','',d)} \
 "

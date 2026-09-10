@@ -35,6 +35,9 @@
 #include <drm/drm_panic.h>
 
 #include "vfr_drm_driver.h"
+#ifdef USE_DMA
+#include "vfr_drm_dma.h"
+#endif
 #include "vfr_drm_plane.h"
 #include "vfr_drm_framebuffer.h"
 #include "intel_vvp_vfr.h"
@@ -47,8 +50,8 @@ struct vfr_drm_framebuffer *vfr_drm_framebuffer_of_fb(struct drm_framebuffer *fb
 
 static void vfr_drm_fb_destroy(struct drm_framebuffer *fb)
 {
-    struct drm_device *dev = fb->dev;
     struct vfr_drm_framebuffer *vfr_drm_fb = vfr_drm_framebuffer_of_fb(fb);
+    
 
     unsigned int i;
 
@@ -76,6 +79,7 @@ vfr_drm_fb_create(struct drm_device *dev, struct drm_file *file,
     if (!vfr_drm_fb)
         return ERR_PTR(-ENOMEM);
     drm_gem_fb_init_with_funcs(dev, &vfr_drm_fb->fb, file, info, mode_cmd, &vfr_drm_fb_funcs);
+
     return &vfr_drm_fb->fb;
 }
 

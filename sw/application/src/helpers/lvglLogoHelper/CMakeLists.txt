@@ -29,6 +29,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 target_compile_options(${PROJECT_NAME} PRIVATE "${common_compile_options}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE "${common_compile_definitions}")
 
-target_link_libraries(${PROJECT_NAME} drmHelper VvpIspDemoInterface)
+target_link_libraries(${PROJECT_NAME} PUBLIC IOverlayHelper)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack.cmake OPTIONAL)

@@ -11,15 +11,12 @@
 DESCRIPTION = "Altera OCS over UIO framework"
 LICENSE = "CLOSED"
 
-S = "${WORKDIR}"
-UNPACKDIR = "${S}"
-
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI += " \
              file://ocs2dto.sh \
              file://altera-ocs.service.in \
             "
-
+S = "${UNPACKDIR}"
 inherit systemd
 
 OECMAKE_SOURCEPATH = "${S}/application"
@@ -30,12 +27,12 @@ OCS_CAPABILITY_BASE ?= "0x40000000"
 
 do_install:append() {
     install -d ${D}/usr/bin
-    install -m 0755 ${WORKDIR}/ocs2dto.sh ${D}/usr/bin/ocs2dto.sh
+    install -m 0755 ${S}/ocs2dto.sh ${D}/usr/bin/ocs2dto.sh
 
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d ${D}${systemd_system_unitdir}
         #install -m 644 ${WORKDIR}/altera-ocs.service ${D}${systemd_system_unitdir}/altera-ocs.service
-        install -m 644 ${WORKDIR}/altera-ocs.service.in \
+        install -m 644  ${S}/altera-ocs.service.in \
             ${D}${systemd_system_unitdir}/altera-ocs.service
         sed -i "s:@OCS_CAPABILITY_BASE@:${OCS_CAPABILITY_BASE}:g" \
             ${D}${systemd_system_unitdir}/altera-ocs.service        

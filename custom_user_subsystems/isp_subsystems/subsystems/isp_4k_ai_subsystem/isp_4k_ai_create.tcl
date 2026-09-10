@@ -42,6 +42,8 @@ set_shell_parameter INST_ID                       {0}
 # AI Controls
 set_shell_parameter EMIF_AGENT                    {}
 set_shell_parameter EMIF_AGENT_CLK_FREQ           {200000000.0}
+set_shell_parameter EMIF_AGENT_2                  {}
+set_shell_parameter EMIF_AGENT_2_CLK_FREQ         {200000000.0}
 
 # AI Interrupts
 set_shell_parameter FRES_VFW_IRQ_PRIORITY         "X"
@@ -81,9 +83,14 @@ proc derive_parameters {param_array} {
 
     # check if the emif agent has been configured
     set v_emif_agent          [get_shell_parameter EMIF_AGENT]
+    set v_emif_agent_2        [get_shell_parameter EMIF_AGENT_2]
 
     if {[llength ${v_emif_agent}] == 0} {
         send_message ERROR "isp_4k_ai_create: EMIF Agent not specified"
+    }
+
+    if {[llength ${v_emif_agent_2}] == 0} {
+        send_message ERROR "isp_4k_ai_create: EMIF Agent 2 not specified"
     }
 
 }
@@ -130,6 +137,7 @@ proc create_isp_ai_subsystem {} {
     set v_ai_lt_pip           {4}
 
     set v_emif_agent_clk_freq     [get_shell_parameter EMIF_AGENT_CLK_FREQ]
+    set v_emif_agent_2_clk_freq   [get_shell_parameter EMIF_AGENT_2_CLK_FREQ]
 
     # General
     set v_inst_id           [get_shell_parameter INST_ID]
@@ -172,6 +180,8 @@ proc create_isp_ai_subsystem {} {
     add_instance  isp_ai_vid_rst_bridge         altera_reset_bridge
     add_instance  isp_ai_emif_clk_bridge        altera_clock_bridge
     add_instance  isp_ai_emif_rst_bridge        altera_reset_bridge
+    add_instance  isp_ai_emif_2_clk_bridge      altera_clock_bridge
+    add_instance  isp_ai_emif_2_rst_bridge      altera_reset_bridge
     add_instance  isp_ai_mm_bridge              altera_avalon_mm_bridge
     add_instance  isp_ai_axi4s_bcast            intel_vvp_axi4s_broadcaster
     add_instance  isp_ai_vfw_fres               intel_vvp_vfw
@@ -254,6 +264,17 @@ proc create_isp_ai_subsystem {} {
     set_instance_parameter_value      isp_ai_emif_rst_bridge      SYNCHRONOUS_EDGES       {deassert}
     set_instance_parameter_value      isp_ai_emif_rst_bridge      SYNC_RESET              {0}
     set_instance_parameter_value      isp_ai_emif_rst_bridge      USE_RESET_REQUEST       {0}
+
+    # isp_ai_emif_2_clk_bridge
+    set_instance_parameter_value      isp_ai_emif_2_clk_bridge    EXPLICIT_CLOCK_RATE     ${v_emif_agent_2_clk_freq}
+    set_instance_parameter_value      isp_ai_emif_2_clk_bridge    NUM_CLOCK_OUTPUTS       {1}
+
+    # isp_ai_emif_2_rst_bridge
+    set_instance_parameter_value      isp_ai_emif_2_rst_bridge    ACTIVE_LOW_RESET        {1}
+    set_instance_parameter_value      isp_ai_emif_2_rst_bridge    NUM_RESET_OUTPUTS       {1}
+    set_instance_parameter_value      isp_ai_emif_2_rst_bridge    SYNCHRONOUS_EDGES       {deassert}
+    set_instance_parameter_value      isp_ai_emif_2_rst_bridge    SYNC_RESET              {0}
+    set_instance_parameter_value      isp_ai_emif_2_rst_bridge    USE_RESET_REQUEST       {0}
 
     # isp_ai_axi4s_bcast
     set_instance_parameter_value      isp_ai_axi4s_bcast      BPS                           ${v_vid_out_bps}
@@ -693,20 +714,25 @@ proc create_isp_ai_subsystem {} {
 
     # isp_ai_emif_clk_bridge
     add_connection      isp_ai_emif_clk_bridge.out_clk          isp_ai_emif_rst_bridge.clk
-    add_connection      isp_ai_emif_clk_bridge.out_clk          isp_ai_vfw_fres.mem_clock
-    add_connection      isp_ai_emif_clk_bridge.out_clk          isp_ai_se_vfw_fres.clock
-    add_connection      isp_ai_emif_clk_bridge.out_clk          isp_ai_vfr_fres.mem_clock
-    add_connection      isp_ai_emif_clk_bridge.out_clk          isp_ai_se_vfr_fres.clock
     add_connection      isp_ai_emif_clk_bridge.out_clk          isp_ai_vfw_lres.mem_clock
     add_connection      isp_ai_emif_clk_bridge.out_clk          isp_ai_se_vfw_lres.clock
 
     # isp_ai_emif_rst_bridge
-    add_connection      isp_ai_emif_rst_bridge.out_reset        isp_ai_vfw_fres.mem_reset
-    add_connection      isp_ai_emif_rst_bridge.out_reset        isp_ai_se_vfw_fres.reset
-    add_connection      isp_ai_emif_rst_bridge.out_reset        isp_ai_vfr_fres.mem_reset
-    add_connection      isp_ai_emif_rst_bridge.out_reset        isp_ai_se_vfr_fres.reset
     add_connection      isp_ai_emif_rst_bridge.out_reset        isp_ai_vfw_lres.mem_reset
     add_connection      isp_ai_emif_rst_bridge.out_reset        isp_ai_se_vfw_lres.reset
+
+    # isp_ai_emif_2_clk_bridge
+    add_connection      isp_ai_emif_2_clk_bridge.out_clk        isp_ai_emif_2_rst_bridge.clk
+    add_connection      isp_ai_emif_2_clk_bridge.out_clk        isp_ai_vfw_fres.mem_clock
+    add_connection      isp_ai_emif_2_clk_bridge.out_clk        isp_ai_se_vfw_fres.clock
+    add_connection      isp_ai_emif_2_clk_bridge.out_clk        isp_ai_vfr_fres.mem_clock
+    add_connection      isp_ai_emif_2_clk_bridge.out_clk        isp_ai_se_vfr_fres.clock
+
+    # isp_ai_emif_2_rst_bridge
+    add_connection      isp_ai_emif_2_rst_bridge.out_reset      isp_ai_vfw_fres.mem_reset
+    add_connection      isp_ai_emif_2_rst_bridge.out_reset      isp_ai_se_vfw_fres.reset
+    add_connection      isp_ai_emif_2_rst_bridge.out_reset      isp_ai_vfr_fres.mem_reset
+    add_connection      isp_ai_emif_2_rst_bridge.out_reset      isp_ai_se_vfr_fres.reset
 
     # isp_ai_mm_bridge
     add_connection      isp_ai_mm_bridge.m0                     isp_ai_vfw_fres.av_mm_control_agent
@@ -803,6 +829,12 @@ proc create_isp_ai_subsystem {} {
 
     # isp_ai_emif_rst_bridge
     set_interface_property  emif_rst_in             EXPORT_OF   isp_ai_emif_rst_bridge.in_reset
+
+    # isp_ai_emif_2_clk_bridge
+    set_interface_property  emif_2_clk_in           EXPORT_OF   isp_ai_emif_2_clk_bridge.in_clk
+
+    # isp_ai_emif_2_rst_bridge
+    set_interface_property  emif_2_rst_in           EXPORT_OF   isp_ai_emif_2_rst_bridge.in_reset
 
     # isp_ai_mm_bridge
     add_interface           mm_ctrl_in              avalon      slave
@@ -1009,8 +1041,8 @@ proc add_auto_connections {} {
     set v_msg_nios_irq_host           [get_shell_parameter MSG_NIOS_IRQ_HOST]
     set v_msg_hps_irq_priority        [get_shell_parameter MSG_HPS_IRQ_PRIORITY]
     set v_msg_hps_irq_host            [get_shell_parameter MSG_HPS_IRQ_HOST]
-
-    set v_emif_agent          [get_shell_parameter EMIF_AGENT]
+    set v_emif_agent                  [get_shell_parameter EMIF_AGENT]
+    set v_emif_agent_2                [get_shell_parameter EMIF_AGENT_2]
 
     add_auto_connection   ${v_instance_name}    cpu_clk_in        100000000
     add_auto_connection   ${v_instance_name}    cpu_rst_in        100000000
@@ -1021,12 +1053,15 @@ proc add_auto_connections {} {
     add_auto_connection   ${v_instance_name}    vid_clk_in        297000000
     add_auto_connection   ${v_instance_name}    vid_rst_in        297000000
 
-    add_auto_connection   ${v_instance_name}    emif_clk_in       emif_user_clk
-    add_auto_connection   ${v_instance_name}    emif_rst_in       emif_user_rst
+    add_auto_connection   ${v_instance_name}    emif_clk_in       ${v_emif_agent}_user_clk
+    add_auto_connection   ${v_instance_name}    emif_rst_in       ${v_emif_agent}_user_rst
+
+    add_auto_connection   ${v_instance_name}    emif_2_clk_in     ${v_emif_agent_2}_user_clk
+    add_auto_connection   ${v_instance_name}    emif_2_rst_in     ${v_emif_agent_2}_user_rst
 
     # frame readers/writers to DDR4
-    add_auto_connection   ${v_instance_name}    av_mm_host_fres_vfw       ${v_emif_agent}_user_data
-    add_auto_connection   ${v_instance_name}    av_mm_host_fres_vfr       ${v_emif_agent}_user_data
+    add_auto_connection   ${v_instance_name}    av_mm_host_fres_vfw       ${v_emif_agent_2}_user_data
+    add_auto_connection   ${v_instance_name}    av_mm_host_fres_vfr       ${v_emif_agent_2}_user_data
 
     add_auto_connection   ${v_instance_name}    av_mm_host_lres_vfw       ${v_emif_agent}_user_data
 

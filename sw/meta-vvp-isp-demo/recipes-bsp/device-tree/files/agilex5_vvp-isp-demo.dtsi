@@ -29,6 +29,17 @@
 			#dma-cells = <1>;
 		};		
 
+		msgdma1: msgdma@0x40800040 {
+			status = "okay";
+			compatible = "altr,socfpga-msgdma";
+			reg = <0x40800040 0x00000020>,
+				  <0x40800060 0x00000020>;
+			reg-names = "csr", "desc";
+			interrupt-parent = <&intc>;
+			interrupts = <0 50 4>;
+			#dma-cells = <1>;
+		};		
+
 		msgdma_userio0 {
 			status = "okay";
 			compatible = "intel,msgdma-userio-1.0";

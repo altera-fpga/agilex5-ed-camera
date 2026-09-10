@@ -41,7 +41,7 @@ if(ISP_AI_BUILD AND ISP_STITCH_BUILD)
     message(FATAL_ERROR "ISP_AI_BUILD and ISP_STITCH_BUILD options are mutually exclusive.")
 endif()
 
-option(SUPPORT_DMA "Support DMA transfers" ON)
+option(USE_DRM "Use DRM for display" ON)
 
 # Need to set this to ON so MSGDMA transactions use singleton correctly
 set(SW_API_UTILS_MEM_SHARED_LIBRARY ON CACHE BOOL "Build SwApiUtils as a shared library" FORCE)

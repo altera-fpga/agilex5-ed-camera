@@ -19,7 +19,7 @@ After=icamera-proxy.service
 
 [Service]
 Type=simple
-ExecStart=/home/root/start.sh
+ExecStart=%ROOT_HOME%/start.sh
 RemainAfterExit=yes
 
 [Install]

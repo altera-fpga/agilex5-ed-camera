@@ -17,7 +17,7 @@ lvglLogoHelper::lvglLogoHelper(const std::weak_ptr<ILogoControl>& logoControl, I
     SwUtils::Thread("lvglLogoHelper"),
     _wspLogoControl(logoControl),
     _uiConnection(uiConnection),
-    _drmHelper(IDrmHelper::GetIDrmHelper()),
+    _overlayHelper(IOverlayHelper::GetIOverlayHelper()),
     _logo_width(0),
     _logo_height(0),
     _logo_alpha(0.75),
@@ -27,14 +27,13 @@ lvglLogoHelper::lvglLogoHelper(const std::weak_ptr<ILogoControl>& logoControl, I
     _initialized(false),
     _dirty(true)
 {
-    StartThread();
 }
 
 lvglLogoHelper::~lvglLogoHelper()
 {
     StopThread();
 
-    std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
+    std::lock_guard<std::recursive_mutex> lock(IOverlayHelper::GetLVGLMutex());
     
     if(_logo_img)
     {
@@ -48,14 +47,52 @@ lvglLogoHelper::~lvglLogoHelper()
     }
 }
 
+void lvglLogoHelper::Start()
+{
+    StartThread();
+}
 
 void lvglLogoHelper::Draw()
 {
+    bool ip_address_enabled_now = true;
+
+    // Hide IP address if UI has connected
+    if(_uiConnection && _uiConnection->UiConnected())
+        ip_address_enabled_now = false;
+
+    bool ip_address_enabled_changed = false;
+    
+    // If no previous value known or it has actually changed
+    if(!_ip_address_enabled.has_value() || (*_ip_address_enabled != ip_address_enabled_now))
+    {
+        ip_address_enabled_changed = true;
+        if(_logo_img)
+        {
+            lv_obj_del(_logo_img);
+            _logo_img = nullptr;
+        }
+        if(_ip_sting)
+        {
+            lv_obj_del(_ip_sting);
+            _ip_sting = nullptr;
+        }
+        _initialized = false;
+    }
+
     if(!_initialized)
     {
         _initialized = true;
-        _logo_width = 300;
-        _logo_height = 180;
+        if(ip_address_enabled_now)
+        {
+            _logo_width = 300;
+            _logo_height = 180;
+        }
+        else
+        {
+            _logo_width = 144;
+            _logo_height = 144;
+        }
+        _ip_address_enabled = ip_address_enabled_now;
 
         auto spLogoControl = _wspLogoControl.lock();
         if(spLogoControl)
@@ -64,7 +101,7 @@ void lvglLogoHelper::Draw()
         }
         if(!_logo_img)
         {
-            _logo_img = lv_image_create(_drmHelper->GetOverlayScreenActive());
+            _logo_img = lv_image_create(_overlayHelper->GetOverlayScreenActive());
 
             if(_logo_img)
             {
@@ -73,10 +110,10 @@ void lvglLogoHelper::Draw()
                 lv_obj_set_style_opa(_logo_img, (lv_opa_t)(255*_logo_alpha), 0);
             }
         }
-        if(!_ip_sting && (_uiConnection != nullptr))
+        if(!_ip_sting && ip_address_enabled_now)
         {
             std::string ip_url = _uiConnection->GetUiUrl(false);
-            _ip_sting = lv_label_create(_drmHelper->GetOverlayScreenActive());
+            _ip_sting = lv_label_create(_overlayHelper->GetOverlayScreenActive());
 
             if(_ip_sting)
             {
@@ -102,43 +139,13 @@ void lvglLogoHelper::Draw()
         _dirty = true;
     }
 
-    bool ip_address_enabled_now = true;
-
-    // Hide IP address if UI has connected
-    if(_uiConnection && _uiConnection->UiConnected())
-        ip_address_enabled_now = false;
-
-    bool ip_address_enabled_changed = false;
-    
-    // If no previous value known or it has actually changed
-    if(!_ip_address_enabled.has_value() || (*_ip_address_enabled != ip_address_enabled_now))
-        ip_address_enabled_changed = true;
-
-    if(ip_address_enabled_changed)
-    {
-        _ip_address_enabled = ip_address_enabled_now;
-
-        if(_ip_sting)
-        {
-            if(*_ip_address_enabled)
-            {
-                lv_obj_clear_flag(_ip_sting, LV_OBJ_FLAG_HIDDEN);
-            }
-            else
-            {
-                lv_obj_add_flag(_ip_sting, LV_OBJ_FLAG_HIDDEN);
-            }
-        }
-        _dirty = true;
-    }
-
     if(_dirty)
     {
         if(_logo_img)
         {
             lv_obj_set_style_opa(_logo_img, (lv_opa_t)(255*_logo_alpha), 0);
         }
-        _drmHelper->FlushOverlay();
+        _overlayHelper->FlushOverlay();
         _dirty = false;
     }
 }
@@ -146,14 +153,14 @@ void lvglLogoHelper::Draw()
 
 void lvglLogoHelper::UpdateLogoLayer()
 {
-    std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
+    std::lock_guard<std::recursive_mutex> lock(IOverlayHelper::GetLVGLMutex());
     Draw();
 }
 
 
 void lvglLogoHelper::SetLogoOpacity(const float v)
 {
-    std::lock_guard<std::recursive_mutex> lock(IDrmHelper::GetLVGLMutex());
+    std::lock_guard<std::recursive_mutex> lock(IOverlayHelper::GetLVGLMutex());
     _logo_alpha = v;
     _dirty = true;
 }

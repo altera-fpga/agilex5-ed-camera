@@ -28,11 +28,27 @@ License.
 #include <condition_variable>
 #include <chrono>
 
-#include "IDrmHelper.h"
+#include "IOverlayHelper.h"
 #include "IAiResultsRenderer.h"
 
 namespace SwApi 
 {
+    class AIResultsWebsocketHandler : public IWebSocketCallback
+    {
+    public:
+        AIResultsWebsocketHandler(IWebSocketService* pIWebSocket);
+        virtual ~AIResultsWebsocketHandler();
+
+        void ReceiveWebSocketMessage(IWebSocketMessage* pMessage) override;
+        void Ready() override;
+
+        void SendResults(std::string& resultsJsonStr);
+
+    protected:
+        void Shutdown() override;
+        std::recursive_mutex _destructorLock;
+        bool _inDestructor;
+    };
 
     class AiResultsRenderer : public IAiResultsRenderer
     {
@@ -49,14 +65,19 @@ namespace SwApi
             virtual void SetKeypointThreshold(float keypointThreshold) override;
             virtual void RenderResults(bool enable) override;
 
+            virtual bool ConnectWebSocketService(IWebSocketService* web_socket) override;
+
             void ResultsHandler(ResultsType resultsType, std::shared_ptr<YoloClassificationResult> results);
 
         private:
             float _keypointThreshold;
             bool _renderResults;
 
-            std::shared_ptr<IDrmHelper> _spDrmHelper;
+            std::shared_ptr<IOverlayHelper> _spOverlayHelper;
             std::shared_ptr<SwApi::ICoreDLAIntf> _spCoreDLAProcessor;
+
+            std::recursive_mutex _cs_wshandler;
+            std::vector<std::weak_ptr<AIResultsWebsocketHandler>> _wsHandlers;
     };
 } // namespace SwApi
 

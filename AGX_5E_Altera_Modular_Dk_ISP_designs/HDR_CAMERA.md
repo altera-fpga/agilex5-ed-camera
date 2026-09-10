@@ -68,7 +68,10 @@ The MDT requires the following Linux versions of software tools:
 Follow the next steps to create the Quartus® and Platform Designer Project for
 the 4Kp60 Multi-Sensor HDR Camera Solution System Example Design:
 
-* Create your workspace and clone the repository using `--recurse-submodules`:
+* Create your workspace and clone the repository using `--recurse-submodules`.
+  Ensure [GIT LFS](https://git-lfs.com/) is
+  [installed](https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing)
+  prior to cloning this repository:
 
 ```bash
 cd <workspace>
@@ -152,13 +155,13 @@ System Example Design:
   selecting the post processing step option for your chosen MDT flow:
 
 ```bash
-cd ./<project>/scripts 
+cd ./<project>/scripts
 # SOF MDT Flow
 quartus_sh -t build_shell.tcl -update_ocs -full_compile -ff_post_agx5e
 ```
 
 ```bash
-cd ./<project>/scripts 
+cd ./<project>/scripts
 # RBF MDT Flow (not supported with OCP evaluation license)
 quartus_sh -t build_shell.tcl -update_ocs -full_compile -hps_post_agx5e
 ```
@@ -201,8 +204,8 @@ cd ./<project>/AGX_5E_Modular_Devkit_ISP_RD
 quartus agilex5_modkit_vvpisp.qpf
 ```
 
-  * Click on the `Compile Design` option in the `Compilation Flow` window. Once
-    complete, you can view all the reports.
+* Click on the `Compile Design` option in the `Compilation Flow` window. Once
+  complete, you can view all the reports.
 
 * Alternatively, you can use the MakeFile from the command line:
 
@@ -247,6 +250,16 @@ The FPGA programming file is located in the
 `./<project>/AGX_5E_Modular_Devkit_ISP_RD/output_files` directory:
 
   * `fsbl_agilex5_modkit_vvpisp_time_limited.sof`
+
+<br>
+
+An additional MakeFile switch can be used from the command line that will
+perform both the compile and bootloader build steps in one go:
+
+```bash
+cd ./<project>/AGX_5E_Modular_Devkit_ISP_AI_RD
+make gen_build
+```
 
 <br>
 

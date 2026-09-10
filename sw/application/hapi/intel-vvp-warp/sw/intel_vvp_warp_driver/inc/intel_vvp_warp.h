@@ -139,6 +139,7 @@ typedef struct intel_vvp_warp_instance
 	uint32_t mem_model;			/* Linear / scattered */
 
 	uint32_t streams;
+	uint32_t bit_depth;
 	uint32_t block_width;
 	uint32_t block_height;
 

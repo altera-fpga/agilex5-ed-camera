@@ -83,14 +83,7 @@ void YoloPoseProcessor::SetIOUThreshold(float threshold)
 std::shared_ptr<YoloClassificationResult> YoloPoseProcessor::GetClassificationResults(const std::shared_ptr<tCoreDLAOutput>& spCoreDLAOutput)
 {
     _confidenceMap.clear();
-    if(_bypass_output_layout_transform)
-    {
-        ParseYOLOOutputCvec(spCoreDLAOutput->output_tensors);
-    }
-    else
-    {
-        ParseYOLOOutput(spCoreDLAOutput->output_tensors);
-    }
+    ParseYOLOOutput(spCoreDLAOutput->output_tensors);
     // Filtering overlapping boxes
     auto itConfidenceMap = _confidenceMap.begin();
     while (itConfidenceMap != _confidenceMap.end())
@@ -143,193 +136,206 @@ float YoloPoseProcessor::IntersectionOverUnion(const YoloDetectionObject &box_1,
 
 void YoloPoseProcessor::ParseYOLOOutput(const std::vector<ov::Tensor>& output_tensors)
 {
-    float scale = (float)_params._original_im_w / (float)_params._input_tensor_w;
-    float yolo_h = _params._input_tensor_h * scale;
-    float offset_y = (yolo_h - _params._original_im_h)/(2*scale);
-
     int prediction = 0;
-    for(size_t ot = 0; ot < 3U; ot++)
+    
+    for(size_t ot = 0; ot < output_tensors.size()/3; ++ot)
     {
-        const float *output_box_blob =  output_tensors[ot].data<const float>();
-        const int out_box_blob_predictions = static_cast<int>(output_tensors[ot].get_shape()[2])*static_cast<int>(output_tensors[ot].get_shape()[3]);
-
-        const float *output_box_blob_i = output_box_blob;
-        const float *output_box_blob_prob = output_box_blob_i + 64*out_box_blob_predictions;
-        for (int i = 0; i < out_box_blob_predictions; ++i, ++prediction) {       
-            float prob = *output_box_blob_prob;
-            // sigmoid
-            prob = 1.0f/(1.0f+expf(-prob));
-            if (prob > _detection_threshold && !std::isnan(prob) && (prob < 0.999f))
-            {
-                float coord[4];
-                const float *output_box_blob_a = output_box_blob_i;
-                // for each coordinate
-                for(int a = 0; a < 4; a++)
-                {
-                    float softmax_sum = 0.0f;
-                    float coord_sum = 0.0f;
-                    const float *output_box_blob_b = output_box_blob_a;
-                    float exp_values[16];
-
-                    for(int b = 0; b < 16; b++)
-                    {
-                        float e = expf(*output_box_blob_b);
-                        softmax_sum += e;
-                        exp_values[b] = e;
-                        output_box_blob_b += out_box_blob_predictions;
-                    }
-                    
-                    for(int b = 0; b < 16; b++)
-                    {
-                        // Softmax 
-                        float softmax = exp_values[b] / softmax_sum;
-                        // scale and sum
-                        coord_sum += softmax * static_cast<float>(b);
-                    }
-                    coord[a] = coord_sum;
-                    output_box_blob_a = output_box_blob_b;
-                }
-                // anchor adjust
-                float tlx = 0.5f + _params._anchor_x[prediction] - coord[0];
-                float tly = 0.5f + _params._anchor_y[prediction] - coord[1];
-                float brx = 0.5f + _params._anchor_x[prediction] + coord[2];
-                float bry = 0.5f + _params._anchor_y[prediction] + coord[3];
-                float x = _params._anchor_mult[prediction]*((tlx + brx) / 2.0f);
-                float y = _params._anchor_mult[prediction]*((tly + bry) / 2.0f);
-                float width = _params._anchor_mult[prediction]*(brx - tlx);
-                float height = _params._anchor_mult[prediction]*(bry - tly);
-
-                const float *output_keypoints_blob =  output_tensors[ot+3U].data<const float>();
-                
-                // for each keypoint
-                std::vector<struct YoloPoseKeypoint> keypoints;
-                for(int a = 0; a < 17; a++)
-                {
-                    struct YoloPoseKeypoint keypoint;
-                    int index = a * 3 * out_box_blob_predictions + i;
-                    keypoint.keypoint_id = a;
-                    keypoint._x = output_keypoints_blob[index];
-                    keypoint._y = output_keypoints_blob[index + out_box_blob_predictions];
-                    keypoint._v = output_keypoints_blob[index + 2*out_box_blob_predictions];
-                    keypoint._x *= 2;
-                    keypoint._y *= 2;
-                    keypoint._x += _params._anchor_x[prediction];
-                    keypoint._y += _params._anchor_y[prediction];
-                    keypoint._x *= _params._anchor_mult[prediction];
-                    keypoint._y *= _params._anchor_mult[prediction];
-                    // sigmoid
-                    keypoint._v = 1.0f/(1.0f+expf(-keypoint._v));
-
-                    keypoints.emplace_back(keypoint);
-                }
-
-                _objects[prediction].Set(x, y, height, width, 0, prob, &keypoints, static_cast<int>(offset_y), scale, scale);
-                _confidenceMap.emplace(prob, prediction);
-            }
-            output_box_blob_i++;
-            output_box_blob_prob++;
+        const ov::Tensor& output_tensor_boxes = output_tensors.at(ot);
+        const ov::Tensor& output_tensor_predictions = output_tensors.at(ot + output_tensors.size()/3);
+        const ov::Tensor& output_tensor_keypoints = output_tensors.at(ot + 2 * output_tensors.size()/3);
+        if(_bypass_output_layout_transform)
+        {
+            ParseYOLOOutputTensorCvec(output_tensor_boxes,output_tensor_predictions, output_tensor_keypoints, prediction);
         }
+        else
+        {
+            ParseYOLOOutputTensor(output_tensor_boxes, output_tensor_predictions, output_tensor_keypoints, prediction);
+        }
+        const int out_blob_predictions = static_cast<int>(output_tensor_predictions.get_shape()[2]) * static_cast<int>(output_tensor_predictions.get_shape()[3]);
+        prediction += out_blob_predictions;
     }
 }
 
-void YoloPoseProcessor::ParseYOLOOutputCvec(const std::vector<ov::Tensor>& output_tensors)
+void YoloPoseProcessor::ParseYOLOOutputTensor(const ov::Tensor& output_tensor_boxes, const ov::Tensor& output_tensor_predictions, const ov::Tensor& output_tensor_keypoints, int prediction)
 {
     float scale = (float)_params._original_im_w / (float)_params._input_tensor_w;
     float yolo_h = _params._input_tensor_h * scale;
     float offset_y = (yolo_h - _params._original_im_h)/(2*scale);
 
-    int prediction = 0;
-    for(size_t ot = 0; ot < 3U; ot++)
-    {
-        const __fp16 *output_box_blob =  (const __fp16 *)output_tensors[ot].data<ov::float16>();
-        const int out_box_blob_predictions = static_cast<int>(output_tensors[ot].get_shape()[2])*static_cast<int>(output_tensors[ot].get_shape()[3]);
-        const size_t c_stride = 16*out_box_blob_predictions;
+    const int out_blob_predictions = static_cast<int>(output_tensor_predictions.get_shape()[2]) * static_cast<int>(output_tensor_predictions.get_shape()[3]);
+    const size_t c_stride = 16 * out_blob_predictions;
 
-        const __fp16 *output_box_blob_i = output_box_blob;
-        const __fp16 *output_box_blob_prob = output_box_blob_i + 4*c_stride;
-        for (int i = 0; i < out_box_blob_predictions; ++i, ++prediction) {       
-            float prob = *output_box_blob_prob;
-            // sigmoid
-            prob = 1.0f/(1.0f+expf(-prob));
-            if(ot != 2U)
+    const float* p_boxes =  (const float *)output_tensor_boxes.data<float>();
+    const float* p_prediction =  (const float *)output_tensor_predictions.data<float>();
+    const float *p_keypoints =  (const float *)output_tensor_keypoints.data<float>();
+
+    const float *output_box_blob_i = p_boxes;
+    const float *output_box_blob_prob = p_prediction;
+    for (int i = 0; i < out_blob_predictions; ++i, ++prediction) {       
+        float prob = *output_box_blob_prob;
+        // sigmoid
+        prob = 1.0f/(1.0f+expf(-prob));
+        if (prob > _detection_threshold && !std::isnan(prob) && (prob < 0.999f))
+        {
+            float coord[4];
+            const float *output_box_blob_a = output_box_blob_i;
+            // for each coordinate
+            for(int a = 0; a < 4; a++)
             {
-                prob = 0.0;
-            }
-            if (prob > _detection_threshold && !std::isnan(prob) && (prob < 0.999f))
-            {
-                float coord[4];
-                const __fp16 *output_box_blob_a = output_box_blob_i;
-                // for each coordinate
-                for(int a = 0; a < 4; a++)
+                float softmax_sum = 0.0f;
+                float coord_sum = 0.0f;
+                const float *output_box_blob_b = output_box_blob_a;
+                float exp_values[16];
+
+                for(int b = 0; b < 16; b++)
                 {
-                    float softmax_sum = 0.0f;
-                    float coord_sum = 0.0f;
-                    const __fp16 *output_box_blob_b = output_box_blob_a;
-                    for(int b = 0; b < 16; b++)
-                    {
-                        float e = expf(*output_box_blob_b);
-                        softmax_sum += e;
-                        output_box_blob_b ++;
-                    }
-                    output_box_blob_b = output_box_blob_a;
-                    for(int b = 0; b < 16; b++)
-                    {
-                        float e = expf(*output_box_blob_b);
-                        // Softmax 
-                        float softmax = e/softmax_sum;
-                        // scale and sum
-                        coord_sum += softmax * static_cast<float>(b);
-                        output_box_blob_b ++;
-                    }
-                    coord[a] = coord_sum;
-                    output_box_blob_a += c_stride;
+                    float e = expf(*output_box_blob_b);
+                    softmax_sum += e;
+                    exp_values[b] = e;
+                    output_box_blob_b += out_blob_predictions;
                 }
-                // anchor adjust
-                float tlx = 0.5f + _params._anchor_x[prediction] - coord[0];
-                float tly = 0.5f + _params._anchor_y[prediction] - coord[1];
-                float brx = 0.5f + _params._anchor_x[prediction] + coord[2];
-                float bry = 0.5f + _params._anchor_y[prediction] + coord[3];
-                float x = _params._anchor_mult[prediction]*((tlx + brx) / 2.0f);
-                float y = _params._anchor_mult[prediction]*((tly + bry) / 2.0f);
-                float width = _params._anchor_mult[prediction]*(brx - tlx);
-                float height = _params._anchor_mult[prediction]*(bry - tly);
-
-                const __fp16 *output_keypoints_blob =  (const __fp16 *)output_tensors[ot+3U].data<const ov::float16>();
                 
-                // for each keypoint
-                std::vector<struct YoloPoseKeypoint> keypoints;
-                for(int a = 0; a < 17; a++)
+                for(int b = 0; b < 16; b++)
                 {
-                    struct YoloPoseKeypoint keypoint;
-                    auto cvec_index = [](int a, int i, int o, int c_stride){ 
-                        int index = a * 3 + o;
-                        int index_c = index / 16;
-                        int index_cvec = index % 16;
-                        index = index_c * c_stride + i*16 + index_cvec;
-                        return index;
-                    };
-                    keypoint.keypoint_id = a;
-                    keypoint._x = output_keypoints_blob[cvec_index(a, i, 0, c_stride)];
-                    keypoint._y = output_keypoints_blob[cvec_index(a, i, 1, c_stride)];
-                    keypoint._v = output_keypoints_blob[cvec_index(a, i, 2, c_stride)];
-                    keypoint._x *= 2;
-                    keypoint._y *= 2;
-                    keypoint._x += _params._anchor_x[prediction];
-                    keypoint._y += _params._anchor_y[prediction];
-                    keypoint._x *= _params._anchor_mult[prediction];
-                    keypoint._y *= _params._anchor_mult[prediction];
-                    // sigmoid
-                    keypoint._v = 1.0f/(1.0f+expf(-keypoint._v));
-
-                    keypoints.emplace_back(keypoint);
+                    // Softmax 
+                    float softmax = exp_values[b] / softmax_sum;
+                    // scale and sum
+                    coord_sum += softmax * static_cast<float>(b);
                 }
-
-                _objects[prediction].Set(x, y, height, width, 0, prob, &keypoints, static_cast<int>(offset_y), scale, scale);
-                _confidenceMap.emplace(prob, prediction);
+                coord[a] = coord_sum;
+                output_box_blob_a = output_box_blob_b;
             }
-            output_box_blob_i+=16;
-            output_box_blob_prob+=16;
+            // anchor adjust
+            float tlx = 0.5f + _params._anchor_x[prediction] - coord[0];
+            float tly = 0.5f + _params._anchor_y[prediction] - coord[1];
+            float brx = 0.5f + _params._anchor_x[prediction] + coord[2];
+            float bry = 0.5f + _params._anchor_y[prediction] + coord[3];
+            float x = _params._anchor_mult[prediction]*((tlx + brx) / 2.0f);
+            float y = _params._anchor_mult[prediction]*((tly + bry) / 2.0f);
+            float width = _params._anchor_mult[prediction]*(brx - tlx);
+            float height = _params._anchor_mult[prediction]*(bry - tly);
+            
+            // for each keypoint
+            std::vector<struct YoloPoseKeypoint> keypoints;
+            for(int a = 0; a < 17; a++)
+            {
+                struct YoloPoseKeypoint keypoint;
+                int index = a * 3 * out_blob_predictions + i;
+                keypoint.keypoint_id = a;
+                keypoint._x = p_keypoints[index];
+                keypoint._y = p_keypoints[index + out_blob_predictions];
+                keypoint._v = p_keypoints[index + 2*out_blob_predictions];
+                keypoint._x *= 2;
+                keypoint._y *= 2;
+                keypoint._x += _params._anchor_x[prediction];
+                keypoint._y += _params._anchor_y[prediction];
+                keypoint._x *= _params._anchor_mult[prediction];
+                keypoint._y *= _params._anchor_mult[prediction];
+                // sigmoid
+                keypoint._v = 1.0f/(1.0f+expf(-keypoint._v));
+
+                keypoints.emplace_back(keypoint);
+            }
+
+            _objects[prediction].Set(x, y, height, width, 0, prob, &keypoints, static_cast<int>(offset_y), scale, scale);
+            _confidenceMap.emplace(prob, prediction);
         }
+        output_box_blob_i++;
+        output_box_blob_prob++;
+    }
+}
+
+void YoloPoseProcessor::ParseYOLOOutputTensorCvec(const ov::Tensor& output_tensor_boxes, const ov::Tensor& output_tensor_predictions, const ov::Tensor& output_tensor_keypoints, int prediction)
+{
+    float scale = (float)_params._original_im_w / (float)_params._input_tensor_w;
+    float yolo_h = _params._input_tensor_h * scale;
+    float offset_y = (yolo_h - _params._original_im_h)/(2*scale);
+
+    const int out_blob_predictions = static_cast<int>(output_tensor_predictions.get_shape()[2]) * static_cast<int>(output_tensor_predictions.get_shape()[3]);
+    const size_t c_stride = 16 * out_blob_predictions;
+
+    const __fp16* p_boxes =  (const __fp16 *)output_tensor_boxes.data<ov::float16>();
+    const __fp16* p_prediction =  (const __fp16 *)output_tensor_predictions.data<ov::float16>();
+    const __fp16 *p_keypoints =  (const __fp16 *)output_tensor_keypoints.data<ov::float16>();
+
+    const __fp16 *output_box_blob_i = p_boxes;
+    const __fp16 *output_box_blob_prob = p_prediction;
+    for (int i = 0; i < out_blob_predictions; ++i, ++prediction) {       
+        float prob = static_cast<float>(*output_box_blob_prob);
+        // sigmoid
+        prob = 1.0f/(1.0f+expf(-prob));
+        if (prob > _detection_threshold && !std::isnan(prob) && (prob < 0.999f))
+        {
+            float coord[4];
+            const __fp16 *output_box_blob_a = output_box_blob_i;
+            // for each coordinate
+            for(int a = 0; a < 4; a++)
+            {
+                float softmax_sum = 0.0f;
+                float coord_sum = 0.0f;
+                const __fp16 *output_box_blob_b = output_box_blob_a;
+                for(int b = 0; b < 16; b++)
+                {
+                    float e = expf(*output_box_blob_b);
+                    softmax_sum += e;
+                    output_box_blob_b ++;
+                }
+                output_box_blob_b = output_box_blob_a;
+                for(int b = 0; b < 16; b++)
+                {
+                    float e = expf(*output_box_blob_b);
+                    // Softmax 
+                    float softmax = e/softmax_sum;
+                    // scale and sum
+                    coord_sum += softmax * static_cast<float>(b);
+                    output_box_blob_b ++;
+                }
+                coord[a] = coord_sum;
+                output_box_blob_a += c_stride;
+            }
+            // anchor adjust
+            float tlx = 0.5f + _params._anchor_x[prediction] - coord[0];
+            float tly = 0.5f + _params._anchor_y[prediction] - coord[1];
+            float brx = 0.5f + _params._anchor_x[prediction] + coord[2];
+            float bry = 0.5f + _params._anchor_y[prediction] + coord[3];
+            float x = _params._anchor_mult[prediction]*((tlx + brx) / 2.0f);
+            float y = _params._anchor_mult[prediction]*((tly + bry) / 2.0f);
+            float width = _params._anchor_mult[prediction]*(brx - tlx);
+            float height = _params._anchor_mult[prediction]*(bry - tly);
+           
+            // for each keypoint
+            std::vector<struct YoloPoseKeypoint> keypoints;
+            for(int a = 0; a < 17; a++)
+            {
+                struct YoloPoseKeypoint keypoint;
+                auto cvec_index = [](int a, int i, int o, int c_stride){ 
+                    int index = a * 3 + o;
+                    int index_c = index / 16;
+                    int index_cvec = index % 16;
+                    index = index_c * c_stride + i*16 + index_cvec;
+                    return index;
+                };
+                keypoint.keypoint_id = a;
+                keypoint._x = p_keypoints[cvec_index(a, i, 0, c_stride)];
+                keypoint._y = p_keypoints[cvec_index(a, i, 1, c_stride)];
+                keypoint._v = p_keypoints[cvec_index(a, i, 2, c_stride)];
+                keypoint._x *= 2;
+                keypoint._y *= 2;
+                keypoint._x += _params._anchor_x[prediction];
+                keypoint._y += _params._anchor_y[prediction];
+                keypoint._x *= _params._anchor_mult[prediction];
+                keypoint._y *= _params._anchor_mult[prediction];
+                // sigmoid
+                keypoint._v = 1.0f/(1.0f+expf(-keypoint._v));
+
+                keypoints.emplace_back(keypoint);
+            }
+
+            _objects[prediction].Set(x, y, height, width, 0, prob, &keypoints, static_cast<int>(offset_y), scale, scale);
+            _confidenceMap.emplace(prob, prediction);
+        }
+        output_box_blob_i+=16;
+        output_box_blob_prob+=16;
     }
 }
 

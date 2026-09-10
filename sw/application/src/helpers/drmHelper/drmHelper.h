@@ -17,42 +17,38 @@ License.
 #include <mutex>
 #include "SwUtilsThread.h"
 #include <lvgl.h>
-#include "IDrmHelper.h" 
+#include "IOverlayHelper.h" 
 
-class drmHelper : public IDrmHelper, public SwUtils::Thread
+class DrmHelper : public IOverlayHelper, public SwUtils::Thread
 {
 public:
-    drmHelper();
-    ~drmHelper();
-    drmHelper(const drmHelper& other) = delete;
-    drmHelper& operator=(const drmHelper& other) = delete;
-    drmHelper(drmHelper&& other) = delete;
-    drmHelper& operator=(drmHelper&& other) = delete;
+    static void Create();
+
+    DrmHelper();
+    ~DrmHelper();
+    DrmHelper(const DrmHelper& other) = delete;
+    DrmHelper& operator=(const DrmHelper& other) = delete;
+    DrmHelper(DrmHelper&& other) = delete;
+    DrmHelper& operator=(DrmHelper&& other) = delete;
     virtual bool Open(const char *const card, uint32_t width, uint32_t height, lv_color_format_t format) final override;
 
-    virtual uint32_t GetPrimaryHeight() final override { return _primary_height;}
-    virtual uint32_t GetPrimaryWidth() final override { return _primary_width;}
-    virtual uint32_t GetPrimaryStride() final override { return _primary_stride;}
-    virtual uint8_t* GetPrimaryBuffer() final override { return _modeset != nullptr ? _modeset->primary_bufs[_modeset->write_fb].map : nullptr;}
-    virtual lv_display_t * GetPrimaryDisplay() final override { return _primary_display;}
-    virtual lv_obj_t * GetPrimaryScreenActive() final override { return lv_display_get_screen_active(_primary_display);}
-    virtual bool FlushPrimary() final override;
-
-    virtual void SetOverlayResolution(uint32_t width, uint32_t height);
-    virtual uint32_t GetOverlayHeight() final override { return _overlay_height;}
-    virtual uint32_t GetOverlayWidth() final override { return _overlay_width;}
-    virtual uint32_t GetOverlayStride() final override { return _overlay_stride;}
-    virtual uint8_t* GetOverlayBuffer() final override { return _modeset != nullptr ? _modeset->overlay_buf.map : nullptr;}
-    virtual lv_display_t * GetOverlayDisplay() final override { return _overlay_display;}
-    virtual lv_obj_t * GetOverlayScreenActive() final override { return lv_display_get_screen_active(_overlay_display);}
-    virtual bool FlushOverlay() final override;
-
+    virtual bool SetPrimaryResolutionLow(uint32_t width, uint32_t height, lv_color_format_t format) final override;
+    virtual uint32_t GetPrimaryStrideLow() final override { return _primary_stride;}
+    virtual uint8_t* GetPrimaryBuffer(int32_t index) final override;
+    virtual bool FlushPrimaryLow() final override;
+    
+    virtual bool SetOverlayResolutionLow(uint32_t width, uint32_t height) final override;
+    virtual uint32_t GetOverlayStrideLow() final override { return _overlay_stride;}
+    virtual uint8_t* GetOverlayBuffer() final override;
+    virtual bool FlushOverlayLow() final override;
+    
     virtual void RunThread() override;
 private:
     static constexpr uint32_t NUM_BUFFERS = 2;
     
     class drm_object {
     public:
+        bool valid;
         drmModeObjectProperties *props;
         drmModePropertyRes **props_info;
         uint32_t id;
@@ -76,6 +72,7 @@ private:
         drm_object crtc;
         drm_object primary_plane;
         drm_object overlay_plane;
+        bool overlay_dirty;
 
         drmModeModeInfo mode;
         uint32_t mode_blob_id;
@@ -125,23 +122,11 @@ private:
                     unsigned int sec, unsigned int usec,
                     unsigned int crtc_id, void *data);
 
-    static void flush_cb_static(lv_display_t * display, const lv_area_t * area, uint8_t * px_map);
-
-
-protected:
-    void flush_cb(lv_display_t * display, const lv_area_t * area, uint8_t * px_map);
-
 private:
     int _fd;
-    uint32_t _primary_height;
-    uint32_t _primary_width;
-    lv_color_format_t _primary_lvgl_format;
     uint32_t _primary_drm_format;
     uint32_t _primary_stride;
     uint32_t _primary_fb_size;
-    uint32_t _overlay_height;
-    uint32_t _overlay_width;
-    lv_color_format_t _overlay_lvgl_format;
     uint32_t _overlay_drm_format;
     uint32_t _overlay_stride;
     uint32_t _overlay_fb_size;

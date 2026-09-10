@@ -5,6 +5,7 @@
 
 #include <linux/types.h>
 #include <linux/iosys-map.h>
+#include <linux/spinlock.h>
 #include "intel_vvp_vfr.h"
 #include "intel_addr_span_expander.h"
 
@@ -19,13 +20,22 @@ struct vfr_drm_plane {
     unsigned int vfr_irq_index;
     unsigned int vfr_mem_index;
     unsigned int ase_mem_index;
-    phys_addr_t fb_offset;
-    struct iosys_map base;
+    phys_addr_t fb_offset[2];
+    unsigned int num_frame_buffers;
+    /* protects write_fb_index, read_fb_index and pending_flip */
+    spinlock_t flip_lock;
+    unsigned int write_fb_index;
+    unsigned int read_fb_index;
+    bool pending_flip;
+    struct iosys_map base[2];
     size_t nformats;
     uint32_t formats[8];
     int hw_irq;
     intel_addr_span_expander_instance ase_instance;
     intel_vvp_vfr_instance vfr_instance;
+#ifdef USE_DMA
+    loff_t dma_emif_offset[2];
+#endif
 };
 
 struct vfr_drm_plane *vfr_drm_plane_of_plane(struct drm_plane *plane);

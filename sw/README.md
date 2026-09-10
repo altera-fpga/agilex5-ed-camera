@@ -82,7 +82,8 @@ For detailed information on system requirements and dependencies please refer to
 
 ## Supported Machines
 
- - `agilex5_mk_a5e065bb32aes1` alias `agilex5_modkit`
+ - `agilex5_mk_a5e065bb32aes1`
+ - `agilex5_mk_a5e065bb32aea` alias `agilex5_modkit`
 
 ## Supported Image Types
 
@@ -97,7 +98,7 @@ KAS_MACHINE=${MACHINE} kas build kas/${DESIGN}.yml
 For example:
 
 ```bash
-KAS_MACHINE=agilex5_mk_a5e065bb32aes1 kas build kas/agilex_camera_ff.yml
+KAS_MACHINE=agilex5_mk_a5e065bb32aea kas build kas/agilex_camera_ff.yml
 ```
 
 See above for a list of supported `MACHINE` and `DESIGN` identifiers.
@@ -132,14 +133,14 @@ KAS_MACHINE=${MACHINE} kas build kas/${DESIGN}.yml -c populate_sdk
 For example:
 
 ```bash
-KAS_MACHINE=agilex5_mk_a5e065bb32aes1 kas build kas/agilex_camera.yml -c populate_sdk
+KAS_MACHINE=agilex5_mk_a5e065bb32aea kas build kas/agilex_camera.yml -c populate_sdk
 ```
 
 If you are using a custom build directory (e.g. `/yb`), set `KAS_BUILD_DIR` first:
 
 ```bash
 export KAS_BUILD_DIR=/yb
-KAS_MACHINE=agilex5_mk_a5e065bb32aes1 kas build kas/agilex_camera.yml -c populate_sdk
+KAS_MACHINE=agilex5_mk_a5e065bb32aea kas build kas/agilex_camera.yml -c populate_sdk
 ```
 
 Once the build has finished, the SDK installer script will be available in `build/tmp/deploy/sdk/`.

@@ -196,6 +196,7 @@ void IspMixerHelper::SetLogoResolution(const uint32_t width, const uint32_t heig
     _logoWidth = width;
     _logoHeight = height;
     _spMixer->SetLayerResolution(LOGO_LAYER, width, height);
+    UpdateLogoLayer();
 }
 
 

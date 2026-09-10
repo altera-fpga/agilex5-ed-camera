@@ -20,7 +20,7 @@ python do_dts_update () {
     import shutil
 
     workdir = d.getVar('DT_FILES_PATH')
-    source = d.getVar('WORKDIR')
+    source = d.getVar('UNPACKDIR')
     dts_name = d.getVar('DTS_NAME')
     dts_path = os.path.join(workdir, dts_name + ".dts")
     dtsi_files = [f for f in os.listdir(source) if os.path.isfile(os.path.join(source, f)) and f.endswith(".dtsi")]

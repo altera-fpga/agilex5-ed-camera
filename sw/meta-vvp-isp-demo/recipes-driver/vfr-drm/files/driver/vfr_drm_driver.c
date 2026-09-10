@@ -27,7 +27,7 @@
 #include <drm/drm_framebuffer.h>
 #include <drm/drm_gem_atomic_helper.h>
 #include <drm/drm_gem_framebuffer_helper.h>
-#include <drm/drm_gem_shmem_helper.h>
+#include <drm/drm_gem_dma_helper.h>
 #include <drm/drm_managed.h>
 #include <drm/drm_modeset_helper_vtables.h>
 #include <drm/drm_probe_helper.h>
@@ -35,6 +35,9 @@
 #include <drm/drm_panic.h>
 
 #include "vfr_drm_driver.h"
+#ifdef USE_DMA
+#include "vfr_drm_dma.h"
+#endif 
 #include "vfr_drm_plane.h"
 #include "vfr_drm_framebuffer.h"
 #include "intel_vvp_vfr.h"
@@ -134,12 +137,10 @@ static enum hrtimer_restart vfr_drm_vblank_simulate(struct hrtimer *timer)
     if (ret_overrun != 1)
         drm_warn(dev, "%s: vblank timer overrun\n", __func__);
 
-    spin_lock( &(sdev->lock) );
     ret = drm_crtc_handle_vblank(crtc);
     if (!ret)
         drm_err(dev, "vfr_drm failure on handling vblank");
 
-    spin_unlock( &( sdev->lock ) );
 
     return HRTIMER_RESTART;
 }
@@ -183,37 +184,6 @@ static void vfr_drm_disable_vblank(struct drm_crtc *crtc)
     }
 }
 
-#if 0
-static bool vfr_drm_get_vblank_timestamp_from_timer(struct drm_crtc *crtc,
-    int *max_error,
-    ktime_t *vblank_time,
-    bool in_vblank_irq)
-{
-    struct vfr_drm_device *sdev = container_of(crtc, struct vfr_drm_device, crtc);
-    struct drm_vblank_crtc *vblank = drm_crtc_vblank_crtc(crtc);
-
-    if (!READ_ONCE(vblank->enabled)) {
-        *vblank_time = ktime_get();
-        return true;
-    }
-
-    *vblank_time = READ_ONCE(sdev->vblank_hrtimer.node.expires);
-
-    if (WARN_ON(*vblank_time == vblank->time))
-        return true;
-
-    /*
-     * To prevent races we roll the hrtimer forward before we do any
-     * interrupt processing - this is how real hw works (the interrupt is
-     * only generated after all the vblank registers are updated) and what
-     * the vblank core expects. Therefore we need to always correct the
-     * timestampe by one frame.
-     */
-    *vblank_time -= sdev->vblank_period_ns;
-
-    return true;
-}
-#endif
 #endif
 
 static void vfr_drm_atomic_enable(struct drm_crtc *crtc, struct drm_atomic_state *state)
@@ -226,36 +196,6 @@ static void vfr_drm_atomic_disable(struct drm_crtc *crtc, struct drm_atomic_stat
     drm_crtc_vblank_off(crtc);
 }
 
-
-static void vfr_drm_atomic_begin(struct drm_crtc *crtc,
-                   struct drm_atomic_state *state)
-{
-    struct vfr_drm_device *sdev = container_of(crtc, struct vfr_drm_device, crtc);
-
-    /* This lock is held across the atomic commit to block vblank timer */
-    spin_lock_irq(&sdev->lock);
-}
-
-static void vfr_drm_atomic_flush(struct drm_crtc *crtc,
-                   struct drm_atomic_state *state)
-{
-    struct vfr_drm_device *sdev = container_of(crtc, struct vfr_drm_device, crtc);
-
-    if (crtc->state->event) {
-        spin_lock(&crtc->dev->event_lock);
-
-        if (drm_crtc_vblank_get(crtc) != 0)
-            drm_crtc_send_vblank_event(crtc, crtc->state->event);
-        else
-            drm_crtc_arm_vblank_event(crtc, crtc->state->event);
-
-        spin_unlock(&crtc->dev->event_lock);
-
-        crtc->state->event = NULL;
-    }
-
-    spin_unlock_irq(&sdev->lock);
-}
 
 static enum drm_mode_status vfr_drm_crtc_helper_mode_valid(struct drm_crtc *crtc,
                                  const struct drm_display_mode *mode)
@@ -277,13 +217,43 @@ static enum drm_mode_status vfr_drm_crtc_helper_mode_valid(struct drm_crtc *crtc
     return status;
 }
 
+static void vfr_drm_plane_helper_atomic_flush(struct drm_crtc *crtc,
+    struct drm_atomic_state *state)
+{
+    struct drm_pending_vblank_event *event;
+    struct vfr_drm_device *sdev = vfr_drm_device_of_dev(crtc->dev);
+    struct drm_device *dev = &sdev->dev;
+
+    event = crtc->state->event;
+    crtc->state->event = NULL;
+
+    if (!event)
+    {
+        drm_dbg(dev, "No VBLANK event\n");
+        return;
+    }
+
+    spin_lock_irq(&crtc->dev->event_lock);
+// Don't defer vblank event as we only need DMA to complete before we accept another commit
+//    if (drm_crtc_vblank_get(crtc) == 0)
+//    {
+//        drm_dbg(dev, "Arming VBLANK\n");
+//        drm_crtc_arm_vblank_event(crtc, event);
+//    }
+//    else
+//    {
+        drm_dbg(dev, "Sending VBLANK\n");
+        drm_crtc_send_vblank_event(crtc, event);
+//    }
+    spin_unlock_irq(&crtc->dev->event_lock);
+}
+
 static const struct drm_crtc_helper_funcs vfr_drm_crtc_helper_funcs = {
     .mode_valid = vfr_drm_crtc_helper_mode_valid,
     .atomic_check = drm_crtc_helper_atomic_check,
-    .atomic_begin = vfr_drm_atomic_begin,
-    .atomic_flush = vfr_drm_atomic_flush,
     .atomic_enable = vfr_drm_atomic_enable,
     .atomic_disable = vfr_drm_atomic_disable,
+    .atomic_flush = vfr_drm_plane_helper_atomic_flush
 };
 
 static const struct drm_crtc_funcs vfr_drm_crtc_funcs = {
@@ -296,9 +266,6 @@ static const struct drm_crtc_funcs vfr_drm_crtc_funcs = {
 #if 1
     .enable_vblank = vfr_drm_enable_vblank,
     .disable_vblank = vfr_drm_disable_vblank,
-#if 0
-    .get_vblank_timestamp = vfr_drm_get_vblank_timestamp_from_timer,
-#endif
 #endif
 };
 
@@ -337,6 +304,7 @@ static const struct drm_connector_helper_funcs vfr_drm_connector_helper_funcs = 
 };
 
 static const struct drm_connector_funcs vfr_drm_connector_funcs = {
+    .dpms = drm_helper_connector_dpms,
     .reset = drm_atomic_helper_connector_reset,
     .fill_modes = drm_helper_probe_single_connector_modes,
     .destroy = drm_connector_cleanup,
@@ -497,6 +465,16 @@ static struct vfr_drm_device *vfr_drm_device_create(struct drm_driver *drv,
     drm_dbg(dev, "framebuffer format=%p4cc, size=1920x1080\n",
         &sdev->drm_format_info[sdev->primary.format]->format);
 
+#ifdef USE_DMA
+    /*
+     * Init VFR DRM DMA
+     */
+    ret = vfr_drm_dma_init(sdev, pdev);
+    if (ret) {
+        drm_err(dev, "could not init dma channel\n");
+        return ERR_PTR(ret);
+    }
+#endif
 
     /*
      * Memory management
@@ -554,10 +532,27 @@ static struct vfr_drm_device *vfr_drm_device_create(struct drm_driver *drv,
         iosys_map_set_vaddr_iomem(&sdev->vfr_buffer_base, vfr_buffer_base);
     }
 
-    sdev->primary.fb_offset = mem->start;
-    sdev->overlay.fb_offset = mem->start + 0x800000;
-    sdev->primary.base = IOSYS_MAP_INIT_OFFSET(&sdev->vfr_buffer_base, 0);
-    sdev->overlay.base = IOSYS_MAP_INIT_OFFSET(&sdev->vfr_buffer_base, 0x800000);
+    sdev->primary.fb_offset[0] = mem->start;
+    sdev->primary.fb_offset[1] = mem->start + 0x200000;
+    sdev->overlay.fb_offset[0] = mem->start + 0x800000;
+#ifdef USE_DMA
+    sdev->primary.dma_emif_offset[0] = 0x240000000;
+    sdev->primary.dma_emif_offset[1] = 0x240200000;
+    sdev->overlay.dma_emif_offset[0] = 0x240800000;
+#endif
+    sdev->primary.base[0] = IOSYS_MAP_INIT_OFFSET(&sdev->vfr_buffer_base, 0);
+    sdev->primary.base[1] = IOSYS_MAP_INIT_OFFSET(&sdev->vfr_buffer_base, 0x200000);
+    sdev->overlay.base[0] = IOSYS_MAP_INIT_OFFSET(&sdev->vfr_buffer_base, 0x800000);
+
+    sdev->primary.num_frame_buffers = 2;
+    sdev->primary.write_fb_index = 0;
+    sdev->primary.read_fb_index = 1;
+    sdev->primary.pending_flip = false;
+
+    sdev->overlay.num_frame_buffers = 1;
+    sdev->overlay.write_fb_index = 0;
+    sdev->overlay.read_fb_index = 0;
+    sdev->overlay.pending_flip = false;
 
     /*
      * Modesetting
@@ -653,9 +648,22 @@ static struct vfr_drm_device *vfr_drm_device_create(struct drm_driver *drv,
 
 DEFINE_DRM_GEM_FOPS(vfr_drm_fops);
 
+static int vfr_dumb_create(
+        struct drm_file *file,
+        struct drm_device *dev,
+        struct drm_mode_create_dumb *args
+    )
+{
+    int ret;
+    u32 min_pitch = DIV_ROUND_UP(args->width * args->bpp, 8);
+    args->pitch = roundup_pitch(min_pitch);
+    args->size = args->pitch * args->height;
+    ret = drm_gem_dma_dumb_create_internal(file, dev, args);
+    return ret;
+}
+
 static struct drm_driver vfr_drm_driver = {
-    DRM_GEM_SHMEM_DRIVER_OPS,
-    DRM_FBDEV_SHMEM_DRIVER_OPS,
+    DRM_GEM_DMA_DRIVER_OPS_VMAP_WITH_DUMB_CREATE(vfr_dumb_create),
     .name            = DRIVER_NAME,
     .desc            = DRIVER_DESC,
     .major            = DRIVER_MAJOR,
@@ -704,6 +712,9 @@ static void vfr_drm_remove(struct platform_device *pdev)
 
     vfr_drm_plane_remove(&sdev->overlay);
     vfr_drm_plane_remove(&sdev->primary);   
+#ifdef USE_DMA
+    vfr_drm_dma_deinit(sdev);
+#endif
 
     spin_unlock_irqrestore( &( sdev->lock ), flags );
 

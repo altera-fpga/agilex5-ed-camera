@@ -1,0 +1,2 @@
+#LINUX_VERSION = "6.18.20"
+#SRCREV = "d8e46bd82a1e1dbbc641db7f0f57d7ddeb2621b1"

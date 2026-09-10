@@ -5,8 +5,12 @@
 
 #include <linux/fb.h>
 #include <linux/types.h>
-#include <drm/drm_framebuffer.h>
 
+#ifdef USE_DMA
+#include "vfr_drm_dma.h"
+#endif
+
+#include <drm/drm_framebuffer.h>
 
 struct vfr_drm_framebuffer
 {

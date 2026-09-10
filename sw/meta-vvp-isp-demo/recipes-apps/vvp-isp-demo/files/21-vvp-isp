@@ -12,8 +12,8 @@
 
 case "\$1" in
     start)
-        /home/root/ICameraProxyServer/start_icamera_proxy.sh
-        /home/root/start.sh
+        %ROOT_HOME%/ICameraProxyServer/start_icamera_proxy.sh
+        %ROOT_HOME%/start.sh
         ;;
         
     stop)

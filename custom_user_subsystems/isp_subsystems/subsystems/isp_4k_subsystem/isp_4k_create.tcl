@@ -50,6 +50,7 @@ set_shell_parameter EXP_FUSION_EN             {0}
 set_shell_parameter HDR_EN                    {0}
 
 # Warp Controls
+set_shell_parameter WARP_EN                   {1}
 set_shell_parameter WARP_SB                   {0}
 set_shell_parameter WARP_MM                   {1}
 set_shell_parameter WARP_CACHE                {512}
@@ -91,17 +92,18 @@ proc derive_parameters {param_array} {
     upvar $param_array p_array
 
     # check if the emif agent has been configured
+    set v_warp_en             [get_shell_parameter WARP_EN]
     set v_emif_agent          [get_shell_parameter EMIF_AGENT]
 
-    if {[llength ${v_emif_agent}] == 0} {
-        send_message ERROR "isp_4k_create: EMIF Agent not specified"
+    if {${v_warp_en} && [llength ${v_emif_agent}] == 0} {
+        send_message ERROR "isp_4k_create: Warp EMIF Agent not specified"
     }
 
     set v_raw_snapshot_en     [get_shell_parameter RAW_SNAPSHOT_EN]
     set v_emif_agent_2        [get_shell_parameter EMIF_AGENT_2]
 
     if {${v_raw_snapshot_en} && [llength ${v_emif_agent_2}] == 0} {
-        send_message ERROR "isp_4k_create: EMIF Agent 2 not specified"
+        send_message ERROR "isp_4k_create: Snapshot EMIF Agent 2 not specified"
     }
   }
 
@@ -120,7 +122,11 @@ proc post_creation_step {} {
 }
 
 proc post_connection_step {} {
-    modify_avmm_arbitration
+    set v_warp_en               [get_shell_parameter WARP_EN]
+
+    if {${v_warp_en}} {
+        modify_avmm_arbitration
+    }
 }
 
 
@@ -199,6 +205,7 @@ proc create_isp_subsystem {} {
     set v_emif_agent_2_clk_freq   [get_shell_parameter EMIF_AGENT_2_CLK_FREQ]
 
     # Warp
+    set v_warp_en                 [get_shell_parameter WARP_EN]
     if {${v_pip} > 1} {
         set v_num_warp_engines        {2}
     } else {
@@ -280,8 +287,10 @@ proc create_isp_subsystem {} {
     add_instance  isp_vid_rst               altera_reset_bridge
     add_instance  isp_niosv_clk             altera_clock_bridge
     add_instance  isp_niosv_rst             altera_reset_bridge
-    add_instance  isp_emif_clk              altera_clock_bridge
-    add_instance  isp_emif_rst              altera_reset_bridge
+    if {${v_warp_en}} {
+        add_instance  isp_emif_clk              altera_clock_bridge
+        add_instance  isp_emif_rst              altera_reset_bridge
+    }
     if {${v_raw_snapshot_en}} {
         add_instance  isp_emif_2_clk            altera_clock_bridge
         add_instance  isp_emif_2_rst            altera_reset_bridge
@@ -317,10 +326,12 @@ proc create_isp_subsystem {} {
     add_instance  isp_pix_adapt_tmo         intel_vvp_pixel_adapter
     add_instance  isp_usm                   intel_vvp_usm
     add_instance  isp_roi                   altera_vvp_roi
-    add_instance  isp_warp                intel_vvp_warp
-    add_instance  isp_se_warp             altera_address_span_extender
-    if {${v_ai_en}} {
-        add_instance  isp_warp_throttle   altera_vvp_throttle
+    if {${v_warp_en}} {
+        add_instance  isp_warp                intel_vvp_warp
+        add_instance  isp_se_warp             altera_address_span_extender
+        if {${v_ai_en}} {
+            add_instance  isp_warp_throttle   altera_vvp_throttle
+        }
     }
 
 
@@ -379,16 +390,18 @@ proc create_isp_subsystem {} {
     set_instance_parameter_value      isp_niosv_rst      SYNC_RESET              {0}
     set_instance_parameter_value      isp_niosv_rst      USE_RESET_REQUEST       {0}
 
-    # isp_emif_clk
-    set_instance_parameter_value      isp_emif_clk     EXPLICIT_CLOCK_RATE       ${v_emif_agent_clk_freq}
-    set_instance_parameter_value      isp_emif_clk     NUM_CLOCK_OUTPUTS         {1}
+    if {${v_warp_en}} {
+        # isp_emif_clk
+        set_instance_parameter_value      isp_emif_clk     EXPLICIT_CLOCK_RATE       ${v_emif_agent_clk_freq}
+        set_instance_parameter_value      isp_emif_clk     NUM_CLOCK_OUTPUTS         {1}
 
-    # isp_emif_rst
-    set_instance_parameter_value      isp_emif_rst     ACTIVE_LOW_RESET          {1}
-    set_instance_parameter_value      isp_emif_rst     NUM_RESET_OUTPUTS         {1}
-    set_instance_parameter_value      isp_emif_rst     SYNCHRONOUS_EDGES         {deassert}
-    set_instance_parameter_value      isp_emif_rst     SYNC_RESET                {0}
-    set_instance_parameter_value      isp_emif_rst     USE_RESET_REQUEST         {0}
+        # isp_emif_rst
+        set_instance_parameter_value      isp_emif_rst     ACTIVE_LOW_RESET          {1}
+        set_instance_parameter_value      isp_emif_rst     NUM_RESET_OUTPUTS         {1}
+        set_instance_parameter_value      isp_emif_rst     SYNCHRONOUS_EDGES         {deassert}
+        set_instance_parameter_value      isp_emif_rst     SYNC_RESET                {0}
+        set_instance_parameter_value      isp_emif_rst     USE_RESET_REQUEST         {0}
+    }
 
     if {${v_raw_snapshot_en}} {
         # isp_emif_2_clk
@@ -1168,64 +1181,66 @@ proc create_isp_subsystem {} {
     set_instance_parameter_value      isp_roi        PIXELS_IN_PARALLEL            ${v_pip}
     set_instance_parameter_value      isp_roi        RUNTIME_CONTROL               {1}
 
-    # isp_warp
-    set_instance_parameter_value      isp_warp        BPS                           ${v_usm_bps}
-    set_instance_parameter_value      isp_warp        CACHE_BLOCKS                  ${v_warp_cache_blocks}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_ID_ASSOCIATED      {0}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_ID_COMPONENT       ${v_inst_id}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ                {255}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ_ENABLE         {0}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ_ENABLE_EN      {0}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ_STATUS         {0}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ_STATUS_EN      {0}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_TAG                {0}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_TYPE               {367}
-    set_instance_parameter_value      isp_warp        C_OMNI_CAP_VERSION            {1}
-    set_instance_parameter_value      isp_warp        DEBUG_ENABLE                  ${v_warp_debug}
-    set_instance_parameter_value      isp_warp        EASY_WARP                     {0}
-    set_instance_parameter_value      isp_warp        EXTERNAL_MODE                 {1}
-    set_instance_parameter_value      isp_warp        MAX_INPUT_WIDTH               {3840}
-    set_instance_parameter_value      isp_warp        MAX_OUTPUT_WIDTH              {3840}
-    set_instance_parameter_value      isp_warp        MEMORY_MAP                    {2}
-    set_instance_parameter_value      isp_warp        MIPMAP_ENABLE                 ${v_warp_mipmap_enable}
-    set_instance_parameter_value      isp_warp        NUMBER_OF_COLOR_PLANES        ${v_cppp}
-    set_instance_parameter_value      isp_warp        NUM_ENGINES                   ${v_num_warp_engines}
-    set_instance_parameter_value      isp_warp        PIXELS_IN_PARALLEL            ${v_pip}
-    set_instance_parameter_value      isp_warp        SINGLE_BOUNCE                 ${v_warp_single_bounce}
-    set_instance_parameter_value      isp_warp        EXT_MEM_DATA_WIDTH            256
+    if {${v_warp_en}} {
+        # isp_warp
+        set_instance_parameter_value      isp_warp        BPS                           ${v_usm_bps}
+        set_instance_parameter_value      isp_warp        CACHE_BLOCKS                  ${v_warp_cache_blocks}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_ID_ASSOCIATED      {0}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_ID_COMPONENT       ${v_inst_id}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ                {255}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ_ENABLE         {0}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ_ENABLE_EN      {0}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ_STATUS         {0}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_IRQ_STATUS_EN      {0}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_TAG                {0}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_TYPE               {367}
+        set_instance_parameter_value      isp_warp        C_OMNI_CAP_VERSION            {1}
+        set_instance_parameter_value      isp_warp        DEBUG_ENABLE                  ${v_warp_debug}
+        set_instance_parameter_value      isp_warp        EASY_WARP                     {0}
+        set_instance_parameter_value      isp_warp        EXTERNAL_MODE                 {1}
+        set_instance_parameter_value      isp_warp        MAX_INPUT_WIDTH               {3840}
+        set_instance_parameter_value      isp_warp        MAX_OUTPUT_WIDTH              {3840}
+        set_instance_parameter_value      isp_warp        MEMORY_MAP                    {2}
+        set_instance_parameter_value      isp_warp        MIPMAP_ENABLE                 ${v_warp_mipmap_enable}
+        set_instance_parameter_value      isp_warp        NUMBER_OF_COLOR_PLANES        ${v_cppp}
+        set_instance_parameter_value      isp_warp        NUM_ENGINES                   ${v_num_warp_engines}
+        set_instance_parameter_value      isp_warp        PIXELS_IN_PARALLEL            ${v_pip}
+        set_instance_parameter_value      isp_warp        SINGLE_BOUNCE                 ${v_warp_single_bounce}
+        set_instance_parameter_value      isp_warp        EXT_MEM_DATA_WIDTH            256
 
-    # isp_se_warp
-    set_instance_parameter_value      isp_se_warp         BURSTCOUNT_WIDTH              {7}
-    set_instance_parameter_value      isp_se_warp         DATA_WIDTH                    {256}
-    set_instance_parameter_value      isp_se_warp         ENABLE_SLAVE_PORT             {0}
-    set_instance_parameter_value      isp_se_warp         MASTER_ADDRESS_DEF            {0}
-    set_instance_parameter_value      isp_se_warp         MASTER_ADDRESS_WIDTH          {33}
-    set_instance_parameter_value      isp_se_warp         MAX_PENDING_READS             {64}
-    set_instance_parameter_value      isp_se_warp         SLAVE_ADDRESS_WIDTH           {26}
-    set_instance_parameter_value      isp_se_warp         SUB_WINDOW_COUNT              {1}
-    set_instance_parameter_value      isp_se_warp         SYNC_RESET                    {0}
+        # isp_se_warp
+        set_instance_parameter_value      isp_se_warp         BURSTCOUNT_WIDTH              {7}
+        set_instance_parameter_value      isp_se_warp         DATA_WIDTH                    {256}
+        set_instance_parameter_value      isp_se_warp         ENABLE_SLAVE_PORT             {0}
+        set_instance_parameter_value      isp_se_warp         MASTER_ADDRESS_DEF            {0}
+        set_instance_parameter_value      isp_se_warp         MASTER_ADDRESS_WIDTH          {33}
+        set_instance_parameter_value      isp_se_warp         MAX_PENDING_READS             {64}
+        set_instance_parameter_value      isp_se_warp         SLAVE_ADDRESS_WIDTH           {26}
+        set_instance_parameter_value      isp_se_warp         SUB_WINDOW_COUNT              {1}
+        set_instance_parameter_value      isp_se_warp         SYNC_RESET                    {0}
 
-    if {${v_ai_en}} {
-        # isp_warp_throttle
-        set_instance_parameter_value    isp_warp_throttle     BPS                         ${v_usm_bps}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_ID_ASSOCIATED    {0}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_ID_COMPONENT     ${v_inst_id}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ              {255}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ_ENABLE       {0}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ_ENABLE_EN    {0}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ_STATUS       {0}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ_STATUS_EN    {0}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_SIZE             {128}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_TAG              {0}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_TYPE             {598}
-        set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_VERSION          {1}
-        set_instance_parameter_value    isp_warp_throttle     ENABLE_DEBUG                ${v_enable_debug}
-        set_instance_parameter_value    isp_warp_throttle     EXTERNAL_MODE               {1}
-        set_instance_parameter_value    isp_warp_throttle     NUMBER_OF_COLOR_PLANES      ${v_cppp}
-        set_instance_parameter_value    isp_warp_throttle     PIPELINE_READY              ${v_pipeline_ready}
-        set_instance_parameter_value    isp_warp_throttle     PIXELS_IN_PARALLEL          ${v_pip}
-        set_instance_parameter_value    isp_warp_throttle     SEPARATE_SLAVE_CLOCK        {1}
-        set_instance_parameter_value    isp_warp_throttle     SLAVE_PROTOCOL              {Avalon}
+        if {${v_ai_en}} {
+            # isp_warp_throttle
+            set_instance_parameter_value    isp_warp_throttle     BPS                         ${v_usm_bps}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_ID_ASSOCIATED    {0}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_ID_COMPONENT     ${v_inst_id}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ              {255}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ_ENABLE       {0}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ_ENABLE_EN    {0}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ_STATUS       {0}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_IRQ_STATUS_EN    {0}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_SIZE             {128}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_TAG              {0}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_TYPE             {598}
+            set_instance_parameter_value    isp_warp_throttle     C_OMNI_CAP_VERSION          {1}
+            set_instance_parameter_value    isp_warp_throttle     ENABLE_DEBUG                ${v_enable_debug}
+            set_instance_parameter_value    isp_warp_throttle     EXTERNAL_MODE               {1}
+            set_instance_parameter_value    isp_warp_throttle     NUMBER_OF_COLOR_PLANES      ${v_cppp}
+            set_instance_parameter_value    isp_warp_throttle     PIPELINE_READY              ${v_pipeline_ready}
+            set_instance_parameter_value    isp_warp_throttle     PIXELS_IN_PARALLEL          ${v_pip}
+            set_instance_parameter_value    isp_warp_throttle     SEPARATE_SLAVE_CLOCK        {1}
+            set_instance_parameter_value    isp_warp_throttle     SLAVE_PROTOCOL              {Avalon}
+        }
     }
 
 
@@ -1266,9 +1281,11 @@ proc create_isp_subsystem {} {
     add_connection        isp_cpu_clk.out_clk       isp_tmo.external_cpu_clock
     add_connection        isp_cpu_clk.out_clk       isp_usm.agent_clock
     add_connection        isp_cpu_clk.out_clk       isp_roi.agent_clock
-    add_connection        isp_cpu_clk.out_clk       isp_warp.av_mm_control_agent_clock
-    if {${v_ai_en}} {
-        add_connection        isp_cpu_clk.out_clk       isp_warp_throttle.agent_clock
+    if {${v_warp_en}} {
+        add_connection        isp_cpu_clk.out_clk       isp_warp.av_mm_control_agent_clock
+        if {${v_ai_en}} {
+            add_connection        isp_cpu_clk.out_clk       isp_warp_throttle.agent_clock
+        }
     }
 
     # isp_cpu_rst
@@ -1303,9 +1320,11 @@ proc create_isp_subsystem {} {
     add_connection        isp_cpu_rst.out_reset         isp_tmo.external_cpu_reset
     add_connection        isp_cpu_rst.out_reset         isp_usm.agent_reset
     add_connection        isp_cpu_rst.out_reset         isp_roi.agent_reset
-    add_connection        isp_cpu_rst.out_reset         isp_warp.av_mm_control_agent_reset
-    if {${v_ai_en}} {
-        add_connection        isp_cpu_rst.out_reset         isp_warp_throttle.agent_reset
+    if {${v_warp_en}} {
+        add_connection        isp_cpu_rst.out_reset         isp_warp.av_mm_control_agent_reset
+        if {${v_ai_en}} {
+            add_connection        isp_cpu_rst.out_reset         isp_warp_throttle.agent_reset
+        }
     }
 
     # isp_mm_bridge
@@ -1339,9 +1358,11 @@ proc create_isp_subsystem {} {
     add_connection          isp_mm_bridge.m0            isp_tmo.av_mm_cpu_agent
     add_connection          isp_mm_bridge.m0            isp_usm.av_mm_control_agent
     add_connection          isp_mm_bridge.m0            isp_roi.av_mm_control_agent
-    add_connection          isp_mm_bridge.m0            isp_warp.av_mm_control_agent
-    if {${v_ai_en}} {
-        add_connection          isp_mm_bridge.m0            isp_warp_throttle.av_mm_control_agent
+    if {${v_warp_en}} {
+        add_connection          isp_mm_bridge.m0            isp_warp.av_mm_control_agent
+        if {${v_ai_en}} {
+            add_connection          isp_mm_bridge.m0            isp_warp_throttle.av_mm_control_agent
+        }
     }
 
     # isp_vid_clk
@@ -1378,11 +1399,13 @@ proc create_isp_subsystem {} {
     add_connection        isp_vid_clk.out_clk           isp_pix_adapt_tmo.main_clock
     add_connection        isp_vid_clk.out_clk           isp_usm.main_clock
     add_connection        isp_vid_clk.out_clk           isp_roi.main_clock
-    add_connection        isp_vid_clk.out_clk           isp_warp.core_clock
-    add_connection        isp_vid_clk.out_clk           isp_warp.axi4s_vid_in_0_clock
-    add_connection        isp_vid_clk.out_clk           isp_warp.axi4s_vid_out_0_clock
-    if {${v_ai_en}} {
-        add_connection        isp_vid_clk.out_clk           isp_warp_throttle.main_clock
+    if {${v_warp_en}} {
+        add_connection        isp_vid_clk.out_clk           isp_warp.core_clock
+        add_connection        isp_vid_clk.out_clk           isp_warp.axi4s_vid_in_0_clock
+        add_connection        isp_vid_clk.out_clk           isp_warp.axi4s_vid_out_0_clock
+        if {${v_ai_en}} {
+            add_connection        isp_vid_clk.out_clk           isp_warp_throttle.main_clock
+        }
     }
 
     # isp_vid_rst
@@ -1418,11 +1441,13 @@ proc create_isp_subsystem {} {
     add_connection        isp_vid_rst.out_reset         isp_pix_adapt_tmo.main_reset
     add_connection        isp_vid_rst.out_reset         isp_usm.main_reset
     add_connection        isp_vid_rst.out_reset         isp_roi.main_reset
-    add_connection        isp_vid_rst.out_reset         isp_warp.core_reset
-    add_connection        isp_vid_rst.out_reset         isp_warp.axi4s_vid_in_0_reset
-    add_connection        isp_vid_rst.out_reset         isp_warp.axi4s_vid_out_0_reset
-    if {${v_ai_en}} {
-        add_connection        isp_vid_rst.out_reset          isp_warp_throttle.main_reset
+    if {${v_warp_en}} {
+        add_connection        isp_vid_rst.out_reset         isp_warp.core_reset
+        add_connection        isp_vid_rst.out_reset         isp_warp.axi4s_vid_in_0_reset
+        add_connection        isp_vid_rst.out_reset         isp_warp.axi4s_vid_out_0_reset
+        if {${v_ai_en}} {
+            add_connection        isp_vid_rst.out_reset          isp_warp_throttle.main_reset
+        }
     }
 
     # isp_niosv_clk
@@ -1432,14 +1457,16 @@ proc create_isp_subsystem {} {
     # isp_niosv_rst
     add_connection         isp_niosv_rst.out_reset       isp_tmo.internal_cpu_reset
 
-    # isp_emif_clk
-    add_connection         isp_emif_clk.out_clk          isp_emif_rst.clk
-    add_connection         isp_emif_clk.out_clk          isp_warp.av_mm_memory_host_clock
-    add_connection         isp_emif_clk.out_clk          isp_se_warp.clock
+    if {${v_warp_en}} {
+        # isp_emif_clk
+        add_connection         isp_emif_clk.out_clk          isp_emif_rst.clk
+        add_connection         isp_emif_clk.out_clk          isp_warp.av_mm_memory_host_clock
+        add_connection         isp_emif_clk.out_clk          isp_se_warp.clock
 
-    # isp_emif_rst
-    add_connection         isp_emif_rst.out_reset        isp_warp.av_mm_memory_host_reset
-    add_connection         isp_emif_rst.out_reset        isp_se_warp.reset
+        # isp_emif_rst
+        add_connection         isp_emif_rst.out_reset        isp_warp.av_mm_memory_host_reset
+        add_connection         isp_emif_rst.out_reset        isp_se_warp.reset
+    }
 
     if {${v_clipper_en}} {
         if {${v_bls_en}} {
@@ -1546,15 +1573,17 @@ proc create_isp_subsystem {} {
     # isp_usm
     add_connection         isp_usm.axi4s_vid_out                isp_roi.axi4s_vid_in
 
-    # isp_roi
-    add_connection         isp_roi.axi4s_vid_out                isp_warp.axi4s_vid_in_0
-    # isp_warp
-    if {${v_ai_en}} {
-        add_connection        isp_warp.axi4s_vid_out_0              isp_warp_throttle.axi4s_vid_in
-    }
+    if {${v_warp_en}} {
+        # isp_roi
+        add_connection         isp_roi.axi4s_vid_out                isp_warp.axi4s_vid_in_0
+        # isp_warp
+        if {${v_ai_en}} {
+            add_connection        isp_warp.axi4s_vid_out_0              isp_warp_throttle.axi4s_vid_in
+        }
 
-    # isp_warp
-    add_connection         isp_warp.av_mm_memory_host           isp_se_warp.windowed_slave
+        # isp_warp
+        add_connection         isp_warp.av_mm_memory_host           isp_se_warp.windowed_slave
+    }
 
 
     ##########################
@@ -1585,11 +1614,13 @@ proc create_isp_subsystem {} {
     # isp_niosv_rst
     set_interface_property  niosv_rst_in  EXPORT_OF   isp_niosv_rst.in_reset
 
-    # isp_emif_clk
-    set_interface_property  emif_clk_in   EXPORT_OF   isp_emif_clk.in_clk
+    if {${v_warp_en}} {
+        # isp_emif_clk
+        set_interface_property  emif_clk_in   EXPORT_OF   isp_emif_clk.in_clk
 
-    # isp_emif_rst
-    set_interface_property  emif_rst_in   EXPORT_OF   isp_emif_rst.in_reset
+        # isp_emif_rst
+        set_interface_property  emif_rst_in   EXPORT_OF   isp_emif_rst.in_reset
+    }
 
     add_interface           isp_in_s_vid_axis    axi4stream  subordinate
     if {${v_bls_en}} {
@@ -1603,18 +1634,24 @@ proc create_isp_subsystem {} {
         set_interface_property  isp_in_s_vid_axis    EXPORT_OF   isp_dpc.axi4s_vid_in
     }
 
-    # isp_se_warp
-    set_interface_property  av_mm_host_warp    EXPORT_OF   isp_se_warp.expanded_master
-    set_interface_property  warp_int           EXPORT_OF   isp_warp.interrupt
+    if {${v_warp_en}} {
+        # isp_se_warp
+        set_interface_property  av_mm_host_warp    EXPORT_OF   isp_se_warp.expanded_master
+        set_interface_property  warp_int           EXPORT_OF   isp_warp.interrupt
 
-    if {${v_ai_en}} {
-        # isp_warp_throttle
+        if {${v_ai_en}} {
+            # isp_warp_throttle
+            add_interface           isp_out_m_vid_axis        axi4stream  manager
+            set_interface_property  isp_out_m_vid_axis        EXPORT_OF   isp_warp_throttle.axi4s_vid_out
+        } else {
+            # isp_warp
+            add_interface           full_isp_out_m_vid_axis        axi4stream  manager
+            set_interface_property  full_isp_out_m_vid_axis        EXPORT_OF   isp_warp.axi4s_vid_out_0
+        }
+    } elseif {${v_ai_en}} {
+        # isp_roi
         add_interface           isp_out_m_vid_axis        axi4stream  manager
-        set_interface_property  isp_out_m_vid_axis        EXPORT_OF   isp_warp_throttle.axi4s_vid_out
-    } else {
-        # isp_warp
-        add_interface           full_isp_out_m_vid_axis        axi4stream  manager
-        set_interface_property  full_isp_out_m_vid_axis        EXPORT_OF   isp_warp.axi4s_vid_out_0
+        set_interface_property  isp_out_m_vid_axis        EXPORT_OF   isp_roi.axi4s_vid_out
     }
 
     if {${v_raw_snapshot_en}} {
@@ -1708,11 +1745,13 @@ proc create_isp_subsystem {} {
                                                                   baseAddress ${v_usm_addr_offset}
     set_connection_parameter_value isp_mm_bridge.m0/isp_roi.av_mm_control_agent \
                                                                   baseAddress ${v_roi_addr_offset}
-    set_connection_parameter_value isp_mm_bridge.m0/isp_warp.av_mm_control_agent \
+    if {${v_warp_en}} {
+        set_connection_parameter_value isp_mm_bridge.m0/isp_warp.av_mm_control_agent \
                                                                   baseAddress ${v_warp_addr_offset}
-    if {${v_ai_en}} {
-        set_connection_parameter_value isp_mm_bridge.m0/isp_warp_throttle.av_mm_control_agent \
+        if {${v_ai_en}} {
+            set_connection_parameter_value isp_mm_bridge.m0/isp_warp_throttle.av_mm_control_agent \
                                                                   baseAddress ${v_warp_throttle_addr_offset}
+        }
     }
 
     if {${v_raw_snapshot_en}} {
@@ -1745,17 +1784,19 @@ proc create_isp_subsystem {} {
     lock_avalon_base_address  isp_tmo.av_mm_cpu_agent
     lock_avalon_base_address  isp_usm.av_mm_control_agent
     lock_avalon_base_address  isp_roi.av_mm_control_agent
-    lock_avalon_base_address  isp_warp.av_mm_control_agent
-    if {${v_ai_en}} {
-        lock_avalon_base_address  isp_warp_throttle.av_mm_control_agent
-    }
+    if {${v_warp_en}} {
+        lock_avalon_base_address  isp_warp.av_mm_control_agent
+        if {${v_ai_en}} {
+            lock_avalon_base_address  isp_warp_throttle.av_mm_control_agent
+        }
 
-    set_connection_parameter_value isp_warp.av_mm_memory_host/isp_se_warp.windowed_slave \
+        set_connection_parameter_value isp_warp.av_mm_memory_host/isp_se_warp.windowed_slave \
                                             qsys_mm.burstAdapterImplementation {PER_BURST_TYPE_CONVERTER}
-    set_connection_parameter_value isp_warp.av_mm_memory_host/isp_se_warp.windowed_slave \
+        set_connection_parameter_value isp_warp.av_mm_memory_host/isp_se_warp.windowed_slave \
                                             qsys_mm.widthAdapterImplementation {OPTIMIZED_CONVERTER}
-    set_domain_assignment isp_warp.av_mm_memory_host qsys_mm.burstAdapterImplementation PER_BURST_TYPE_CONVERTER
-    set_domain_assignment isp_warp.av_mm_memory_host qsys_mm.widthAdapterImplementation OPTIMIZED_CONVERTER
+        set_domain_assignment isp_warp.av_mm_memory_host qsys_mm.burstAdapterImplementation PER_BURST_TYPE_CONVERTER
+        set_domain_assignment isp_warp.av_mm_memory_host qsys_mm.widthAdapterImplementation OPTIMIZED_CONVERTER
+    }
 
 
     #############################
@@ -1786,6 +1827,7 @@ proc add_auto_connections {} {
     set v_vid_clk_freq          [get_shell_parameter VID_CLK_FREQ]
     set v_tmo_nios_clk_freq     [get_shell_parameter TMO_NIOS_CLK_FREQ]
     set v_async_clk             [get_shell_parameter ASYNC_CLK]
+    set v_warp_en               [get_shell_parameter WARP_EN]
     set v_emif_agent            [get_shell_parameter EMIF_AGENT]
     set v_ai_en                 [get_shell_parameter AI_EN]
     set v_raw_snapshot_en       [get_shell_parameter RAW_SNAPSHOT_EN]
@@ -1802,15 +1844,17 @@ proc add_auto_connections {} {
     add_auto_connection   ${v_instance_name} niosv_rst_in     ${v_tmo_nios_clk_freq}
 
     # DDR
-    if {${v_async_clk}} {
-        add_auto_connection   ${v_instance_name} emif_clk_in      [expr ${v_async_clk} * 1000000]
-        add_auto_connection   ${v_instance_name} emif_rst_in      [expr ${v_async_clk} * 1000000]
-    } else {
-        add_auto_connection   ${v_instance_name} emif_clk_in      ${v_emif_agent}_user_clk
-        add_auto_connection   ${v_instance_name} emif_rst_in      ${v_emif_agent}_user_rst
-    }
+    if {${v_warp_en}} {
+        if {${v_async_clk}} {
+            add_auto_connection   ${v_instance_name} emif_clk_in      [expr ${v_async_clk} * 1000000]
+            add_auto_connection   ${v_instance_name} emif_rst_in      [expr ${v_async_clk} * 1000000]
+        } else {
+            add_auto_connection   ${v_instance_name} emif_clk_in      ${v_emif_agent}_user_clk
+            add_auto_connection   ${v_instance_name} emif_rst_in      ${v_emif_agent}_user_rst
+        }
 
-    add_auto_connection   ${v_instance_name} av_mm_host_warp  ${v_emif_agent}_user_data
+        add_auto_connection   ${v_instance_name} av_mm_host_warp  ${v_emif_agent}_user_data
+    }
 
     if {${v_raw_snapshot_en}} {
         add_auto_connection   ${v_instance_name} emif_2_clk_in    ${v_emif_agent_2}_user_clk

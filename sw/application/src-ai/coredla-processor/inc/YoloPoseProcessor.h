@@ -30,7 +30,8 @@ private:
     std::shared_ptr<YoloClassificationResult> GetClassificationResults(const std::shared_ptr<tCoreDLAOutput>& spCoreDLAOutput);
     float IntersectionOverUnion(const YoloDetectionObject &box_1, const YoloDetectionObject &box_2);
     void ParseYOLOOutput(const std::vector<ov::Tensor>& output_tensors);
-    void ParseYOLOOutputCvec(const std::vector<ov::Tensor>& output_tensors);
+    void ParseYOLOOutputTensor(const ov::Tensor& output_tensor_boxes, const ov::Tensor& output_tensor_predictions, const ov::Tensor& output_tensor_keypoints, int prediction);
+    void ParseYOLOOutputTensorCvec(const ov::Tensor& output_tensor_boxes, const ov::Tensor& output_tensor_predictions, const ov::Tensor& output_tensor_keypoints, int prediction);
 
 private:
     bool _bypass_output_layout_transform;

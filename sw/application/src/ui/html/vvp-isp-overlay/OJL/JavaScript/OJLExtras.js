@@ -12,4 +12,5 @@ export * from "./OJBarChart.js";
 export * from "./OJCurveEditor.js";
 export * from "./OJISPBLSChart.js";
 export * from "./OJISPWBSRatioChart.js";
-export * from "./OJISPAWBDialog.js"
+export * from "./OJISPAWBDialog.js";
+export * from "./OJAIResults.js";

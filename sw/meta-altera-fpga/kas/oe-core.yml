@@ -1,0 +1,21 @@
+header:
+  version: 17
+
+distro: nodistro
+
+repos:
+  bitbake:
+    url: https://git.openembedded.org/bitbake
+    branch: "2.18"
+    commit: 33581c84f3a85008239acbd940501a35de48dc91
+    path: layers/bitbake
+    layers:
+      .: disabled
+
+  core:
+    url: https://git.openembedded.org/openembedded-core
+    branch: wrynose
+    commit: 42fa856a00ac16b2a7a83d7ecfa60a5be192b16c
+    path: layers/core
+    layers:
+      meta:

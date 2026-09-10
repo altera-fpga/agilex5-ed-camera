@@ -35,7 +35,7 @@ extern "C"
 
 #define INTEL_VVP_VFR_PRODUCT_ID                           0x024Au              ///< Frame reader product ID
 #define INTEL_VVP_VFR_MIN_SUPPORTED_REGMAP_VERSION         1                    ///< Minimum supported register map version
-#define INTEL_VVP_VFR_MAX_SUPPORTED_REGMAP_VERSION         1                    ///< Maximum supported register map version
+#define INTEL_VVP_VFR_MAX_SUPPORTED_REGMAP_VERSION         2                    ///< Maximum supported register map version
 
 #define INTEL_VVP_VFR_REG_IORD(instance, reg)          INTEL_VVP_CORE_REG_IORD((&(instance->core_instance)), (reg))           ///< frame reader register read function
 #define INTEL_VVP_VFR_REG_IOWR(instance, reg, value)   INTEL_VVP_CORE_REG_IOWR((&(instance->core_instance)), (reg), (value))  ///< frame reader register write function

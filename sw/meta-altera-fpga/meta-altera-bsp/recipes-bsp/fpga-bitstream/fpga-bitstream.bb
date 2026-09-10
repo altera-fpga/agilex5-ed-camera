@@ -24,10 +24,12 @@ PACKAGES = "${PN}"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
+S = "${UNPACKDIR}"
+
 python find_rbf () {
     import os
 
-    workdir = d.getVar('WORKDIR')
+    workdir = d.getVar('S')
     rbf_files = [f for f in os.listdir(workdir) if os.path.isfile(os.path.join(workdir, f)) and f.endswith(".rbf")]
 
     if len(rbf_files) == 0:
@@ -41,11 +43,11 @@ do_install[prefuncs] += "find_rbf"
 do_deploy[prefuncs] += "find_rbf"
 
 do_install () {
-    install -D -m 0644 ${WORKDIR}/${FPGA_BST_PATH} ${D}/boot/top.core.rbf
+    install -D -m 0644 ${S}/${FPGA_BST_PATH} ${D}/boot/top.core.rbf
 }
 
 do_deploy () {
-    install -D -m 0644 ${WORKDIR}/${FPGA_BST_PATH} ${DEPLOYDIR}/top.core.rbf
+    install -D -m 0644 ${S}/${FPGA_BST_PATH} ${DEPLOYDIR}/top.core.rbf
 }
 
 FILES:${PN} = "\

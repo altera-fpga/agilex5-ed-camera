@@ -14,3 +14,4 @@ SRC_URI:append:agilex5_terasic_de25s = ' file://agilex5_terasic_de25s_vvp-isp-vf
 SRC_URI:append:agilex5_terasic_de25_nano = ' file://agilex5_terasic_de25s_vvp-isp-vfw-buffer.dtsi'
 
 SRC_URI:append:agilex5_mk_a5e065bb32aes1 = ' file://agilex5_overlay_fb.dtsi'
+SRC_URI:append:agilex5_mk_a5e065bb32aea = ' file://agilex5_overlay_fb.dtsi'

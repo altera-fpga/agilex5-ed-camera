@@ -62,4 +62,8 @@ if [[ "$MACADDRESS" != "$MAC_ETHERNETMAC" ]]; then
     echo ${MACADDRESS} >/etc/${MAC_ADDRESS_FILE}
 fi
 
-/sbin/ifconfig $IFACE down && /sbin/ifconfig $IFACE hw ether ${MACADDRESS} && /sbin/ifconfig $IFACE up
+if [ -e /sbin/ifconfig ]; then
+    /sbin/ifconfig $IFACE down && /sbin/ifconfig $IFACE hw ether ${MACADDRESS} && /sbin/ifconfig $IFACE up
+elif [ -e /bin/ifconfig ]; then
+    /bin/ifconfig $IFACE down && /bin/ifconfig $IFACE hw ether ${MACADDRESS} && /bin/ifconfig $IFACE up
+fi

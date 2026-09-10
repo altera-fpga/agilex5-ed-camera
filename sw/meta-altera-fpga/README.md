@@ -8,7 +8,7 @@ Altera® Yocto layers to support Altera® SoC FPGA devices.
 | --- | --- | --- |
 | `agilex3` | meta-altera-devkit | Agilex 3 SoCFPGA |
 | `agilex5_dk_a5e065bb32aes` | meta-altera-devkit | Agilex 5 FPGA E-Series Premium Development Kit |
-| `agilex5_mk_a5e065bb32aes1` | meta-altera-devkit | Agilex 5 FPGA E-Series Modular Development Kit |
+| `agilex5_mk_a5e065bb32aea` | meta-altera-devkit | Agilex 5 FPGA E-Series Modular Development Kit |
 | `agilex7_dk_dev_agf027f1es` | meta-altera-devkit | Agilex 7 FPGA F-Series Development Kit |
 | `agilex7_dk_dev_agm039fes` | meta-altera-devkit | Agilex 7 FPGA M-Series Development Kit |
 | `agilex7_dk_si_agf014ea` | meta-altera-devkit | Agilex 7 FPGA F-Series Transceiver-SoC Development Kit |
@@ -100,12 +100,12 @@ The `base` config provided by [kas/base.yml](kas/base.yml) is required and shoul
       file: kas/base.yml
 ```
 
-You will also need to choose your base distro. [Poky](https://git.yoctoproject.org/poky) is a common reference distro and can be enabled by including [kas/poky.yml](kas/poky.yml).
+If you wish to do an OpenEmbedded-Core based build the following config should also be included (recommended).
 
 ```
   includes:
     - repo: meta-altera-fpga
-      file: kas/poky.yml
+      file: kas/oe-core.yml
 ```
 
 ### Target Machine
@@ -118,7 +118,7 @@ machine: ${MACHINE}
 For example to build for Agilex 5 E-Series Modular Devkit:
 
 ```
-machine: agilex5_mk_a5e065bb32aes1
+machine: agilex5_mk_a5e065bb32aea
 ```
 
 > You can omit `machine` from your config file and simply use `KAS_MACHINE=${MACHINE}` when running `kas` commands if preferred

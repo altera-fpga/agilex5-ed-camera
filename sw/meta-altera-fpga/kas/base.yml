@@ -3,6 +3,7 @@ header:
   includes:
     - repo: meta-altera-fpga
       file: kas/bsp.yml
+
 local_conf_header:
   meta-altera-fpga-base: |
     PATCHRESOLVE = "noop"

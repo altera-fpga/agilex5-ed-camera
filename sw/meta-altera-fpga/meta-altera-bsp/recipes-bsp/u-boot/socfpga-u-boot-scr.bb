@@ -12,7 +12,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 SRC_URI = "file://uboot_script.its"
 
-S = "${WORKDIR}"
+S = "${UNPACKDIR}"
 
 do_install[noexec] = "1"
 

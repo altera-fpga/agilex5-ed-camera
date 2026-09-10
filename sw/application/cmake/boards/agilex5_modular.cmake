@@ -9,10 +9,13 @@
 # *******************************************************************************/
 
 list(APPEND CAMERA_SOURCE_DIRS "framos-gmsl")
+list(APPEND CAMERA_SOURCE_DIRS "framos-imx676c")
 list(APPEND CAMERA_SOURCE_DIRS "framos-imx678")
 list(APPEND CAMERA_LIBS "SwApiFramosGMSL")
+list(APPEND CAMERA_LIBS "SwApiFramosIMX676")
 list(APPEND CAMERA_LIBS "SwApiFramosIMX678")
 list(APPEND CAMERA_DEFINITIONS "CAMERA_FramosGMSL")
+list(APPEND CAMERA_DEFINITIONS "CAMERA_FramosIMX676")
 list(APPEND CAMERA_DEFINITIONS "CAMERA_FramosIMX678")
 if(ISP_AI_BUILD OR ISP_STITCH_BUILD)
     set(AWB_PROFILE awb_profile_imx678_sdr.json)

@@ -12,6 +12,7 @@
 * [Altera® Quartus® Prime Pro Edition version 26.1 Linux].
   * Altera® Quartus® Agilex™ 5 Support.
 * FPGA NiosV Open-Source Tools 26.1 (installed with Quartus® Prime).
+* [Altera® FPGA AI Suite] 26.1.1.
 
 <br/>
 
@@ -53,7 +54,6 @@ Note licenses must be downloaded and installed where needed.
 </center>
 <br/>
 
-
 * 1 or 2 [Framos FSM:GO IMX678C Camera Modules], with:
   * [Wide 110deg HFOV Lens], or
   * [Medium 100deg HFOV Lens], or
@@ -63,9 +63,7 @@ Note licenses must be downloaded and installed where needed.
   * Alternative Framos Tripod Mount: [openSCAD File - Camera Tripod Mount Adapter for Framos FSM:GO IMX678C].
   * [Tripod].
   * [Alternative Tripod].
-* A Framos cable for PixelMate MIPI-CSI-2 for each Camera Module:
-  * [150mm flex-cable], or
-  * [300mm micro-coax cable].
+* A Framos [150mm flex-cable] for PixelMate MIPI-CSI-2 for each Camera Module.
 * (Optional):
   * [Framos GMSL3 5m].
   * (Optional):
@@ -75,9 +73,7 @@ Note licenses must be downloaded and installed where needed.
 * DP cable or HDMI cable with [DP to HDMI Adapter] (recommend 4Kp60 capable).
 * USB Micro B cable x2 (for QSPI programming and HPS serial console access).
 * Ethernet cable (for HPS network connection).
-* PC monitor or TV: 4Kp30 capable required.
-
-
+* PC monitor or TV: 4Kp60 Recommended.
 
 <br/>
 
@@ -122,15 +118,20 @@ compiled for the FPGA AI Suite IP. This will only need to be done once:
 
 <br/>
 
-> **Note** <br/>
-> The downloaded YOLOv8 nano models must be placed in the directory specified.
+> **Important Notes** <br/>
+> **-** The downloaded YOLOv8 nano models must be placed in the directory
+        specified. <br/>
+> **-** Ensure [GIT LFS] is installed prior to cloning this repository.
+        See [GIT LFS Installing]. <br/>
+> **-** This repository contains a git submodule.
+        Use ```--recurse submodules``` option when cloning.
 
 <br/>
 
   ```bash
   mkdir -p <workspace>
   cd <workspace>
-  git clone [https://github.com/altera-fpga/agilex-ed-camera-ai] .
+  git clone -b rel/26.1 --recurse-submodules https://github.com/altera-fpga/agilex5-ed-camera.git agilex5-ed-camera
   cd yolo_cnn
   ```
 
@@ -179,7 +180,6 @@ files:
 <br/>
 
 
-
 ## Getting Started - build and run new binaries
 
 Follow the instructions provided in this section to build the Camera Solution
@@ -202,16 +202,25 @@ You can use the pre-built binaries for reference:
 </center>
 
 ## HW Compilation
-Use the **[SOF Modular Design Toolkit (MDT) Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt)** to create and build the
-FPGA Design.
+
+Use the **[SOF Modular Design Toolkit (MDT) Create Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt)** to create and the
+**[SOF Modular Design Toolkit (MDT) Build Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt)** to build the FPGA Design.
+
+You may want to use the **[FPGA AI Suite Prerequisites](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/fpga_ai_suite_prerequisite.tcl)** script provided to
+simplify Altera® FPGA AI Suite installation.
 
 ## SW Compilation
+
 Use the **[Create microSD card image (.wic.gz) using YOCTO/KAS](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md)** flow to
 create the microSD card image.
+
+<br>
 
 > **Note** <br/>
 > use **KAS_MACHINE=agilex5_mk_a5e065bb32aes1** and
   **kas/agilex_camera_ff.yml** configuration.
+
+<br>
 
 ## Programming
 
@@ -386,9 +395,7 @@ Software to use at runtime:
   `<ip address>`):
   * Power up the Modular Development Kit (if not already powered) and set up the
     serial terminal emulator (minicom, [TeraTerm], [PuTTY], etc.):
-    * Select the correct `COMx` port. (The Modular Development Kit presents 4
-      serial COM ports over a single connection and the Linux system uses the 3rd
-      port in order). Set the port configuration as follows:
+    * Select the correct `COMx` port. Set the port configuration as follows:
       * 115200 baud rate, 8 Data bits, 1 Stop bit, CRC and Hardware flow control
         disabled.
     * The Linux OS will boot.
@@ -439,14 +446,16 @@ Software to use at runtime:
 ### **Setting Up the Camera Solution**
 
 > **Warning** <br/>
-> Handle ESD-sensitive equipment (boards, microSD cards, camera sensors, etc.)
-  only when properly grounded and at an ESD-safe workstation.
+> **-** Handle ESD-sensitive equipment (boards, microSD cards, camera sensors, etc.)
+        only when properly grounded and at an ESD-safe workstation. <br/>
+> **-** Failing to ensure the MIPI connections are aligned pin 1 to pin 1 can cause
+        equipment damage.
 
 <br/>
 
 * Make the required connections between the Host PC and the
-[Agilex™ 5 FPGA E-Series 065B Modular Development Kit] as detailed in the
-  **Setting Up the Modular Development Kit** section.
+  [Agilex™ 5 FPGA E-Series 065B Modular Development Kit] as detailed in
+  [**Setting Up the Modular Development Kit**](../camera_4k_ai/camera_4k_ai.md#programming).
 * Connect the Framos cable(s) between the Framos Camera Module(s) and the MIPI
   connector(s) on the Modular Development Kit Carrier Board taking care to
   align the cable(s) correctly with the connector(s) (pin 1 to pin 1). When
@@ -510,7 +519,6 @@ Software to use at runtime:
         support a second GMSL solution in the MIPI1 connector. <br/>
 > **-** [openSCAD models](../common/scad-models.md) exist to improve GMSL
         solution robustness.
-
 
 <br/>
 
@@ -615,9 +623,7 @@ from the MicroSD Card.
 
 * Power up the Modular Development Kit (if not already powered) and set up the
   serial terminal emulator (minicom, [TeraTerm], [PuTTY], etc.):
-  * Select the correct `COMx` port. (The Modular Development Kit presents 4
-    serial COM ports over a single connection and the Linux system uses the 3rd
-    port in order). Set the port configuration as follows:
+  * Select the correct `COMx` port. Set the port configuration as follows:
     * 115200 baud rate, 8 Data bits, 1 Stop bit, CRC and Hardware flow control
       disabled.
 * The Linux OS will boot and the Camera Solution System Example Design Software
@@ -692,9 +698,18 @@ from the MicroSD Card.
 <br/>
 
 
-<br/>
-[Back](../camera_4k_ai/camera_4k_ai.md#recommended-user-flows){ .md-button }
-<br/>
+<br>
+<br>
+
+***
+
+<center markdown="1">
+
+[BACK](../camera_4k_ai/camera_4k_ai.md#recommended-user-flows)
+</center>
+
+***
+<br>
 
 
 
@@ -729,6 +744,7 @@ from the MicroSD Card.
 [openSCAD File - Fixed Camera Mount Adapter for Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/gmsl_bracket_framos.scad
 [openSCAD File - Multi-Camera Tripod Mount Adapter for Framos]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/stitch_camera_mount.scad
 
+
 [ultralytics YOLO]: https://docs.ultralytics.com
 [ONNX]: https://onnx.ai/
 [OpenVINO™ Toolkit]: https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.6/linux
@@ -738,11 +754,13 @@ from the MicroSD Card.
 
 [Agilex™ 5 E-Series Modular Development Board GSRD User Guide (25.1)]: https://altera-fpga.github.io/rel-25.1/gsrd/ug-gsrd-agx5e-modular/
 [Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/gsrd/ug-gsrd-agx5e-modular/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/gsrd/ug-gsrd-agx5e-modular/
 
 
 [Agilex™ 5 SoC FPGA]: https://www.altera.com/products/fpga/agilex/5
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (25.1)]: https://docs.altera.com/r/docs/814346/25.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/download-document
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1)]:https://docs.altera.com/r/docs/814346/26.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
+[Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1.1)]:https://docs.altera.com/r/docs/814346/26.1.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [NiosV Processor for Altera® FPGA]: https://www.altera.com/design/guidance/nios-v-developer
 [Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3001/agilex-5-fpga-and-soc-e-series-modular-development-kit-es
 [Agilex™ 5 FPGA E-Series Modular Development Kits - Product Brief]: https://docs.altera.com/v/u/docs/815178/agilex-5-fpga-e-series-065b-and-065a-modular-development-kit-product-brief
@@ -769,6 +787,12 @@ from the MicroSD Card.
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-windows
 [Altera® Quartus® Prime Pro Edition version 26.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.0.110-linux.run
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.0.110-windows.exe
+
+
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-linux
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-windows
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.1.110-linux.run
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.1.110-windows.exe
 
 
 
@@ -814,7 +838,7 @@ from the MicroSD Card.
 [MSGDMA IP]: https://docs.altera.com/r/docs/683130/26.1/embedded-peripherals-ip-user-guide/modular-scatter-gather-dma-core
 [Broadcaster IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/axi-stream-broadcaster-ip
 [Video and Vision Monitor IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-and-vision-monitor-ip
-[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_interest_basic_guide.pdf
+[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_Interest_basic_guide.pdf
 [Remoasaic IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Remosaic_basic_guide.pdf
 [Throttle IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Throttle_basic_guide.pdf
 [Alpha Channel IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Alpha_Channel_basic_guide.pdf
@@ -834,7 +858,7 @@ from the MicroSD Card.
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
 
 
 
@@ -846,6 +870,7 @@ from the MicroSD Card.
 [top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevB_GrpB/top.core.jic
 [top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevB_GrpB/top.core.rbf
 [model_compiler]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel-26.1/yolo_cnn
+[FPGA AI Suite Prerequisites]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/fpga_ai_suite_prerequisite.tcl
 
 
 
@@ -853,7 +878,11 @@ from the MicroSD Card.
 [AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_AI_WARP_RD.xml
 [Create microSD card image (.wic.gz) using YOCTO/KAS]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md
 [SOF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [RBF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [Quartus® GUI Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#using-the-pregenerated-mdt-quartus-project
 [Quartus® GUI Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_CAMERA.md#building-the-pregenerated-mdt-quartus-project
 

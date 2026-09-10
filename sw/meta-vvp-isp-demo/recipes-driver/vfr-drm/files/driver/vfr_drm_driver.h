@@ -11,6 +11,9 @@
 #include <drm/drm_crtc.h>
 #include <drm/drm_encoder.h>
 
+#ifdef USE_DMA
+#include "vfr_drm_dma.h"
+#endif
 
 #include "vfr_drm_plane.h"
 
@@ -72,6 +75,9 @@ struct vfr_drm_device {
     struct hrtimer vblank_hrtimer;
     ktime_t vblank_period_ns;
     
+#ifdef USE_DMA
+    struct vfr_drm_dma_ctx dma_ctx;
+#endif
 };
 
 struct vfr_drm_device *vfr_drm_device_of_dev(struct drm_device *dev);

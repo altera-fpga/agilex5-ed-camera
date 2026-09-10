@@ -89,17 +89,30 @@ namespace SwApi
         Initialise();
     }
 
-    // Try read IMX678 "Standby" register
-    // See if accessible and check for
-    // only two possible values 0x0 or 0x1
+    // Take the sensor out of standby, then confirm chip ID 678
+    // at 0x4D12 / 0x4D13 (76, 8).
     bool FramosImx678::Probe()
     {
-        bool ret = false;
+        const bool inStandby = I2CRead(0x3000) == 0x1;
 
-        const uint8_t reg_val = I2CRead(0x3000);
-        ret = ((reg_val == 0x0) || (reg_val == 0x1));
+        if(inStandby)
+        {
+            I2CWrite(0x3014, 0x1);
+            I2CWrite(0x3000, 0x0);
+            std::this_thread::sleep_for(std::chrono::milliseconds(IMX678_INT_REGULATOR_WAIT_MS));
+            I2CWrite(0x3002, 0x0);
+        }
 
-        return ret;
+        const uint8_t id_lsb = I2CRead(0x4D12);
+        const uint8_t id_msb = I2CRead(0x4D13);
+
+        if(inStandby)
+        {
+            I2CWrite(0x3000, 0x1);
+            I2CWrite(0x3002, 0x1);
+        }
+
+        return (id_lsb == 0x76) && (id_msb == 0x08);
     }
 
     void FramosImx678::Initialise()

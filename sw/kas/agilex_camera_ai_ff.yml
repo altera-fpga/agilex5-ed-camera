@@ -11,7 +11,12 @@
 header:
   version: 17 
   includes:
-    - agilex_camera_ai.yml
+    - repo: top
+      file: agilex_camera_ai.yml
+
+repos:
+  top:
+    path: kas
 
 local_conf_header:
   meta-vvp-isp-demo-ff: |

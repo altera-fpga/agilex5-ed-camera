@@ -9,13 +9,14 @@
 # *******************************************************************************/
 obj-m := vfr_drm.o
 vfr_drm-y += vfr_drm_driver.o
+vfr_drm-y += vfr_drm_dma.o
 vfr_drm-y += vfr_drm_plane.o
 vfr_drm-y += vfr_drm_framebuffer.o
 vfr_drm-y += hal/intel_vvp_vfr.o
 vfr_drm-y += hal/intel_vvp_core.o
 vfr_drm-y += hal/intel_addr_span_expander.o
 
-subdir-ccflags-y += -Ihal
+subdir-ccflags-y += -Ihal $(EXTRA_CFLAGS)
 
 SRC := $(shell pwd)
 

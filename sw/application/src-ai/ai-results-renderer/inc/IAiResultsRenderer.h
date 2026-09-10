@@ -11,6 +11,8 @@ License.
 #ifndef __IAiResultsRenderer_H__
 #define __IAiResultsRenderer_H__
 
+#include "IHttpServerHost.h"
+
 namespace SwApi 
 {
     class IAiResultsRenderer
@@ -21,6 +23,8 @@ namespace SwApi
 
             virtual void SetKeypointThreshold(float keypointThreshold) = 0;
             virtual void RenderResults(bool enable) = 0;
+
+            virtual bool ConnectWebSocketService(IWebSocketService* web_socket) = 0;
     };
 } // namespace SwApi
 

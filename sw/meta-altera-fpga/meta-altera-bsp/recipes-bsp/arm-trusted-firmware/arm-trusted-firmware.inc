@@ -20,13 +20,10 @@ ATF_REPO ?= "github.com/altera-fpga/arm-trusted-firmware.git"
 
 SRC_URI = "git://${ATF_REPO};protocol=https;branch=${ATF_BRANCH}"
 
-S = "${WORKDIR}/git"
-
 CFLAGS = "-Wno-error=array-bounds"
 
 # Let the Makefile handle setting up the CFLAGS and LDFLAGS as it is a standalone application
 EXTRA_OEMAKE = 'CROSS_COMPILE="${TARGET_PREFIX}" PLAT="${ATF_PLAT}" CFLAGS="${CFLAGS}" DEPRECATED=1'
-# CFLAGS[unexport] = "1"
 LDFLAGS[unexport] = "1"
 AS[unexport] = "1"
 LD[unexport] = "1"

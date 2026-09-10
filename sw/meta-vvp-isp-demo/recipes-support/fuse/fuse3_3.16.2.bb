@@ -8,17 +8,17 @@ HOMEPAGE = "https://github.com/libfuse/libfuse"
 SECTION = "libs"
 LICENSE = "GPL-2.0-only & LGPL-2.0-only"
 LIC_FILES_CHKSUM = " \
-    file://GPL2.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
-    file://LGPL2.txt;md5=4fbd65380cdd255951079008b364516c \
-    file://LICENSE;md5=a55c12a2d7d742ecb41ca9ae0a6ddc66 \
+    file://${S}/GPL2.txt;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
+    file://${S}/LGPL2.txt;md5=4fbd65380cdd255951079008b364516c \
+    file://${S}/LICENSE;md5=a55c12a2d7d742ecb41ca9ae0a6ddc66 \
 "
+
+S = "${UNPACKDIR}/fuse-${PV}"
 
 SRC_URI = "https://github.com/libfuse/libfuse/releases/download/fuse-${PV}/fuse-${PV}.tar.gz \
            file://fuse3.conf \
 "
 SRC_URI[sha256sum] = "f797055d9296b275e981f5f62d4e32e089614fc253d1ef2985851025b8a0ce87"
-
-S = "${WORKDIR}/fuse-${PV}"
 
 UPSTREAM_CHECK_URI = "https://github.com/libfuse/libfuse/releases"
 UPSTREAM_CHECK_REGEX = "fuse\-(?P<pver>3(\.\d+)+).tar.xz"
@@ -57,6 +57,6 @@ do_install:append() {
     # Install systemd related configuration file
     if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
         install -d ${D}${sysconfdir}/modules-load.d
-        install -m 0644 ${WORKDIR}/fuse3.conf ${D}${sysconfdir}/modules-load.d
+        install -m 0644 ${UNPACKDIR}/fuse3.conf ${D}${sysconfdir}/modules-load.d
     fi
 }

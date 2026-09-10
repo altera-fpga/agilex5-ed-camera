@@ -1,11 +1,13 @@
 header:
   version: 17
+
 repos:
   meta-intel-realsense:
     url: "https://github.com/IntelRealSense/meta-intel-realsense.git"
-    commit: 6d585884724b7c0c56c6734949ebde3dbc55f72c
-    branch: scarthgap
+    branch: wrynose
+    commit: 46aa4079e82ff9a5d4ca32e2b72c6d3477458050
     path: layers/meta-intel-realsense
+
 local_conf_header:
   realsense: |
     IMAGE_INSTALL:append = " \

@@ -14,7 +14,6 @@ set(header_files "")
 set(source_files "")
 
 set(header_files ${header_files} "${CMAKE_CURRENT_SOURCE_DIR}/drmHelper.h")
-set(header_files ${header_files} "${CMAKE_CURRENT_SOURCE_DIR}/IDrmHelper.h")
 
 set(source_files ${source_files} "${CMAKE_CURRENT_SOURCE_DIR}/drmHelper.cpp")
 
@@ -30,24 +29,10 @@ if(NOT "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
     if(NOT libdrm_FOUND)
         message(FATAL_ERROR "Cannot build ${PROJECT_NAME} without libdrm support in sdk")
     endif()
-
-    include(FetchContent)
-    set(LV_CONF_BUILD_DISABLE_EXAMPLES ON)
-    set(LV_CONF_BUILD_DISABLE_DEMOS ON)
-
-    FetchContent_Declare(
-        lvgl
-        URL https://github.com/lvgl/lvgl/archive/refs/tags/v9.2.1.tar.gz
-        PATCH_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/patches/lvglPatchCommand.sh <SOURCE_DIR>
-    )
-    FetchContent_MakeAvailable(lvgl)
 endif()
 
 # Target
 add_library(${PROJECT_NAME} STATIC ${all_files})
-
-file(GLOB patches "${CMAKE_CURRENT_SOURCE_DIR}/patches/*")
-list(APPEND all_files ${patches})
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -59,9 +44,10 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE "${common_compile_definitions
 target_link_libraries(${PROJECT_NAME} PUBLIC HapiIntelVvpVfr)
 target_link_libraries(${PROJECT_NAME} PUBLIC HapiIntelAddrSpanExpander)
 target_link_libraries(${PROJECT_NAME} PUBLIC SwApiUtils)
+target_link_libraries(${PROJECT_NAME} PUBLIC VvpIspDemoInterface)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${libdrm_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${libdrm_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} PUBLIC lvgl)
+target_link_libraries(${PROJECT_NAME} PUBLIC IOverlayHelper)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpack.cmake OPTIONAL)

@@ -15,8 +15,7 @@ inherit module systemd
 
 # Set source paths
 SRC_URI = "file://.;subdir=${S}"
-
-S = "${WORKDIR}/src"
+S = "${UNPACKDIR}/vfr-drm-${PV}"
 
 RPROVIDES_${PN}:append = "module-vfr-drm"
 
@@ -24,20 +23,22 @@ MODULES_MODULE_SYMVERS_LOCATION = "driver"
 
 IMAGE_BOOT_ARGS:append = " fbcon=map:1"
 
+EXTRA_OEMAKE:append = "${@bb.utils.contains('APP_FEATURES', 'ISP_AI', ' EXTRA_CFLAGS=-DUSE_DMA', '', d)}"
+
 do_compile:prepend() {
-    cd ${WORKDIR}/src/driver
+    cd ${S}/driver
 }
 
 do_install:prepend() {
     install -d ${D}/usr/bin
-    install -m 0755 ${WORKDIR}/src/vfr_drm_ocs2dto.sh ${D}/usr/bin/vfr_drm_ocs2dto.sh
+    install -m 0755 ${S}/vfr_drm_ocs2dto.sh ${D}/usr/bin/vfr_drm_ocs2dto.sh
 
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d ${D}${systemd_system_unitdir}
-        install -m 644 ${WORKDIR}/src/altera-vfr_drm-ocs.service ${D}${systemd_system_unitdir}/altera-vfr_drm-ocs.service
+        install -m 644 ${S}/altera-vfr_drm-ocs.service ${D}${systemd_system_unitdir}/altera-vfr_drm-ocs.service
     fi
 
-    cd ${WORKDIR}/src/driver
+    cd ${S}/driver
 }
 
 FILES:${PN} += " \

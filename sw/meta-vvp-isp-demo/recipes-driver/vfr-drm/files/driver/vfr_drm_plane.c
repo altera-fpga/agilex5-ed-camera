@@ -28,6 +28,7 @@
 #include <drm/drm_gem_atomic_helper.h>
 #include <drm/drm_gem_framebuffer_helper.h>
 #include <drm/drm_gem_shmem_helper.h>
+#include <drm/drm_fb_dma_helper.h>
 #include <drm/drm_managed.h>
 #include <drm/drm_modeset_helper_vtables.h>
 #include <drm/drm_probe_helper.h>
@@ -35,6 +36,9 @@
 #include <drm/drm_panic.h>
 
 #include "vfr_drm_driver.h"
+#ifdef USE_DMA
+#include "vfr_drm_dma.h"
+#endif
 #include "vfr_drm_plane.h"
 #include "vfr_drm_framebuffer.h"
 #include "intel_vvp_vfr.h"
@@ -109,24 +113,43 @@ static void vfr_drm_plane_helper_atomic_update(struct drm_plane *plane,
 
     struct drm_plane_state *plane_state = drm_atomic_get_new_plane_state(state, plane);
     struct drm_plane_state *old_plane_state = drm_atomic_get_old_plane_state(state, plane);
+#ifndef USE_DMA
     struct drm_shadow_plane_state *shadow_plane_state = to_drm_shadow_plane_state(plane_state);
+#endif
     struct drm_framebuffer *fb = plane_state->fb;
     struct vfr_drm_framebuffer *vfr_drm_fb = vfr_drm_framebuffer_of_fb(fb);
+#ifdef USE_DMA
+    dma_addr_t addr;
+#endif
     struct drm_framebuffer *old_fb = old_plane_state->fb;
     struct drm_device *dev = plane->dev;
     struct vfr_drm_device *sdev = vfr_drm_device_of_dev(dev);
+#ifndef USE_DMA
     struct drm_atomic_helper_damage_iter iter;
     struct drm_rect damage;
     int ret, idx;
+#endif
+    unsigned long flip_flags;
+    bool pending_flip;
+    unsigned int write_fb_index;
     
     (void)vfr_drm_fb; // currently unused
 
+    if (fb == NULL)
+        return;
+
+#ifdef USE_DMA
+    addr = drm_fb_dma_get_gem_addr(&vfr_drm_fb->fb, plane_state, 0);
+#endif
+
+#ifndef USE_DMA
     ret = drm_gem_fb_begin_cpu_access(fb, DMA_FROM_DEVICE);
     if (ret)
         return;
 
     if (!drm_dev_enter(dev, &idx))
         goto out_drm_gem_fb_end_cpu_access;
+#endif
 
     if(fb && (fb != old_fb))
     {       
@@ -159,7 +182,7 @@ static void vfr_drm_plane_helper_atomic_update(struct drm_plane *plane,
                 pitch = width * 4;
                 pixels_per_symbol = 1;
             }
-            for(uint32_t index; index < ARRAY_SIZE(sdev->drm_format_info); index++)
+            for(uint32_t index = 0; index < ARRAY_SIZE(sdev->drm_format_info); index++)
             {
                 if(sdev->drm_format_info[index] == NULL)
                 {
@@ -181,109 +204,119 @@ static void vfr_drm_plane_helper_atomic_update(struct drm_plane *plane,
             vfr_drm_p->pitch = pitch;
             if(vfr_drm_p->vfr_instance.core_instance.base != NULL)
             {
-                intel_vvp_vfr_set_bufset_width(&vfr_drm_p->vfr_instance, 0, width /* /pixels_per_symbol*/);
-                intel_vvp_vfr_set_bufset_height(&vfr_drm_p->vfr_instance, 0, height);
+                intel_vvp_vfr_set_num_buffer_sets(&vfr_drm_p->vfr_instance, vfr_drm_p->num_frame_buffers);
+                for(uint32_t index = 0; index < vfr_drm_p->num_frame_buffers; index++)
+                {
+                    intel_vvp_vfr_set_bufset_width(&vfr_drm_p->vfr_instance, index, width /* /pixels_per_symbol*/);
+                    intel_vvp_vfr_set_bufset_height(&vfr_drm_p->vfr_instance, index, height);
+                    intel_vvp_vfr_set_bufset_inter_line_offset(&vfr_drm_p->vfr_instance, index, pitch);
+                }
                 intel_vvp_core_set_img_info_width(&vfr_drm_p->vfr_instance, width /* /pixels_per_symbol*/);
                 intel_vvp_core_set_img_info_height(&vfr_drm_p->vfr_instance, height);
-                intel_vvp_vfr_set_bufset_inter_line_offset(&vfr_drm_p->vfr_instance, 0, pitch);
                 intel_vvp_vfr_commit_writes(&vfr_drm_p->vfr_instance);
             }
         }
     }
 
-    drm_atomic_helper_damage_iter_init(&iter, old_plane_state, plane_state);
-    drm_atomic_for_each_plane_damage(&iter, &damage) {
-        struct drm_rect dst_clip = plane_state->dst;
-        struct iosys_map dst = vfr_drm_p->base;
+    spin_lock_irqsave(&vfr_drm_p->flip_lock, flip_flags);
+    pending_flip = vfr_drm_p->pending_flip;
+    write_fb_index = vfr_drm_p->write_fb_index;
+    spin_unlock_irqrestore(&vfr_drm_p->flip_lock, flip_flags);
 
-        if (!drm_rect_intersect(&dst_clip, &damage))
-            continue;
+#ifndef USE_DMA
+    if(pending_flip)
+    {
+        drm_dbg(dev, "vfr_drm: vfr_drm_plane_helper_atomic_update pending flip %u \n", vfr_drm_p->num_frame_buffers);
+    }
+    else
+    {
+        drm_atomic_helper_damage_iter_init(&iter, old_plane_state, plane_state);
+        drm_atomic_for_each_plane_damage(&iter, &damage) {
+            struct drm_rect dst_clip = plane_state->dst;
+            struct iosys_map dst = vfr_drm_p->base[write_fb_index];
 
-        iosys_map_incr(&dst, drm_fb_clip_offset(vfr_drm_p->pitch, sdev->drm_format_info[vfr_drm_p->format], &dst_clip));
-        drm_fb_blit(&dst, &vfr_drm_p->pitch, sdev->drm_format_info[vfr_drm_p->format]->format, shadow_plane_state->data,
-                fb, &damage, &shadow_plane_state->fmtcnv_state);
-                
+            if (!drm_rect_intersect(&dst_clip, &damage))
+                continue;
+
+            iosys_map_incr(&dst, drm_fb_clip_offset(vfr_drm_p->pitch, sdev->drm_format_info[vfr_drm_p->format], &dst_clip));
+            drm_fb_blit(&dst, &vfr_drm_p->pitch, sdev->drm_format_info[vfr_drm_p->format]->format, shadow_plane_state->data,
+                    fb, &damage, &shadow_plane_state->fmtcnv_state);
+        }
     }
 
     drm_dev_exit(idx);
 out_drm_gem_fb_end_cpu_access:
     drm_gem_fb_end_cpu_access(fb, DMA_FROM_DEVICE);
-}
-
-static void vfr_drm_plane_helper_atomic_disable(struct drm_plane *plane,
-                              struct drm_atomic_state *state)
-{
-    struct vfr_drm_plane *vfr_drm_p = vfr_drm_plane_of_plane(plane);
-
-    struct drm_device *dev = plane->dev;
-    int idx;
-
-    struct drm_crtc_state *crtc_state;
-
-    if (!drm_dev_enter(dev, &idx))
-        return;
-
-    if(plane->crtc != NULL)
+#else
+    if(!pending_flip)
     {
-        crtc_state = plane->crtc->state;
-        /* Clear screen to black if disabled */
-        if(crtc_state != NULL)
+        if(plane_state->fb_damage_clips)
         {
-            iosys_map_memset(&vfr_drm_p->base, 0, 0, vfr_drm_p->pitch * vfr_drm_p->height);
+            unsigned int damage = drm_plane_get_damage_clips_count(plane_state);
+            if(damage > 1)
+            {
+                vfr_drm_dma_write(sdev, vfr_drm_fb, addr , &vfr_drm_p->dma_emif_offset[write_fb_index]);
+            }
+            else if(damage == 1)
+            {
+                struct drm_mode_rect *clip = drm_plane_get_damage_clips(plane_state);
+                if(clip)
+                {
+                    // special case for no damage, the clip is set to 0,0,2,2
+                    if(clip->x1 == 0 && clip->y1 == 0 && clip->x2 == 2 && clip->y2 == 2)
+                    {
+                        //drm_dbg(dev, "no damage\n");
+                    }
+                    else
+                    {
+                        vfr_drm_dma_write(sdev, vfr_drm_fb, addr , &vfr_drm_p->dma_emif_offset[write_fb_index]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            //drm_dbg(dev, "no damage info\n");
+            vfr_drm_dma_write(sdev, vfr_drm_fb, addr , &vfr_drm_p->dma_emif_offset[write_fb_index]);
+        }
+        if(vfr_drm_p->num_frame_buffers > 1)
+        {
+            spin_lock_irqsave(&vfr_drm_p->flip_lock, flip_flags);
+            vfr_drm_p->pending_flip = true;
+            spin_unlock_irqrestore(&vfr_drm_p->flip_lock, flip_flags);
+            intel_vvp_vfr_set_starting_buffer_set(&vfr_drm_p->vfr_instance, write_fb_index);
+            intel_vvp_vfr_commit_writes(&vfr_drm_p->vfr_instance);
         }
     }
-
-    drm_dev_exit(idx);
-}
-
-static int vfr_drm_plane_helper_get_scanout_buffer(struct drm_plane *plane,
-                                 struct drm_scanout_buffer *sb)
-{
-    struct vfr_drm_plane *vfr_drm_p = vfr_drm_plane_of_plane(plane);
-    struct vfr_drm_device *sdev = vfr_drm_device_of_dev(plane->dev);
-
-    sb->width = sdev->default_mode.hdisplay;
-    sb->height = sdev->default_mode.vdisplay;
-    sb->format = sdev->drm_format_info[vfr_drm_p->format];
-    sb->pitch[0] = vfr_drm_p->pitch;
-    sb->map[0] = vfr_drm_p->base;
-
-    return 0;
+#endif
 }
 
 static const struct drm_plane_helper_funcs vfr_drm_plane_helper_funcs = {
+#ifndef USE_DMA
     DRM_GEM_SHADOW_PLANE_HELPER_FUNCS,
+#endif
     .atomic_check = vfr_drm_plane_helper_atomic_check,
     .atomic_update = vfr_drm_plane_helper_atomic_update,
-    .atomic_disable = vfr_drm_plane_helper_atomic_disable,
-    .get_scanout_buffer = vfr_drm_plane_helper_get_scanout_buffer,
 };
 
 static const struct drm_plane_funcs vfr_drm_plane_funcs = {
     .update_plane = drm_atomic_helper_update_plane,
     .disable_plane = drm_atomic_helper_disable_plane,
     .destroy = drm_plane_cleanup,
+#ifndef USE_DMA
     DRM_GEM_SHADOW_PLANE_FUNCS,
+#else
+    .reset = drm_atomic_helper_plane_reset,
+    .atomic_duplicate_state = drm_atomic_helper_plane_duplicate_state,
+    .atomic_destroy_state = drm_atomic_helper_plane_destroy_state,
+#endif
 };
 
 static irqreturn_t vfr_drm_irq( int irq, void * dev_id )
 {
     struct vfr_drm_plane *vfr_drm_p = (struct vfr_drm_plane *)dev_id;
     struct vfr_drm_device *sdev = vfr_drm_p->sdev;
-#if 0
-    struct drm_device *dev = &sdev->dev;
-    u64 ret_overrun;
-#endif
-    unsigned long flags;
     irqreturn_t irq_return = IRQ_NONE;
-
-    spin_lock_irqsave( &(sdev->lock), flags );
-
-#if 0
-    ret_overrun = hrtimer_forward_now(&sdev->vblank_hrtimer, sdev->vblank_period_ns);
-    if (ret_overrun != 1)
-        drm_warn(dev, "%s: vblank timer overrun\n", __func__);
-#endif
 
     // Disable VFR Core interrupts
     INTEL_VVP_VFR_REG_IOWR((&vfr_drm_p->vfr_instance), VFR_REG_IRQ_CONTROL, 0);
@@ -294,9 +327,27 @@ static irqreturn_t vfr_drm_irq( int irq, void * dev_id )
     // Clear the interrupt
     INTEL_VVP_VFR_REG_IOWR((&vfr_drm_p->vfr_instance), VFR_REG_IRQ_STATUS, irq_status);
 
-#if 0
+    spin_lock(&vfr_drm_p->flip_lock);
+    if(vfr_drm_p->pending_flip)
+    {
+        unsigned int old_write_fb_index = vfr_drm_p->write_fb_index;
+
+        vfr_drm_p->pending_flip = false;
+        vfr_drm_p->write_fb_index = vfr_drm_p->read_fb_index;
+        vfr_drm_p->read_fb_index = old_write_fb_index;
+        spin_unlock(&vfr_drm_p->flip_lock);
+    }
+    else
+    {
+        spin_unlock(&vfr_drm_p->flip_lock);
+    }
+
+#if 1
     if(irq_status & 1)
     {
+        // Real interrupt received: re-arm the watchdog so the hrtimer only
+        // fires a dummy vblank if no real one arrives within the period.
+        hrtimer_start(&sdev->vblank_hrtimer, sdev->vblank_period_ns, HRTIMER_MODE_REL);
         drm_crtc_handle_vblank( &(sdev->crtc) );
         irq_return = IRQ_HANDLED;
     }
@@ -304,8 +355,6 @@ static irqreturn_t vfr_drm_irq( int irq, void * dev_id )
 
     // Enable VFR Core interrupts
     INTEL_VVP_VFR_REG_IOWR((&vfr_drm_p->vfr_instance), VFR_REG_IRQ_CONTROL, 1);
-
-    spin_unlock_irqrestore( &( sdev->lock ), flags );
 
     return irq_return;
 }
@@ -316,6 +365,7 @@ int vfr_drm_plane_add(struct vfr_drm_device *sdev, struct platform_device *pdev,
     int ret;
     
     vfr_drm_p->sdev = sdev;
+    spin_lock_init(&vfr_drm_p->flip_lock);
     
     ret = drm_universal_plane_init(dev, &vfr_drm_p->plane, 0, &vfr_drm_plane_funcs,
                        vfr_drm_p->formats, vfr_drm_p->nformats,
@@ -324,13 +374,13 @@ int vfr_drm_plane_add(struct vfr_drm_device *sdev, struct platform_device *pdev,
     if (ret)
         return ret;
     drm_plane_helper_add(&vfr_drm_p->plane, &vfr_drm_plane_helper_funcs);
-    drm_plane_enable_fb_damage_clips(&vfr_drm_p->plane);
- 
+    drm_plane_enable_fb_damage_clips(&vfr_drm_p->plane); 
+
     vfr_drm_p->hw_irq = platform_get_irq(pdev, vfr_drm_p->vfr_irq_index);
     if(vfr_drm_p->hw_irq > 0)
     {
         drm_info(dev, "vfr_drm: VFR irq found %i\n", vfr_drm_p->hw_irq);
-        int status = request_threaded_irq( vfr_drm_p->hw_irq, vfr_drm_irq, NULL, IRQF_SHARED, "VFR DRM", vfr_drm_p );
+        int status = devm_request_irq(&pdev->dev, vfr_drm_p->hw_irq, vfr_drm_irq, IRQF_SHARED, "VFR DRM", vfr_drm_p );
         if( status )
         {
             drm_err(dev, "vfr_drm: Couldn't request IRQ line - error %d!\n",status);
@@ -349,18 +399,21 @@ int vfr_drm_plane_add(struct vfr_drm_device *sdev, struct platform_device *pdev,
             }
             else
             {
-                drm_info(dev, "using I/O ASE at %pr\n", ase_mem);
+                if(ase_mem->start != 0)
+                {
+                    drm_info(dev, "using I/O ASE at %pr\n", ase_mem);
 
-                ase_base = devm_ioremap_resource(&pdev->dev, ase_mem);
-                if (!ase_base)
-                {
-                    drm_err(dev, "vfr_drm: Failed to map ase registers!\n");
-                }
-                else
-                {
-                    drm_info(dev, "using ASE mapped at %p\n", ase_base);
-                    intel_addr_span_expander_init(&vfr_drm_p->ase_instance, (intel_vvp_core_base)ase_base);
-                    intel_addr_span_expander_set_window_address(&vfr_drm_p->ase_instance, 0, vfr_drm_p->fb_offset & 0xFFFFFFFF80000000ULL);
+                    ase_base = devm_ioremap_resource(&pdev->dev, ase_mem);
+                    if (!ase_base)
+                    {
+                        drm_err(dev, "vfr_drm: Failed to map ase registers!\n");
+                    }
+                    else
+                    {
+                        drm_info(dev, "using ASE mapped at %p\n", ase_base);
+                        intel_addr_span_expander_init(&vfr_drm_p->ase_instance, (intel_vvp_core_base)ase_base);
+                        intel_addr_span_expander_set_window_address(&vfr_drm_p->ase_instance, 0, vfr_drm_p->fb_offset[0] & 0xFFFFFFFF80000000ULL);
+                    }
                 }
             }
             
@@ -384,22 +437,32 @@ int vfr_drm_plane_add(struct vfr_drm_device *sdev, struct platform_device *pdev,
                 else
                 {
                     drm_info(dev, "using VFR mapped at %p\n", vfr_base);
-                    intel_addr_span_expander_init(&vfr_drm_p->ase_instance, (intel_vvp_core_base)ase_base);
+                    //intel_addr_span_expander_init(&vfr_drm_p->ase_instance, (intel_vvp_core_base)ase_base);
                     intel_vvp_vfr_init(&vfr_drm_p->vfr_instance, (intel_vvp_core_base)vfr_base);
 
-                    intel_vvp_vfr_set_bufset_base_addr(&vfr_drm_p->vfr_instance, 0, vfr_drm_p->fb_offset & 0x7FFFFFFFULL);
-                    intel_vvp_vfr_set_bufset_inter_buffer_offset(&vfr_drm_p->vfr_instance, 0, 0);
-                    intel_vvp_vfr_set_bufset_inter_line_offset(&vfr_drm_p->vfr_instance, 0, vfr_drm_p->pitch);
-                    intel_vvp_vfr_set_bufset_field_count(&vfr_drm_p->vfr_instance, 0, 1);
+                    intel_vvp_vfr_set_num_buffer_sets(&vfr_drm_p->vfr_instance, vfr_drm_p->num_frame_buffers);
+                    for(uint32_t index = 0; index < vfr_drm_p->num_frame_buffers; index++)
+                    {
+#ifdef USE_DMA
+                        intel_vvp_vfr_set_bufset_base_addr(&vfr_drm_p->vfr_instance, index, vfr_drm_p->dma_emif_offset[index] & 0x7FFFFFFFULL);
+#else
+                        intel_vvp_vfr_set_bufset_base_addr(&vfr_drm_p->vfr_instance, index, vfr_drm_p->fb_offset[index] & 0x7FFFFFFFULL);
+#endif
+                        intel_vvp_vfr_set_bufset_inter_buffer_offset(&vfr_drm_p->vfr_instance, index, 0);
+                        intel_vvp_vfr_set_bufset_inter_line_offset(&vfr_drm_p->vfr_instance, index, vfr_drm_p->pitch);
+                        intel_vvp_vfr_set_bufset_field_count(&vfr_drm_p->vfr_instance, index, 1);
 
-                    intel_vvp_vfr_set_bufset_bps(&vfr_drm_p->vfr_instance, 0, 8);
-                    intel_vvp_vfr_set_bufset_colorspace(&vfr_drm_p->vfr_instance, 0, 0);
-                    intel_vvp_vfr_set_bufset_cositing(&vfr_drm_p->vfr_instance, 0, 0);
-                    intel_vvp_vfr_set_bufset_interlace(&vfr_drm_p->vfr_instance, 0, 0);
-                    intel_vvp_vfr_set_bufset_subsampling(&vfr_drm_p->vfr_instance, 0, 0x3);
+                        intel_vvp_vfr_set_bufset_bps(&vfr_drm_p->vfr_instance, index, 8);
+                        intel_vvp_vfr_set_bufset_colorspace(&vfr_drm_p->vfr_instance, index, 0);
+                        intel_vvp_vfr_set_bufset_cositing(&vfr_drm_p->vfr_instance, index, 0);
+                        intel_vvp_vfr_set_bufset_interlace(&vfr_drm_p->vfr_instance, index, 0);
+                        intel_vvp_vfr_set_bufset_subsampling(&vfr_drm_p->vfr_instance, index, 0x3);
 
-                    intel_vvp_vfr_set_bufset_width(&vfr_drm_p->vfr_instance, 0, vfr_drm_p->width);
-                    intel_vvp_vfr_set_bufset_height(&vfr_drm_p->vfr_instance, 0, vfr_drm_p->height);
+                        intel_vvp_vfr_set_bufset_width(&vfr_drm_p->vfr_instance, index, vfr_drm_p->width);
+                        intel_vvp_vfr_set_bufset_height(&vfr_drm_p->vfr_instance, index, vfr_drm_p->height);
+
+                        intel_vvp_vfr_set_bufset_num_buffers(&vfr_drm_p->vfr_instance, index, 1);
+                    }
                     intel_vvp_core_set_img_info_width(&vfr_drm_p->vfr_instance, vfr_drm_p->width);
                     intel_vvp_core_set_img_info_height(&vfr_drm_p->vfr_instance, vfr_drm_p->height);
 

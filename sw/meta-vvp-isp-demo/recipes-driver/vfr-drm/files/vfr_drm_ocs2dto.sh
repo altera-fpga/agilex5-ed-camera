@@ -247,8 +247,12 @@ fi
 cat >>vfr_drm_ocs.dtso <<EOF
                 memory-region = <&overlay_fb_reserved>;
                 interrupt-parent = <&intc>;
-                interrupts = <0 51 4>, <0 52 4>;
+                interrupts = <0 19 4>, <0 20 4>;
                 status = "okay";
+                dma_mem_start = <0x00000010 0x00000000>;
+                dma_mem_end = <0x00000013 0xFFFFFFFF>;
+                dmas = <&msgdma1 0>;
+                dma-names = "drm";
             };
         };
     };

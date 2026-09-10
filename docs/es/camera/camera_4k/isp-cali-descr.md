@@ -6,18 +6,14 @@ The 4Kp60 Multi-Sensor HDR Camera Solution System Example Design for Agilex™ 5
 when used with the additional offline calibration tools, can help calibrate the
 Image Signal Processing (ISP) pipeline for any given Image Sensor.
 
-Note that Image Sensor ingest can be via a live Image Sensor as connected to
-the Development Kit, or raw bayer images uploaded and played using the Input
-Frame Reader function.
-
-
 <br/>
 
 > **Important Notes** <br/>
-> The following text can contain embedded links that aim to assist with
-> navigation, pointers to useful references and resources, or to add clarity. <br/>
-> There may be slight variations between screenshots and diagrams used here
-> and the actual Camera Solution System Example Design.
+> **-** The following text can contain embedded links that aim to assist with
+        navigation, pointers to useful references and resources, or to add
+        clarity. <br/>
+> **-** There may be slight variations between screenshots and diagrams used
+        here and the actual Camera Solution System Example Design.
 
 <br/>
 
@@ -27,7 +23,7 @@ This guide describes the end-to-end image sensor calibration flow using the
 subtraction, adaptive noise reduction (ANR), and color reproduction across a
 range of illuminants. The procedure is performed using the Camera Solution
 System Example Designs web GUI and is supplemented by offline
-[Jupyter Notebook] processing for color correction matrix (CCM) and white
+[Jupyter Notebook](https://jupyter.org/) processing for color correction matrix (CCM) and white
 balance correction (WBC) coefficients.
 
 <br/>
@@ -39,6 +35,8 @@ balance correction (WBC) coefficients.
 | Black Level | Measure CFA pedestal and scaler values at each analog gain step | Dark box or dark room |
 | ANR | Characterize dark noise and combined gain for adaptive noise reduction | Controlled static scene and dark cover |
 | Colorimetry | Capture raw images at multiple color temperatures; compute WBC and CCM offline | Light box or gray wall with color chart |
+
+<br/>
 
 > **Important** <br/>
 > The phases must be performed in order as each phase builds on parameters
@@ -64,20 +62,46 @@ balance correction (WBC) coefficients.
 
 > **Note** <br/>
 > The guide assumes a live image sensor is being used such as the Sony IMX678
-  sensor (as used in the examples below). However the Input Frame Reader
-  function of the Camera Solution System Example Design can be equally used
-  as long as the actual raw bayer images/sequence of images being used
-  conform to the requirements being asked for by the calibration process. For
-  example, dark scene capture images taken with different analog gain
-  settings. Some calibration steps will only require single input images,
-  whereas others (like ANR calibration) will require a sequence of input
-  images.
+  sensor (as used in the examples below). You can only use the standard
+  Application Software with a live sensor, if the sensor is supported.
+  Non-supported sensors will require Application Software changes to both the
+  sensor I2C driver Application and the main Application.
+> The Linux software stack includes the i2cdetect and i2ctransfer commands to
+  aid sensor I2C driver development. Using the connected terminal:
+>    ```
+>    root
+>    # list devices connected to the MIPI I2C bus
+>    i2cdetect -r -y 1
+>
+>    # an example to read from device 0x1A:
+>    i2ctransfer -y 1 w2@0x1a 0x30 0x00 r1
+>
+>    # an example to write to device 0x1A:
+>    i2ctransfer -y 1 w3@0x1a 0x30 0x00 0x0
+>  ```
+> Note that the Agilex 5e Modular Development Kit hard-wires the MIPI0
+  SLAMODE0-2 connector pins high and the MIPI1 SLAMODE0-2 connector pins low.
+  This will help you determine what a connected sensor's likely I2C address
+  will be although be aware that not all MIPI devices use the SLAMODE pins.
+  Framos GMSL solution is one such example. <br/>
+> As an alternative, when using the standard Application Software, the Input
+  Frame Reader function of the Camera Solution System Example Design can be
+  used as the sensor ingest. Externally captured raw bayer sensor images can be
+  uploaded and played through the ISP pipeline. 8-16-bit color depth, RGB and
+  RGGB CFA phase images - up to 4k resolutions are generally supported,
+  although they must also conform to the requirements being asked for by the
+  calibration process. For example, dark scene capture images taken with
+  different analog gain settings. Some calibration steps will only require
+  single input images, whereas others (like ANR calibration) will require a
+  sequence of input images. Note that RGB images will always be converted to
+  RGGB CFA phase images. Supporting different CFA phase image formats will
+  require an Application Software change.
 
 <br/>
 
 ### Software
-* [GIMP] (or equivalent) for raw image inspection and grayscale conversion.
-* [Jupyter Notebook] with [python] 3.11+ and package dependencies for
+* [GIMP](https://www.gimp.org/) (or equivalent) for raw image inspection and grayscale conversion.
+* [Jupyter Notebook](https://jupyter.org/) with [python](https://www.python.org/) 3.11+ and package dependencies for
   [`color_calibration.ipynb`](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/calibration/color_calibration.ipynb).
 
 <br/>
@@ -96,20 +120,17 @@ balance correction (WBC) coefficients.
 * Place the system in a dark box or dark room. Follow all the Camera Solution
   System Example Design instructions to setup and run the demo. Do not exclude
   any steps as this guide requires the terminal, Web browser, and output
-  monitor connections. Remember to take note of the Modular Development Kit's IP address.
+  monitor connections. Remember to take note of the Modular Development Kit IP
+  address.
+  * The IP address can also be found using the terminal by logging in as `root`
+    (no password required) and querying the Ethernet controller:
 
-<br/>
+    ```bash
+    root
+    ifconfig
+    ```
 
-> **Note** <br/>
-> The IP address can also be found using the terminal by logging in as `root`
-  (no password required) and querying the Ethernet controller: <br/>
-> ```bash
->  root
->  ifconfig
->  ```
-> `eth0` provides the IPv4 or IPv6 address to connect to.
-
-<br/>
+  * `eth0` provides the IPv4 or IPv6 address to connect to.
 
 * Ensure you are logged in as `root` and stop any running instance of the demo application:
 
@@ -149,11 +170,20 @@ balance correction (WBC) coefficients.
 </center>
 
 <br/>
+
 The `Input Config` Tab will be used to set `Shutter Speed` and `Analog Gain`
 (in the `Camera` Tile), and to disable auto exposure (AE) and auto white
 balance (AWB) functions (within their respective Tiles) during the calibration
 process.
 
+<br/>
+
+> **Note** <br/>
+> power-user mode exposes the I2C controller to the sensor connected. You can
+  use this to peek and poke sensor registers. You should only use this
+  function, with caution, if you know the sensor register map.
+
+<br/>
 <br/>
 
 The `Sensor Calibration` Tab is is the primary workspace for calibrating the
@@ -263,6 +293,8 @@ power-of-two sequence:
   `Sensor Calibration` Tab and re-select the matching gain from the
   `Select Gain` dropdown.
 
+<br/>
+
 * Re-cover the sensor if needed, then click `Read BLS`. The `CFA Pedestal` and
   `CFA Scalar` fields will populate automatically and the values will be
   recorded internally.
@@ -363,7 +395,7 @@ scene for all gain steps.
 Colorimetry calibration captures raw sensor images at multiple color
 temperatures. White balance statistics are collected within the GUI. Color
 Correction Matrix (CCM) and refined White Balance Correction (WBC) coefficients
-are computed offline using a [Jupyter Notebook].
+are computed offline using a [Jupyter Notebook](https://jupyter.org/).
 
 <br/>
 
@@ -445,7 +477,7 @@ click `Read Color Temp Data` to capture the white balance statistics:
   * Click `Raw Camera Snapshot`.
   * Click `Download Image`.
   * Rename the file with the color temperature for future reference (e.g., 2700K.tif).
-* Open the image in [GIMP] and verify the exposure:
+* Open the image in [GIMP](https://www.gimp.org/) and verify the exposure:
   * The brightest pixels in the white patch in the color chart should ideally
     fall between **50,000** and **58,000** in 16-bit range.
   * Re-adjust the exposure and recapture if necessary.
@@ -481,12 +513,12 @@ replace the corresponding fields in the exported calibration `.json` file.
 
 ### Prepare Raw Images
 
-* Open all captured TIFF images in [GIMP].
+* Open all captured TIFF images in [GIMP](https://www.gimp.org/).
 * Convert each image to **grayscale** mode and overwrite the original files.
-  The [Jupyter Notebook] expects single-channel CFA raw data.
+  The [Jupyter Notebook](https://jupyter.org/) expects single-channel CFA raw data.
 * Determine the corner coordinates of the color chart in each image. Record as
   `vertical_start`, `vertical_end`, `horizontal_start`, and `horizontal_end`.
-* Copy the images to the [Jupyter Notebook] image folder, following the same
+* Copy the images to the [Jupyter Notebook](https://jupyter.org/) image folder, following the same
   directory layout as existing sensors -
   `../images/<sensor>_calibration/wb_ccm/`
 
@@ -498,7 +530,7 @@ replace the corresponding fields in the exported calibration `.json` file.
 
 <br/>
 
-### Configure the [Jupyter Notebook]
+### Configure the [Jupyter Notebook](https://jupyter.org/)
 
 Open [`color_calibration.ipynb`](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/calibration/color_calibration.ipynb)
 and verify the sensor-specific parameters:
@@ -522,7 +554,7 @@ and verify the sensor-specific parameters:
 
 <br/>
 
-### Setup the Python Environment and Launch the [Jupyter Notebook]
+### Setup the Python Environment and Launch the [Jupyter Notebook](https://jupyter.org/)
 
 * Install required packages:
 
@@ -541,8 +573,8 @@ and verify the sensor-specific parameters:
 
 ### Run and Extract Coefficients
 
-* Run all cells in the [Jupyter Notebook].
-* For each color temperature, the [Jupyter Notebook] prints:
+* Run all cells in the [Jupyter Notebook](https://jupyter.org/).
+* For each color temperature, the [Jupyter Notebook](https://jupyter.org/) prints:
   * `rgb_scalars` — white balance correction (WBC) coefficients.
   * `ccm_coeffs` — 3×4 color correction matrix (CCM) coefficients.
   * Delta-E error metrics for quality assessment.
@@ -619,14 +651,6 @@ and verify the sensor-specific parameters:
 
 
 
-
-
-
-
-
-
-
-
 [User flow 1]: ../camera_4k/camera_4k.md#pre-requisites
 [User flow 2]: ../camera_4k/flow2-sof-mdt.md
 [User flow 3]: ../camera_4k/flow3-rbf-mdt.md
@@ -639,7 +663,7 @@ and verify the sensor-specific parameters:
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
@@ -657,7 +681,11 @@ and verify the sensor-specific parameters:
 [AGX_5E_Modular_Devkit_ISP_RD.xml]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AGX_5E_Modular_Devkit_ISP_RD.xml
 [Create microSD card image (.wic.gz) using YOCTO/KAS]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md
 [SOF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[SOF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [RBF Modular Design Toolkit (MDT) Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt
+[RBF Modular Design Toolkit (MDT) Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt
 [Quartus® GUI Create Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#using-the-pregenerated-mdt-quartus-project
 [Quartus® GUI Build Flow]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/HDR_CAMERA.md#building-the-pregenerated-mdt-quartus-project
 
@@ -694,6 +722,7 @@ and verify the sensor-specific parameters:
 [openSCAD File - Fixed Camera Mount Adapter for Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/gmsl_bracket_framos.scad
 [openSCAD File - Multi-Camera Tripod Mount Adapter for Framos]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1/stitch_camera_mount.scad
 
+
 [ultralytics YOLO]: https://docs.ultralytics.com
 [ONNX]: https://onnx.ai/
 [OpenVINO™ Toolkit]: https://storage.openvinotoolkit.org/repositories/openvino/packages/2024.6/linux
@@ -703,11 +732,13 @@ and verify the sensor-specific parameters:
 
 [Agilex™ 5 E-Series Modular Development Board GSRD User Guide (25.1)]: https://altera-fpga.github.io/rel-25.1/gsrd/ug-gsrd-agx5e-modular/
 [Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/gsrd/ug-gsrd-agx5e-modular/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/gsrd/ug-gsrd-agx5e-modular/
 
 
 [Agilex™ 5 SoC FPGA]: https://www.altera.com/products/fpga/agilex/5
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (25.1)]: https://docs.altera.com/r/docs/814346/25.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/download-document
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1)]:https://docs.altera.com/r/docs/814346/26.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
+[Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1.1)]:https://docs.altera.com/r/docs/814346/26.1.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [NiosV Processor for Altera® FPGA]: https://www.altera.com/design/guidance/nios-v-developer
 [Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3001/agilex-5-fpga-and-soc-e-series-modular-development-kit-es
 [Agilex™ 5 FPGA E-Series Modular Development Kits - Product Brief]: https://docs.altera.com/v/u/docs/815178/agilex-5-fpga-e-series-065b-and-065a-modular-development-kit-product-brief
@@ -734,6 +765,12 @@ and verify the sensor-specific parameters:
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-windows
 [Altera® Quartus® Prime Pro Edition version 26.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.0.110-linux.run
 [Altera® Quartus® Prime Pro Edition version 26.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.0.110-windows.exe
+
+
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-linux
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-windows
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.1.110-linux.run
+[Altera® Quartus® Prime Pro Edition version 26.1.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.1.110-windows.exe
 
 
 
@@ -779,7 +816,7 @@ and verify the sensor-specific parameters:
 [MSGDMA IP]: https://docs.altera.com/r/docs/683130/26.1/embedded-peripherals-ip-user-guide/modular-scatter-gather-dma-core
 [Broadcaster IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/axi-stream-broadcaster-ip
 [Video and Vision Monitor IP]: https://docs.altera.com/r/docs/683329/25.1/video-and-vision-processing-suite-ip-user-guide/video-and-vision-monitor-ip
-[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_interest_basic_guide.pdf
+[Region Of Interest IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Region_of_Interest_basic_guide.pdf
 [Remoasaic IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Remosaic_basic_guide.pdf
 [Throttle IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Throttle_basic_guide.pdf
 [Alpha Channel IP]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/docs/camera/common/non-qpds-ip/Alpha_Channel_basic_guide.pdf

@@ -14,6 +14,7 @@ set(header_files "")
 set(header_files ${header_files} ${CMAKE_CURRENT_SOURCE_DIR}/VvpIspDemo.h)
 set(header_files ${header_files} ${CMAKE_CURRENT_SOURCE_DIR}/IFrameCapture.h)
 set(header_files ${header_files} ${CMAKE_CURRENT_SOURCE_DIR}/ILogoControl.h)
+set(header_files ${header_files} ${CMAKE_CURRENT_SOURCE_DIR}/IWebSocketHandler.h)
 set(header_files ${header_files} ${CMAKE_CURRENT_SOURCE_DIR}/IUIConnection.h)
 set(header_files ${header_files} ${CMAKE_CURRENT_SOURCE_DIR}/CoreIspPipeline.h)
 set(header_files ${header_files} ${CMAKE_CURRENT_SOURCE_DIR}/UdxVvpIspPipeline.h)
@@ -69,6 +70,7 @@ add_executable(${PROJECT_NAME} ${all_files} ${generated_files})
 
 set(interface_header_files "")
 set(interface_header_files ${interface_header_files} ${CMAKE_CURRENT_SOURCE_DIR}/IFrameCapture.h)
+set(interface_header_files ${interface_header_files} ${CMAKE_CURRENT_SOURCE_DIR}/IWebSocketHandler.h)
 set(interface_header_files ${interface_header_files} ${CMAKE_CURRENT_SOURCE_DIR}/dp_tx_app_src/dptx_formats.h)
 
 add_library(${PROJECT_NAME}Interface INTERFACE ${interface_header_files})
@@ -89,10 +91,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${common_compile_definitions} ${CAMERA_DEFINITIONS} ${mixer_definitions})
 
-if(SUPPORT_DMA)
-target_compile_definitions(${PROJECT_NAME} PRIVATE SUPPORT_DMA)
-endif()
-
 if(ISP_AI_BUILD)
 target_compile_definitions(${PROJECT_NAME} PRIVATE ISP_AI_BUILD)
 target_compile_definitions(${PROJECT_NAME} PRIVATE MAX_30_FPS)
@@ -102,6 +100,9 @@ if(ISP_STITCH_BUILD)
 target_compile_definitions(${PROJECT_NAME} PRIVATE ISP_STITCH_BUILD)
 endif()
 
+if(USE_DRM)
+target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DRM)
+endif()
 
 #region Subdirectories
 add_subdirectory(ui)
@@ -130,6 +131,7 @@ if(ISP_AI_BUILD)
 endif()
 
 # helpers
+target_link_libraries(${PROJECT_NAME} PUBLIC dmaOverlayHelper)
 target_link_libraries(${PROJECT_NAME} PUBLIC drmHelper)
 target_link_libraries(${PROJECT_NAME} PUBLIC MultiChannelAutoExposure)
 target_link_libraries(${PROJECT_NAME} PUBLIC MultiChannelWhiteBalance)

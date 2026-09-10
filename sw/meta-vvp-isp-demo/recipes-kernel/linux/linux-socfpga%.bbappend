@@ -18,6 +18,14 @@ SRC_URI:append:agilex5_mk_a5e065bb32aes1 = ' \
     file://0007-altera-msgdma-terminate-all.patch \
     '
 
+SRC_URI:append:agilex5_mk_a5e065bb32aea = ' \
+    file://i2c.cfg \
+    file://msgdma.cfg \
+    file://vfr_drm.cfg \
+    file://0005-altera-msgdma.patch \
+    file://0007-altera-msgdma-terminate-all.patch \
+    '
+
 SRC_URI:append:agilex5_dk_a5e065bb32aes = ' \
     file://89d1397540cd290dbdb9efa663700437e9f8b5dd_revert.patch \
     file://i2c.cfg \

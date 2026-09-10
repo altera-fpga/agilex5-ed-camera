@@ -14,7 +14,7 @@ header:
     - repo: meta-altera-fpga
       file: kas/base.yml
     - repo: meta-altera-fpga
-      file: kas/poky.yml
+      file: kas/oe-core.yml
     - repo: meta-altera-fpga
       file: kas/dev.yml
     - repo: meta-altera-fpga-ocs
@@ -23,7 +23,7 @@ header:
       file: kas/vvp-isp-demo.yml
 
 # default machine, override with KAS_MACHINE
-machine: agilex5_mk_a5e065bb32aes1  
+machine: agilex5_mk_a5e065bb32aea
 
 repos:
   meta-vvp-isp-demo:

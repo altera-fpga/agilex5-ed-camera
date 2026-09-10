@@ -35,5 +35,5 @@ void AiTabbedUiControls::CreateCoreDlaRuntimeTab()
     };
 
     _spAIRuntimeTab = _appCreateUiTabCB("AI runtime", aiRuntimeTabControlsEnabledCB, "AI runtime controls.");
-    _spAIRuntime = _spAIRuntimeTab->AddHapiControl<AIRuntimeControls>(_spAiPipeline->GetCoreDlaRuntime(), _spAiPipeline->GetAiResultsRenderer(), _powerUser);
+    _spAIRuntime = _spAIRuntimeTab->AddHapiControl<AIRuntimeControls>(_spAiPipeline->GetCoreDlaRuntime(), _spAiPipeline->GetAiResultsRenderer(), VvpIspDemo::Get(), _powerUser);
 }

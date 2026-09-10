@@ -135,7 +135,7 @@ static uint32_t get_max_frame_dimension(intel_vvp_warp_instance_t* instance)
 
 static uint32_t get_max_frame_size(intel_vvp_warp_instance_t* instance)
 {
-	uint32_t pixel_size = 4; /* Consider replacing with depth & streams fields, Configuration register (00h) */
+    uint32_t pixel_size = instance->bit_depth == 12 ? 8 : 4;
 	uint32_t frame_dimension = get_max_frame_dimension(instance);
 	uint32_t frame_size = frame_dimension * frame_dimension * pixel_size;
 
@@ -1798,13 +1798,13 @@ int intel_vvp_warp_init_instance(intel_vvp_warp_instance_t* instance, intel_vvp_
 #ifdef INTEL_VVP_WARP_ENABLE_LOGGING
 	uint32_t ver_min		= (reg_val & INTEL_VVP_WARP_CONFIG_VER_MINOR_MSK) >> INTEL_VVP_WARP_CONFIG_VER_MINOR_OFST;
 	uint32_t ver_maj		= (reg_val & INTEL_VVP_WARP_CONFIG_VER_MAJOR_MSK) >> INTEL_VVP_WARP_CONFIG_VER_MAJOR_OFST;
-	uint32_t bit_depth		= (reg_val & INTEL_VVP_WARP_CONFIG_DEPTH_MSK) >> INTEL_VVP_WARP_CONFIG_DEPTH_OFST;
 	uint32_t warp_rt		= (reg_val & INTEL_VVP_WARP_CONFIG_WARP_RT);
 	uint32_t raster_scan	= (reg_val & INTEL_VVP_WARP_CONFIG_RASTER_SCAN);
 	static const char* output_bounce_str[] = {"none", "block", "raster", "per channel"};
 	static const char* memory_map_str[] = {"SDTV", "HDTV", "4KUHD", "8KUHD"};
 #endif /*INTEL_VVP_WARP_ENABLE_LOGGING*/
 
+    uint32_t bit_depth		= (reg_val & INTEL_VVP_WARP_CONFIG_DEPTH_MSK) >> INTEL_VVP_WARP_CONFIG_DEPTH_OFST;
 	uint32_t streams		= (reg_val & INTEL_VVP_WARP_CONFIG_STREAMS_MSK) >> INTEL_VVP_WARP_CONFIG_STREAMS_OFST;
 	uint32_t num_inputs		= (reg_val & INTEL_VVP_WARP_CONFIG_NUM_INPUT_MSK) >> INTEL_VVP_WARP_CONFIG_NUM_INPUT_OFST;
 	uint32_t num_outputs	= (reg_val & INTEL_VVP_WARP_CONFIG_NUM_OUTPUT_MSK) >> INTEL_VVP_WARP_CONFIG_NUM_OUTPUT_OFST;
@@ -1851,6 +1851,7 @@ int intel_vvp_warp_init_instance(intel_vvp_warp_instance_t* instance, intel_vvp_
 	instance->cache_size_max = INTEL_VVP_WARP_CACHE_SIZE_MAX;
 
 	instance->streams = (chr_aberration ? streams : 1);
+	instance->bit_depth = bit_depth;
 	instance->block_width = mem_if_width == 64 ? 8 : 16;
 	instance->block_height = mem_if_width == 64 ? 4 : 8;
 	instance->output_skip = (output_skip ? 1 : 0);
