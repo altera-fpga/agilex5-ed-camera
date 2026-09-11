@@ -52,7 +52,7 @@
   * Based on Poky Linux with additional Yocto layers supporting Altera® FPGAs.
   * Uses the Yocto build system.
 
-* Built in sensor Calibration Tools.
+* Built-in sensor Calibration Tools.
 
 <br>
 

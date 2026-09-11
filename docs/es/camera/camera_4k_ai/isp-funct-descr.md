@@ -1077,7 +1077,7 @@ output image. It uses a VVP Test Pattern Generator IP, a VVP Mixer IP, VVP
 Frame Reader IPs, a VVP Scaler IP, and a VVP Pixel Adapter IP.
 
 The TPG is the base layer for the Mixer IP and is configured to match the
-required output resolution. By default it produces a solid black image which
+required output resolution. By default, it produces a solid black image which
 also serves as the screensaver function. In addition, the TPG also supports
 color bars which can be used to test the DP output.
 
@@ -1240,7 +1240,7 @@ copy functions include the AI processing functions and AI overlay.
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 

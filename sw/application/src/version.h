@@ -15,5 +15,5 @@ License.
 static constexpr uint32_t version_major = 2;
 static constexpr uint32_t version_minor = 5;
 static constexpr uint32_t version_build = 0;
-static constexpr uint32_t version_sub_build = 45;
+static constexpr uint32_t version_sub_build = 46;
 

@@ -49,7 +49,7 @@ composed of the following meta-layers:
 
 
 > **KAS Reference** <br/>
-> [agilex5-ed-camera/sw](https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/)
+> [agilex5-ed-camera/sw](https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/)
 
 
 ### Necessary elements in the meta-layers to bind Software and Hardware
@@ -308,7 +308,7 @@ the file and reboot the board.
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 

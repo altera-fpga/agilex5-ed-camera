@@ -832,7 +832,7 @@ inference rate is unable to keep up. The Frame Writer IP interfaces to an
 Address Span Extender which provides a 2GB window into the EMIF.
 
 When an inference is completed, the Software App reads the result from the
-appropriate external FPGA DDR4 SDRAM, processes it, and generates a inference
+appropriate external FPGA DDR4 SDRAM, processes it, and generates an inference
 results overlay image in the HPS DDR4 SDRAM. The [VID_Out Subsystem](#vid_out-subsystem)
 uses this overlay image.
 
@@ -1036,7 +1036,7 @@ testing the DP output with an ISP unaltered image.
 <br/>
 <br/>
 
-The mixer also has a pair of additional layers for HPS generared overlay
+The mixer also has a pair of additional layers for HPS generated overlay
 images. The first additional layer supports an ARGB2222 image (Alpha+RGB, 2-bit
 per color sample) up to a resolution of 1920x1080. A Scaler is provided to
 support up scaling if required. The ARGB2222 is then converted to ARGB10101010
@@ -1044,14 +1044,14 @@ using simple glue logic with a fixed conversion. The second additional layer
 supports an ARGB8888 image (Alpha+RGB, 8-bit per color sample) which is
 converted to ARGB10101010 using a Pixel Adapter IP. Both additional layers
 support per pixel alpha blending (to control the opacity of the overlay images)
-as well as global settings. The mixer can place both additional layers anywhere
+and global settings. The mixer can place both additional layers anywhere
 over the base layers.
 
 For the 4K Multi-Sensor Fisheye Camera with AI Inference Solution System Example Design for Agilex™ 5 Devices the HPS uses the first overlay for
 the AI inference results where it produces a 960x540 quarter sized HD image
 that is up scaled to 4k to fit over the entire base layers. The ARGB2222 format
 allows for 64 colors (including black and white) and has 4 levels of alpha
-blend (0%, 33%, 66%, and 100%). Using this image format maximises overlay
+blend (0%, 33%, 66%, and 100%). Using this image format maximizes overlay
 performance. The HPS uses.the second overlay for a small but detailed Altera®
 logo that is typically positioned in one corner over the base layers.
 
@@ -1071,7 +1071,7 @@ LUT is configured as a 9-bit LUT with a 10-bit input and output.
 <br/>
 <br/>
 
-Finally the Vid_Out subsystem feeds the 1 PIP VVP AXI4-S Lite, to the DP_Tx
+Finally, the Vid_Out subsystem feeds the 1 PIP VVP AXI4-S Lite, to the DP_Tx
 subsystem input (2 PIP VVP AXI4-S Full) via a VVP PIP Converter IP and VVP
 Protocol Converter IP.
 
@@ -1298,14 +1298,14 @@ Solution System Example Design Quartus® project:
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
 [Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai_warp-MDK_RevC_GrpB
 [https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1
-[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz
+[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz
 [fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
 [top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.jic
 [top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.rbf

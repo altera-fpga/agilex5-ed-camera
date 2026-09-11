@@ -67,3 +67,9 @@ development.
 <br/>
 
 ---
+
+# About this Repo
+> **-** Ensure [GIT LFS](https://git-lfs.com/) is installed prior to cloning this repository.
+        See [GIT LFS Installing](https://github.com/git-lfs/git-lfs?utm_source=gitlfs_site&utm_medium=installation_link&utm_campaign=gitlfs#installing). <br/>
+> **-** This repository contains a git submodule.
+        Use ```--recurse submodules``` option when cloning.<br/>

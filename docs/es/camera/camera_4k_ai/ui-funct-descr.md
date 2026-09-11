@@ -865,12 +865,12 @@ The Network drop box allows selection between the AI networks on the microSD car
   the ‘person’ category with seventeen skeletal key-point estimations. This
   model has an inference rate up to 30 FPS.
 
-The Detection Threshold slider controls the confidence threshold, where a valid
+The "Detection Threshold" slider controls the confidence threshold, where a valid
 detection requires the candidate’s confidence value to be greater than the
 threshold. The confidence level ranges from 0.0 for no confidence to 1.0 for
 extremely high confidence.
 
-The Intersection Over Union (IOU) Threshold slider allows the filtering of
+The "Intersection Over Union (IOU) Threshold" slider allows the filtering of
 overlapping results. The application software calculates an IOU value for each
 pair of overlapping result candidates. The IOU is the area of intersection of
 the bounding boxes divided by the area of union of the bounding boxes. An IOU
@@ -881,19 +881,19 @@ candidate with the lowest confidence when a pair of result candidates have an
 IOU value exceeding the IOU threshold. This algorithm is known as non-maximal
 suppression and allows decluttering of the results.
 
-The Keypoint Threshold slider is only applicable to pose networks and is
+The "Keypoint Threshold" slider is only applicable to pose networks and is
 disabled for detection networks. The keypoint threshold uses confidence values
 of each of the skeletal keypoints and the application software only draws the
 pose-lines (bones) between linked keypoints when both keypoint confidence
 values are above the keypoint threshold.
 
-The Display Results Overlay checkbox controls whether the application software
+The "Display Results Overlay" checkbox controls whether the application software
 renders the results over the video output. Disabling rendering is useful for
 decluttering the image during scene setup and fine-tuning the ISP components.
 Disabling the Overlay can also decrease CPU and FPGA DDR loading, which can
 lead to a higher overall inference rate.
 
-The Display Results UI checkbox allows the application software to render the
+The "Display Results UI" checkbox allows the application software to render the
 results to the UI. Enabling UI rendering is useful when the Display Results
 Overlay is disabled. An example of results rendering in the UI is shown below.
 
@@ -1122,7 +1122,7 @@ The `Defaults` button is used to reset the AI Runtime to default values.
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 

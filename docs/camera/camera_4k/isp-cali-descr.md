@@ -118,7 +118,7 @@ balance correction (WBC) coefficients.
 ## System Setup
 
 * Place the system in a dark box or dark room. Follow all the Camera Solution
-  System Example Design instructions to setup and run the demo. Do not exclude
+  System Example Design instructions to set up and run the demo. Do not exclude
   any steps as this guide requires the terminal, Web browser, and output
   monitor connections. Remember to take note of the Modular Development Kit IP
   address.
@@ -186,7 +186,7 @@ process.
 <br/>
 <br/>
 
-The `Sensor Calibration` Tab is is the primary workspace for calibrating the
+The `Sensor Calibration` Tab is the primary workspace for calibrating the
 Black Level, ANR, and color temperature (colorimetry).
 
 <br/>
@@ -233,7 +233,7 @@ required before ANR and colorimetry can produce valid results.
 * Navigate to the `Sensor Calibration` Tab:
   * In the `Black Level Calibration` Tile, confirm that `Gain` is set to **1**.
   * Click `Read BLS`. The `CFA Pedestal` and `CFA Scalar` fields will populate
-    automatically and the values will be recorded internally.
+    automatically, and the values will be recorded internally.
 
 <br/>
 <center markdown="1">
@@ -296,7 +296,7 @@ power-of-two sequence:
 <br/>
 
 * Re-cover the sensor if needed, then click `Read BLS`. The `CFA Pedestal` and
-  `CFA Scalar` fields will populate automatically and the values will be
+  `CFA Scalar` fields will populate automatically, and the values will be
   recorded internally.
 
 <br/>
@@ -325,7 +325,7 @@ uncovered.
 >   * Use absolutely non-flickering light sources. <br/>
 >   * Ensure zero movement in the scene. Any movement - even by a single pixel,
       is sufficient to invalidate the calibration. <br/>
->   * Try not not move the camera between dark-frame and scene-frame captures
+>   * Try not to move the camera between dark-frame and scene-frame captures
       at the same gain. <br/>
 
 <br/>
@@ -368,7 +368,7 @@ uncovered.
 * Confirm the scene is completely static with no movement or flickering.
 * Click `Read Scene Frames`.
 * Click `Calculate Params`. The `Combined Gain` and `Dark Noise` fields will
-  update and the values will be recorded internally.
+  update, and the values will be recorded internally.
 
 <br/>
 
@@ -405,9 +405,9 @@ are computed offline using a [Jupyter Notebook](https://jupyter.org/).
 * Place a gray card directly below the color chart or use the gray row of
   patches on the chart itself.
 * Attach a narrow-angle lens with minimal distortion and lens shading.
-* Center the camera on the color chart so the chart appears rectangular and
+* Center the camera on the color chart, so the chart appears rectangular and
   undistorted in the monitor output. If fisheye distortion is unavoidable, move
-  the camera farther away so the chart occupies a smaller, undistorted central
+  the camera farther away, so the chart occupies a smaller, undistorted central
   region of the frame.
 * Prepare light sources covering these color temperatures: **2700 K**,
   **3200 K**, **4000 K**, **5000 K**, **6000 K**, **6500 K**, **8000 K**,
@@ -554,7 +554,7 @@ and verify the sensor-specific parameters:
 
 <br/>
 
-### Setup the Python Environment and Launch the [Jupyter Notebook](https://jupyter.org/)
+### Set up the Python Environment and Launch the [Jupyter Notebook](https://jupyter.org/)
 
 * Install required packages:
 
