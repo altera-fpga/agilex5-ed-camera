@@ -216,24 +216,9 @@ bool DrmHelper::FlushOverlayLow()
 {
     bool rc = true;
 
-    if((std::chrono::steady_clock::now() - _modeset->timeLastFlush) > std::chrono::milliseconds(40))
-    {
-        std::lock_guard<std::recursive_mutex> lock(IOverlayHelper::GetLVGLMutex());
-
-        // This will swap the buffers
-        lv_timer_t disp_timer;
-        disp_timer.user_data = _overlay_display;
-        lv_display_refr_timer(&disp_timer);
-        _modeset->overlay_dirty = true;
-    }
-
-    {
-        std::lock_guard<std::recursive_mutex> lock(_modeset->lock_fb);
-        if((std::chrono::steady_clock::now() - _modeset->timeLastFlush) > std::chrono::milliseconds(40))
-        {
-            rc = FlushModeset();
-        }
-    }
+    std::lock_guard<std::recursive_mutex> lock(_modeset->lock_fb);
+    _modeset->overlay_dirty = true;
+    rc = FlushModeset();
 
     return rc;
 }

@@ -28,7 +28,7 @@ and auto exposure (AE) functions.
 The following block diagram shows the main components and subsystems of the
 Camera Solution System Example Design. Note that the IP instance number is
 shown (bottom right corner of the IP) and is used by the Application Software
-to indentify the unique instance.
+to identify the unique instance.
 
 <br/>
 <center markdown="1">
@@ -917,7 +917,7 @@ and less DDR SDRAM bandwidth requirements than double bounce, but requires
 on-chip cache memory - which can limit the transforms available), and Mipmap
 support (to perform 2:1, 4:1, 8:1 downscale ratios and allow more bandwidth for
 transforms). Warp is also used to produce lower output resolutions like Full HD
-and HD Ready, as well as support UHD. However some Camera Solutions always
+and HD Ready, as well as support UHD. However, some Camera Solutions always
 require the output to be a scaled version of the input. In this instance, and
 depending on the required scaling ratio, using a pair of VVP Scaler IPs to
 perform scaling firstly in the Horizontal domain then the Vertical domain
@@ -959,7 +959,7 @@ output image. It uses a VVP Test Pattern Generator IP, a VVP Mixer IP, VVP
 Frame Reader IP, and a VVP Pixel Adapter IP.
 
 The TPG is the base layer for the Mixer IP and is configured to match the
-required output resolution. By default it produces a solid black image which
+required output resolution. By default, it produces a solid black image which
 also serves as the screensaver function. In addition, the TPG also supports
 color bars which can be used to test the DP output.
 

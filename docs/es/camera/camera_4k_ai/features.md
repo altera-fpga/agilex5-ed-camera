@@ -42,9 +42,9 @@
         * Up to 4k ARGB8888 image
   * 1D LUT IP – for OETF operations such as Gamma, HLG, and PQ.
 
-* Up to 4Kp30 10-bit Multi-rate DisplayPort output:
-  * Selects best resolution and color depth supported by the connected Monitor. Supported modes:
-    * 720p30, 1080p30, 4Kp30, 8-bit and 10-bit color depth.
+* 4Kp30 10-bit DisplayPort output:
+  * Selects best color depth supported by the connected Monitor. Supported modes:
+    * 4Kp30, 8-bit and 10-bit color depth.
 
 * Software stack running on HPS (quad-core ARM Cortex CPU):
   * Based on Poky Linux with additional Yocto layers supporting Altera® FPGAs.
@@ -67,9 +67,9 @@
 
 
 [User flow 1]: ../camera_4k_ai/camera_4k_ai.md#pre-requisites
-[User flow 2]: ../camera_4k_ai/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k_ai/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k_ai/flow4.md
+[User flow 2]: ../camera_4k_ai/unsupported_flow.md
+[User flow 3]: ../camera_4k_ai/unsupported_flow.md
+[User flow 4]: ../camera_4k_ai/unsupported_flow.md
 
 
 
@@ -78,7 +78,7 @@
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 

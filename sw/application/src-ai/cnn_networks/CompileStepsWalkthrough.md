@@ -38,19 +38,19 @@ so the need to scale the weights in the first convolution accordingly.
 >>> 
 >>> model = onnx.load("yolov8n.onnx")
 >>> for initializer in model.graph.initializer:
->>>     if initializer.name == "model.0.conv.weight":
->>>         w_in = onnx.numpy_helper.to_array(initializer)
->>>         w_out = w_in/255.0
->>>         tp_out = onnx.numpy_helper.from_array(w_out, initializer.name)
->>>         initializer.CopyFrom(tp_out)
->>> 
+...     if initializer.name == "model.0.conv.weight":
+...         w_in = onnx.numpy_helper.to_array(initializer)
+...         w_out = w_in/255.0
+...         tp_out = onnx.numpy_helper.from_array(w_out, initializer.name)
+...         initializer.CopyFrom(tp_out)
+... 
 >>> for initializer in model.graph.initializer:
->>>     if initializer.name == "model.0.conv.weight":
->>>         w_in = onnx.numpy_helper.to_array(initializer)
->>> 
+...     if initializer.name == "model.0.conv.weight":
+...         w_in = onnx.numpy_helper.to_array(initializer)
+... 
 >>> with open("yolov8n_scaled_640_384.onnx", "wb") as f:
->>>     f.write(model.SerializeToString())
->>> 
+...     f.write(model.SerializeToString())
+... 
 >>> quit()
 ```
 
@@ -59,12 +59,14 @@ In the Camera Solution System Example Design, the decision was taken to remove
 the CPU subgrapgh from the graph and have an FPGA only graph with results
 processing handled by the SW Application.
 
-Find the inputs to the `/model.22/Reshape`, `/model.22/Reshape_1`, and
-`/model.22/Reshape_2`. For instance, load the `yolov8n.onnx` into a tool such as Netron:
+Find the inputs to the `/model.22/Reshape`, `/model.22/Reshape_1`, `/model.22/Reshape_2`, `/model.22/Reshape_3`, `/model.22/Reshape_4`, and `/model.22/Reshape_5`. For instance, load the `yolov8n.onnx` into a tool such as Netron:
 ```
-    /model.22/Reshape input is /model.22/Concat_output_0
-    /model.22/Reshape_1 input is /model.22/Concat_1_output_0
-    /model.22/Reshape_2 input is /model.22/Concat_2_output_0"
+    /model.22/Reshape input is /model.22/cv2.0/cv2.0.2/Conv_output_0
+    /model.22/Reshape_1 input is /model.22/cv2.1/cv2.1.2/Conv_output_0
+    /model.22/Reshape_2 input is /model.22/cv2.2/cv2.2.2/Conv_output_0
+    /model.22/Reshape_3 input is /model.22/cv3.0/cv3.0.2/Conv_output_0
+    /model.22/Reshape_4 input is /model.22/cv3.1/cv3.1.2/Conv_output_0
+    /model.22/Reshape_5 input is /model.22/cv3.2/cv3.2.2/Conv_output_0
 ```
 
 Regenerate onnx model in python, but use onnx.utils to split the network
@@ -76,11 +78,16 @@ python3
 >>> import os
 >>> 
 >>> onnx.utils.extract_model(
->>>     "yolov8n_scaled_640_384.onnx",
->>>     "yolov8n_short_640_384.onnx",
->>>     ["images"],
->>>     ["/model.22/Concat_output_0", "/model.22/Concat_1_output_0", "/model.22/Concat_2_output_0"],
->>> )
+...     "yolov8n_scaled_640_384.onnx",
+...     "yolov8n_short_640_384.onnx",
+...     ["images"],
+...     ["/model.22/cv2.0/cv2.0.2/Conv_output_0",
+...      "/model.22/cv2.1/cv2.1.2/Conv_output_0",
+...      "/model.22/cv2.2/cv2.2.2/Conv_output_0",
+...      "/model.22/cv3.0/cv3.0.2/Conv_output_0",
+...      "/model.22/cv3.1/cv3.1.2/Conv_output_0",
+...      "/model.22/cv3.2/cv3.2.2/Conv_output_0"],
+... )
 >>> 
 >>> quit()
 ```

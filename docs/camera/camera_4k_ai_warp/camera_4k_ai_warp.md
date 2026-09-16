@@ -27,9 +27,13 @@ Industry Processor Interface) D-PHY and MIPI CSI-2 interface on Agilex™ 5
 FPGAs, along with Altera®'s FPGA AI Suite, provides a powerful tool for smart
 camera product development.
 
+| |<center markdown="1">An example of fisheye input</center>| |
+|-|-|-|
+| ![b](./images/AI/blank.png) | ![Fisheye input example](./images/AI/warp_input.jpg) | ![b](./images/AI/blank.png) |
+
 |<center markdown="1">An example of AI Detect</center>|<center markdown="1">An example of AI Pose</center>|
 |-|-|
-| ![Detect example](../camera_4k_ai/images/AI/detect_hd.png) | ![POSE example](../camera_4k_ai/images/AI/pose_hd.png) |
+| ![Detect example](./images/AI/warp_detect.jpg) | ![POSE example](./images/AI/warp_pose.jpg) |
 
 The MIPI interface supports up to 2.5Gbps per lane and up to 8x lanes per MIPI
 interface, enabling seamless data reception from multiple 4K image sensors to
@@ -273,7 +277,7 @@ Kit.
 | Source | Link | Description |
 | ---- | ---- | ---- |
 | QSPI | [top.core.jic] | Allows the Camera Solution System Example Design to be booted from the microSD card |
-| microSD Card Image | [hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz] | The Camera Solution System Example Design |
+| microSD Card Image | [hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz] | The Camera Solution System Example Design |
 
 <br/>
 
@@ -988,8 +992,8 @@ flows that you can explore:
  | HW-Compilation | Creating and Building the Design based on the [SOF Modular Design Toolkit (MDT) Create Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_WARP_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt) and [SOF Modular Design Toolkit (MDT) Build Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_WARP_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt) | &cross; | &check; | &cross; | &cross; |
  | | Creating and Building the Design based on the [RBF Modular Design Toolkit (MDT) Create Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_WARP_CAMERA.md#create-the-design-using-the-modular-design-toolkit-mdt) and [RBF Modular Design Toolkit (MDT) Build Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_WARP_CAMERA.md#build-the-design-using-the-modular-design-toolkit-mdt) | &cross; | &cross; | &check; | &cross; |
  | | Creating and Building the Design based on the [Quartus® GUI Create Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_WARP_CAMERA.md#using-the-pregenerated-mdt-quartus-project) and [Quartus® GUI Build Flow](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/AGX_5E_Altera_Modular_Dk_ISP_designs/AI_WARP_CAMERA.md#building-the-pregenerated-mdt-quartus-project) | &cross; | &cross; | &cross; | &check; |
- | SW-Compilation | [Create microSD card image (.wic.gz) using YOCTO/KAS](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md) <br/> NOTE: use **KAS_MACHINE=agilex5_mk_a5e065bb32aes1** and **kas/agilex_camera_ff.yml** configuration | &cross; | &check; | &cross; | &cross; |
- | | [Create microSD card image (.wic.gz) using YOCTO/KAS](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md) <br/> NOTE: use **KAS_MACHINE=agilex5_mk_a5e065bb32aes1** and **kas/agilex_camera.yml** configuration | &cross; | &cross; | &check; | &cross; |
+ | SW-Compilation | [Create microSD card image (.wic.gz) using YOCTO/KAS](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md) <br/> NOTE: use **KAS_MACHINE=agilex5_mk_a5e065bb32aea** and **kas/agilex_camera_ff.yml** configuration | &cross; | &check; | &cross; | &cross; |
+ | | [Create microSD card image (.wic.gz) using YOCTO/KAS](https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/sw/README.md) <br/> NOTE: use **KAS_MACHINE=agilex5_mk_a5e065bb32aea** and **kas/agilex_camera.yml** configuration | &cross; | &cross; | &check; | &cross; |
  | Programming | Setting Up the Development Kit | [&check;](../camera_4k_ai_warp/camera_4k_ai_warp.md#setting-up-the-development-kit) | [&check;](../camera_4k_ai_warp/flow2-sof-mdt.md#setting-up-the-development-kit) | [&check;](../camera_4k_ai_warp/flow3-rbf-mdt.md#setting-up-the-development-kit) | &cross; |
  | | Burn the microSD card image. | [&check;](../camera_4k_ai_warp/camera_4k_ai_warp.md#burn-the-microsd-card-image) | [&check;](../camera_4k_ai_warp/flow2-sof-mdt.md#burn-the-microsd-card-image) | [&check;](../camera_4k_ai_warp/flow3-rbf-mdt.md#burn-the-microsd-card-image) | &cross; |
  | | Copying the Compiled AI Models to the microSD Card | [&check;](../camera_4k_ai_warp/camera_4k_ai_warp.md#copying-the-compiled-ai-models-to-the-microsd-card) | [&check;](../camera_4k_ai_warp/flow2-sof-mdt.md#copying-the-compiled-ai-models-to-the-microsd-card) | [&check;](../camera_4k_ai_warp/flow3-rbf-mdt.md#copying-the-compiled-ai-models-to-the-microsd-card) | &cross; |
@@ -1068,14 +1072,14 @@ flows that you can explore:
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
 [Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai_warp-MDK_RevC_GrpB
 [https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1
-[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz
+[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz
 [fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
 [top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.jic
 [top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.rbf

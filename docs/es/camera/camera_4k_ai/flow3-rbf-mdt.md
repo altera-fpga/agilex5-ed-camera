@@ -192,7 +192,7 @@ You can use the pre-built binaries for reference:
 
 | Boot Source | Link |
 | ---------------------------------- | ---- |
-| Pre-built microSD Card Image for RBF MDT Flow | [hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevB_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz) |
+| Pre-built microSD Card Image for RBF MDT Flow | [hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz] |
 | Pre-built HPS First `.rbf` file | [top.core.rbf](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevB_GrpB/top.core.rbf) |
 | Pre-built `.jic` file | [top.core.jic](https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevB_GrpB/top.core.jic) |
 
@@ -882,9 +882,9 @@ require the microSD Card to be rebuilt and updated:
 
 
 [User flow 1]: ../camera_4k_ai/camera_4k_ai.md#pre-requisites
-[User flow 2]: ../camera_4k_ai/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k_ai/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k_ai/flow4.md
+[User flow 2]: ../camera_4k_ai/unsupported_flow.md
+[User flow 3]: ../camera_4k_ai/unsupported_flow.md
+[User flow 4]: ../camera_4k_ai/unsupported_flow.md
 
 
 
@@ -893,7 +893,7 @@ require the microSD Card to be rebuilt and updated:
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 

@@ -983,12 +983,12 @@ The Network drop box allows selection between the AI networks on the microSD car
   the ‘person’ category with seventeen skeletal key-point estimations. This
   model has an inference rate up to 30 FPS.
 
-The Detection Threshold slider controls the confidence threshold, where a valid
+The "Detection Threshold" slider controls the confidence threshold, where a valid
 detection requires the candidate’s confidence value to be greater than the
 threshold. The confidence level ranges from 0.0 for no confidence to 1.0 for
 extremely high confidence.
 
-The Intersection Over Union (IOU) Threshold slider allows the filtering of
+The "Intersection Over Union (IOU) Threshold" slider allows the filtering of
 overlapping results. The application software calculates an IOU value for each
 pair of overlapping result candidates. The IOU is the area of intersection of
 the bounding boxes divided by the area of union of the bounding boxes. An IOU
@@ -999,19 +999,19 @@ candidate with the lowest confidence when a pair of result candidates have an
 IOU value exceeding the IOU threshold. This algorithm is known as non-maximal
 suppression and allows decluttering of the results.
 
-The Keypoint Threshold slider is only applicable to pose networks and is
+The "Keypoint Threshold" slider is only applicable to pose networks and is
 disabled for detection networks. The keypoint threshold uses confidence values
 of each of the skeletal keypoints and the application software only draws the
 pose-lines (bones) between linked keypoints when both keypoint confidence
 values are above the keypoint threshold.
 
-The Display Results Overlay checkbox controls whether the application software
+The "Display Results Overlay" checkbox controls whether the application software
 renders the results over the video output. Disabling rendering is useful for
 decluttering the image during scene setup and fine-tuning the ISP components.
 Disabling the Overlay can also decrease CPU and FPGA DDR loading, which can
 lead to a higher overall inference rate.
 
-The Display Results UI checkbox allows the application software to render the
+The "Display Results UI" checkbox allows the application software to render the
 results to the UI. Enabling UI rendering is useful when the Display Results
 Overlay is disabled. An example of results rendering in the UI is shown below.
 
@@ -1134,9 +1134,9 @@ The `Defaults` button is used to reset the AI Runtime to default values.
 
 
 
-
-[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
-[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (25.1)]: https://altera-fpga.github.io/rel-25.1/gsrd/ug-gsrd-agx5e-modular/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/gsrd/ug-gsrd-agx5e-modular/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/gsrd/ug-gsrd-agx5e-modular/
 
 
 [Agilex™ 5 SoC FPGA]: https://www.altera.com/products/fpga/agilex/5
@@ -1144,7 +1144,7 @@ The `Defaults` button is used to reset the AI Runtime to default values.
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1)]:https://docs.altera.com/r/docs/814346/26.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1.1)]:https://docs.altera.com/r/docs/814346/26.1.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [NiosV Processor for Altera® FPGA]: https://www.altera.com/design/guidance/nios-v-developer
-[Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3274/agilex-5-fpga-and-soc-e-series-065b-modular-development-kit
+[Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3001/agilex-5-fpga-and-soc-e-series-modular-development-kit-es
 [Agilex™ 5 FPGA E-Series Modular Development Kits - Product Brief]: https://docs.altera.com/v/u/docs/815178/agilex-5-fpga-e-series-065b-and-065a-modular-development-kit-product-brief
 [Altera® FPGA AI Suite]: https://www.altera.com/products/development-tools/fpga-ai-suite
 
@@ -1175,6 +1175,7 @@ The `Defaults` button is used to reset the AI Runtime to default values.
 [Altera® Quartus® Prime Pro Edition version 26.1.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-windows
 [Altera® Quartus® Prime Pro Edition version 26.1.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.1.110-linux.run
 [Altera® Quartus® Prime Pro Edition version 26.1.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.1.110-windows.exe
+
 
 
 
@@ -1228,9 +1229,9 @@ The `Defaults` button is used to reset the AI Runtime to default values.
 
 
 [User flow 1]: ../camera_4k_ai_warp/camera_4k_ai_warp.md#pre-requisites
-[User flow 2]: ../camera_4k_ai_warp/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k_ai_warp/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k_ai_warp/flow4.md
+[User flow 2]: ../camera_4k_ai_warp/unsupported_flow.md
+[User flow 3]: ../camera_4k_ai_warp/unsupported_flow.md
+[User flow 4]: ../camera_4k_ai_warp/unsupported_flow.md
 
 
 
@@ -1239,17 +1240,17 @@ The `Defaults` button is used to reset the AI Runtime to default values.
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
-[Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai_warp-MDK_RevC_GrpB
+[Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai_warp-MDK_RevB_GrpB
 [https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1
-[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
-[top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.jic
-[top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.rbf
+[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
+[top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/top.core.jic
+[top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/top.core.rbf
 [model_compiler]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel-26.1/yolo_cnn
 [FPGA AI Suite Prerequisites]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/fpga_ai_suite_prerequisite.tcl
 

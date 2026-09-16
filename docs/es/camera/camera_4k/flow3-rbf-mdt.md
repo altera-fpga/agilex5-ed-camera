@@ -748,9 +748,9 @@ require the microSD Card to be rebuilt and updated:
 
 
 [User flow 1]: ../camera_4k/camera_4k.md#pre-requisites
-[User flow 2]: ../camera_4k/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k/flow4.md
+[User flow 2]: ../camera_4k/unsupported_flow.md
+[User flow 3]: ../camera_4k/unsupported_flow.md
+[User flow 4]: ../camera_4k/unsupported_flow.md
 
 
 

@@ -54,11 +54,14 @@ so the need to scale the weights in the first convolution accordingly.
 >>> quit()
 ```
 
-## Step 4: Converting ONNX model to OpenVINO™ IR format
+## Step 4: Converting ONNX model to OpenVINOï¿½ IR format
 ```
 export OPENVINO_OVC=${INTEL_OPENVINO_DIR}/python/openvino/tools/ovc/ovc.py
-python3 ${OPENVINO_OVC} yolov8n-pose_scaled_640_384.onnx --compress_to_fp16=False --output_model yolov8n_ir_640_384
+python3 ${OPENVINO_OVC} yolov8n_scaled_640_384.onnx --compress_to_fp16=False --output_model yolov8n_ir_640_384
 ```
+Note: ovc will attempt to load the graph using different converters available until one succeeds. It has been
+observed that the tourch converter can output W0916 warnings during graph load. These are irrelevant to onnx
+and can be ignorred.
 
 ## Step 5: Generating FPGA AI Suite IP architecture file (`.arch`)
 Start with a basic example achitecture (`base.arch`). The supported YOLO v8
@@ -66,7 +69,7 @@ Nano models do not use the SoftMax operator, so start with
 `AGX5_Small_NoSoftmax.arch`:
 
 ```
-cp mycoredla-src/opt/altera/fpga_ai_suite_2025.1/dla/example_architectures/AGX5_Small_NoSoftmax.arch base.arch
+cp coredla-src/opt/altera/fpga_ai_suite_2025.1/dla/example_architectures/AGX5_Small_NoSoftmax.arch base.arch
 ```
 
 Perform an initial test compile with the base architecture (`base.arch`):
@@ -77,12 +80,15 @@ dla_compiler --network-file yolov8n_ir_640_384.xml --march=base.arch
 
 Check the output:
 ```
-[ INFO ] The input graph is split into 118 subgraph(s), CPU:58 FPGA:60.
+...
+[ INFO ] The input graph is split into 124 subgraph(s), CPU:58 FPGA:66.
 [ WARNING ] Input graph is split into many subgraphs; this can be caused by unsupported architecture layers - check main_graph_dla_messages.txt.
+...
 ```
 
-You are aiming for FPGA:1, check `model_analyzer_report.txt`:
+You are aiming for FPGA:1, check `compiled_model_dir/main_graph/model_analyzer_report.txt`:
 ```
+...
 List of reasons for unsupporting layers:
 - /model.0/act/Mul: This node is of type Swish, however, neither Sigmoid nor Tanh is enabled in the architecture.
 - /model.1/act/Mul: This node is of type Swish, however, neither Sigmoid nor Tanh is enabled in the architecture.
@@ -109,11 +115,12 @@ Check the output:
 [ WARNING ] Input graph is split into many subgraphs; this can be caused by unsupported architecture layers - check main_graph_dla_messages.txt.
 ```
 
-You are aiming for FPGA:1, check `model_analyzer_report.txt`, for now ignore
+You are aiming for FPGA:1, check `compiled_model_dir/main_graph/model_analyzer_report.txt`, for now ignore
 unsupported layes at the detection head (i.e. those starting /model.22/):
 
 ```
 List of reasons for unsupporting layers:
+...
 - /model.9/m/MaxPool: Pool (/model.9/m/MaxPool) kernel width/depth, height (5/1, 5) exceeds maximum window width, height (3, 3).
 - /model.9/m_1/MaxPool: Pool (/model.9/m_1/MaxPool) kernel width/depth, height (5/1, 5) exceeds maximum window width, height (3, 3).
 - /model.9/m_2/MaxPool: Pool (/model.9/m_2/MaxPool) kernel width/depth, height (5/1, 5) exceeds maximum window width, height (3, 3).
@@ -142,7 +149,7 @@ Check the output:
 [ WARNING ] Input graph is split into many subgraphs; this can be caused by unsupported architecture layers - check main_graph_dla_messages.txt.
 ```
 
-FPGA:1 achieved. Check `model_analyzer_report.txt`:
+FPGA:1 achieved. Check `compiled_model_dir/main_graph/model_analyzer_report.txt`:
 ```
 List of redundant modules. Modules activated in the arch file, but not used:
 INFO: Arch file enables the clamp activation module, however, clamp activations are not used in the model.
@@ -165,30 +172,38 @@ dla_compiler --network-file yolov8n_ir_640_384.xml --march=base.arch
 ```
 
 ## Step 9: Review subgraphs in graphviz viewer
-Now check where the graph `hetero_subgraphs_main_graph.dot` is offloading to
-CPU using graphviz viewer. You can see the graph offloads to CPU at three
-points - `/model.22/Reshape`, `/model.22/Reshape_1`, and `/model.22/Reshape_2`.
+Now check where the graph `compiled_model_dir/main_graph/hetero_subgraphs_main_graph.dot` is offloading to
+CPU using graphviz viewer. You can see the graph offloads to CPU at six points - 
+`/model.22/Reshape`, `/model.22/Reshape_1`, `/model.22/Reshape_2`,
+`/model.22/Reshape_3`, `/model.22/Reshape_4` and `/model.22/Reshape_5`.
 
-Check `model_analyzer_report.txt` to confirm why they are offloaded:
+Check `compiled_model_dir/main_graph/model_analyzer_report.txt` to confirm why they are offloaded:
 ```
 - /model.22/Reshape: Expected the output dimension rank = 2, 4, 5 but got: 3.
 - /model.22/Reshape_1: Expected the output dimension rank = 2, 4, 5 but got: 3.
 - /model.22/Reshape_2: Expected the output dimension rank = 2, 4, 5 but got: 3.
+- /model.22/Reshape_3: Expected the output dimension rank = 2, 4, 5 but got: 3.
+- /model.22/Reshape_4: Expected the output dimension rank = 2, 4, 5 but got: 3.
+- /model.22/Reshape_5: Expected the output dimension rank = 2, 4, 5 but got: 3.
 ```
 
 At this point we can conclude that we are happy to run these layers in the
-OpenVINO™ Arm* (third-party) CPU plugin. However the end of the network
+OpenVINOï¿½ Arm* (third-party) CPU plugin. However the end of the network
 contains simple manipulation code which could be implemented more optimally in
 the SW Application. And this was the decision taken in the Camera Solution
 System Example Design.
 
 ## Step 10: Removing CPU subgraph
-Find the inputs to the `/model.22/Reshape`, `/model.22/Reshape_1`, and
-`/model.22/Reshape_2`. For instance, load the `yolov8n.onnx` into a tool such as Netron:
+Find the inputs to the `/model.22/Reshape`, `/model.22/Reshape_1`, 
+`/model.22/Reshape_2`, `/model.22/Reshape_3`, `/model.22/Reshape_4` and
+`/model.22/Reshape_5`. For instance, load the `yolov8n.onnx` into a tool such as Netron:
 ```
-    /model.22/Reshape input is /model.22/Concat_output_0
-    /model.22/Reshape_1 input is /model.22/Concat_1_output_0
-    /model.22/Reshape_2 input is /model.22/Concat_2_output_0"
+    /model.22/Reshape input is /model.22/cv2.0/cv2.0.2/Conv_output_0
+    /model.22/Reshape_1 input is /model.22/cv2.1/cv2.1.2/Conv_output_0
+    /model.22/Reshape_2 input is /model.22/cv2.2/cv2.2.2/Conv_output_0
+    /model.22/Reshape_3 input is /model.22/cv3.0/cv3.0.2/Conv_output_0
+    /model.22/Reshape_4 input is /model.22/cv3.1/cv3.1.2/Conv_output_0
+    /model.22/Reshape_5 input is /model.22/cv3.2/cv3.2.2/Conv_output_0
 ```
 
 Regenerate ONNX model in python, but use `onnx.utils` to split the network:
@@ -200,21 +215,26 @@ python3
 >>> import os
 >>> 
 >>> onnx.utils.extract_model(
->>>     "yolov8n_scaled_640_384.onnx",
->>>     "yolov8n_short_640_384.onnx",
->>>     ["images"],
->>>     ["/model.22/Concat_output_0", "/model.22/Concat_1_output_0", "/model.22/Concat_2_output_0"],
->>> )
->>> 
+...     "yolov8n_scaled_640_384.onnx",
+...     "yolov8n_short_640_384.onnx",
+...     ["images"],
+...     ["/model.22/cv2.0/cv2.0.2/Conv_output_0",
+...      "/model.22/cv2.1/cv2.1.2/Conv_output_0",
+...      "/model.22/cv2.2/cv2.2.2/Conv_output_0",
+...      "/model.22/cv3.0/cv3.0.2/Conv_output_0",
+...      "/model.22/cv3.1/cv3.1.2/Conv_output_0",
+...      "/model.22/cv3.2/cv3.2.2/Conv_output_0"],
+... )
+... 
 >>> quit()
 ```
 
-## Step 11: Convert shortened ONNX model to OpenVINO™ IR format
+## Step 11: Convert shortened ONNX model to OpenVINOï¿½ IR format
 ```
 python3 ${OPENVINO_OVC} yolov8n_short_640_384.onnx --compress_to_fp16=False --output_model yolov8n_ir_640_384
 ```
 
-Perform a test compile of the new OpenVINO™ IR model:
+Perform a test compile of the new OpenVINOï¿½ IR model:
 ```
 dla_compiler --network-file yolov8n_ir_640_384.xml --march=base.arch
 ```

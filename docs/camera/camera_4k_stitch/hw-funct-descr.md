@@ -697,11 +697,11 @@ SW App to highlight an area of interest in the image for use in the GUI.
 
 The 4Kp60 Multi-Sensor Camera Stitch Solution System Example Design for Agilex™ 5 Devices stitches 2 camera images side-by-side. It
 does this by downscaling each 4K input image (3840 * 2160) to 2K (2160 * 1080)
-before stiching together to produce a 4K x 1k output image (3840 * 1080)
+before stitching together to produce a 4K x 1k output image (3840 * 1080)
 (albeit slightly less due to image overlay). The downscaling is achieved using
 a pair of VVP Scaler IPs in series. Firstly is a horizontal downscale followed
 by a vertical downscale. This combination reduces the line store requirements
-and therefore minimises resources.
+and therefor minimizes resources.
 <br/>
 <br/>
 
@@ -715,7 +715,7 @@ EMIF.
 <br/>
 <br/>
 
-Stitching uses an alpha blend to achieve a seemless blend along 1 edge between
+Stitching uses an alpha blend to achieve a seamless blend along 1 edge between
 2 side-by-side images. This is achieved by adding an alpha channel to 1 of the
 ISP pipelines. The Alpha Channel IP adds the alpha channel values to every
 pixel in a video line of a given image. The same set of values are used on
@@ -762,15 +762,15 @@ table:
 
 Both Stitch_ISP outputs feed into the VVP Mixer IP. The mixer uses a VVP TPG IP
 to provide a 4K solid black base layer (layer 0). Layer 1 is used for the left
-2K image which is positioned over the base layer to the left hand side. The
+2K image which is positioned over the base layer to the left-hand side. The
 exact position is the left image left edge is offset to the TPG image left edge
 by the stitch overlap width. Layer 2 is used for the right 2K image which is
-positioned over the base layer (and left image layer) to the right hand side.
+positioned over the base layer (and left image layer) to the right-hand side.
 The exact position is the right image right edge is offset to the TPG image
-right edge by the stitch overlap width. Therefore the left edge of the right
+right edge by the stitch overlap width. Therefore, the left edge of the right
 image is positioned over the right edge of the left image by the stitch overlap
 width. The mixer performs the alpha blend when it overlays the right image.
-Typically the left edge of the right image will have a transparent to opaque
+Typically, the left edge of the right image will have a transparent to opaque
 function over the stitch overlap width therefore smoothly blending the left
 image into the right.
 <br/>
@@ -908,7 +908,7 @@ anything useful like a logo.
 
 A VVP Frame Reader IP is used to fetch the overlay image from the HPS DDR4
 SDRAM via the F2SDRAM HPS interface. A VVP Scaler IP can be used to upscale the
-image which can be placed anywhere in the final output image. A Pixel Adpater
+image which can be placed anywhere in the final output image. A Pixel Adapter
 IP is used to convert the ARGB image to 10-bit color samples to match the mixer
 configuration. The opacity of the overlay image is controlled by the HPS.
 <br/>
@@ -924,7 +924,7 @@ LUT is configured as a 9-bit LUT with a 10-bit input and output.
 <br/>
 <br/>
 
-Finally the Vid_Out subsystem feeds the (2 PIP VVP AXI4-S Lite), to the DP_Tx
+Finally, the Vid_Out subsystem feeds the (2 PIP VVP AXI4-S Lite), to the DP_Tx
 subsystem input (2 PIP VVP AXI4-S Full) via a VVP Protocol Converter IP.
 
 The VID_Out subsystem also includes PIO IPs for the Software App to handshake

@@ -640,7 +640,7 @@ provides the 2GB window into the EMIF. The Software App can access the buffer
 for downloading the captured images.
 
 Note that EMIF performance for the FPGA speed grade Device fitted to the
-Modular Development Kit SOM Board is somewhat limited and therefore the capture
+Modular Development Kit SOM Board is somewhat limited, and therefore the capture
 function can temporarily interrupt the main output and cause the DP output to
 temporarily flicker or go blank during the capture. The Capture feature is
 intended for debug.
@@ -907,7 +907,7 @@ anything useful like a logo.
 
 A VVP Frame Reader IP is used to fetch the overlay image from the HPS DDR4
 SDRAM via the F2SDRAM HPS interface. A VVP Scaler IP can be used to upscale the
-image which can be placed anywhere in the final output image. A Pixel Adpater
+image which can be placed anywhere in the final output image. A Pixel Adapter
 IP is used to convert the ARGB image to 10-bit color samples to match the mixer
 configuration. The opacity of the overlay image is controlled by the HPS.
 <br/>
@@ -933,14 +933,14 @@ provides the 2GB window into the EMIF. The Software App can access the buffer
 for downloading the captured images.
 
 Note that EMIF performance for the FPGA speed grade Device fitted to the
-Modular Development Kit SOM Board is somewhat limited and therefore the capture
+Modular Development Kit SOM Board is somewhat limited, and therefore the capture
 function can temporarily interrupt the main output and cause the DP output to
 temporarily flicker or go blank during the capture. The Capture feature is
 intended for debug.
 <br/>
 <br/>
 
-Finally the Vid_Out subsystem feeds the (2 PIP VVP AXI4-S Lite), to the DP_Tx
+Finally, the Vid_Out subsystem feeds the (2 PIP VVP AXI4-S Lite), to the DP_Tx
 subsystem input (2 PIP VVP AXI4-S Full) via a VVP Protocol Converter IP.
 
 The VID_Out subsystem also includes PIO IPs for the Software App to handshake

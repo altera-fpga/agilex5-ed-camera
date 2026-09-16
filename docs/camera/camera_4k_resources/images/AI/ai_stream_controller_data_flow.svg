@@ -27,6 +27,8 @@
 	]]>
 	</style>
 
+	<rect width="100%" height="100%" fill="white" />
+
 	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
 		<title>AI stream controller data flow</title>
 		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394"

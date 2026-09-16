@@ -197,9 +197,9 @@ Use the **[Quartus® GUI Create Flow](https://github.com/altera-fpga/agilex5-ed-
 
 
 [User flow 1]: ../camera_4k_stitch/camera_4k_stitch.md#pre-requisites
-[User flow 2]: ../camera_4k_stitch/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k_stitch/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k_stitch/flow4.md
+[User flow 2]: ../camera_4k_stitch/unsupported_flow.md
+[User flow 3]: ../camera_4k_stitch/unsupported_flow.md
+[User flow 4]: ../camera_4k_stitch/unsupported_flow.md
 
 
 

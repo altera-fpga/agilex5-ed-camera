@@ -15,7 +15,8 @@ application uses OpenVINO™ framework to schedule inferences and process the
 results. The FPGA AI Suite OpenVINO™ plugin sends messages to the stream
 controller application to control video processing and inference scheduling.
 
-![Stream Controller data flow.](../camera_4k_resources/images/AI/ai_stream_controller_data_flow.svg){:style="display:block; margin-left:auto; margin-right:auto"}
+![Stream Controller data flow.](../camera_4k_resources/images/AI/ai_stream_controller_data_flow.svg)
+
 <center markdown="1">
 
 **Stream Controller data flow**
@@ -129,15 +130,21 @@ and indicates that the message has been received and processed by the receiving
 end.
 
 Messages used directly by the FPGA AI Suite are shown below.
-![Stream Controller Messages.](../camera_4k_resources/images/AI/StreamControllerProtocol_00001.svg){:style="display:block; margin-left:auto; margin-right:auto; width: 80%"}
+
+![Stream Controller Messages.](../camera_4k_resources/images/AI/StreamControllerProtocol_00001.svg)
+
 <center markdown="1">
+
 **Stream Controller Message Packets**
 </center>
 <br/>
 
 For controlling the video IP cores additional messages are required. These messages are sent as user message, and are detailed below.
-![Stream Controller User Messages.](../camera_4k_resources/images/AI/StreamControllerProtocol_00002.svg){:style="display:block; margin-left:auto; margin-right:auto; width: 80%"}
+
+![Stream Controller User Messages.](../camera_4k_resources/images/AI/StreamControllerProtocol_00002.svg)
+
 <center markdown="1">
+
 **Stream Controller User Message Packets**
 </center>
 <br/>
@@ -166,41 +173,57 @@ Nios® V stream controller application. The FPGA AI Suite OpenVINO™ plugin the
 loads the compiled network graph binary data and transfers this to FPGA DDR
 memory. At this stage memory is also reserved for the input and output buffers.
 Memory is allocated for maximum number of inferences possible.
-![Inference sequence diagram.](../camera_4k_resources/images/AI/ai_graph_load_sequence_diagram.svg){:style="display:block; margin-left:auto; margin-right:auto; width: 80%"}
+
+![Inference sequence diagram.](../camera_4k_resources/images/AI/ai_graph_load_sequence_diagram.svg)
+
 <center markdown="1">
+
 **Graph load sequence diagram**
 </center>
 <br/>
+
 ### Inference creation
 After the network graph has been loaded, a configurable number of OpenVINO™
 inference objects are created. These objects are used to pass inference input
 and output buffers to the Nios® V stream controller application, and to pass
 the resulting output data back to the VvpIspDemo application.
-![Inference creation sequence diagram.](../camera_4k_resources/images/AI/ai_create_inferences_sequence_diagram.svg){:style="display:block; margin-left:auto; margin-right:auto; width: 80%"}
+
+![Inference creation sequence diagram.](../camera_4k_resources/images/AI/ai_create_inferences_sequence_diagram.svg)
+
 <center markdown="1">
+
 **Inference creation sequence diagram**
 </center>
 <br/>
+
 ### Video initialization
 During video initialization, video parameters, such as width and height, are
 passed to the Nios® V stream controller application. The Nios® V stream
 controller application configures the video IP cores accordingly.
-![Inference sequence diagram.](../camera_4k_resources/images/AI/ai_video_initialization_sequence_diagram.svg){:style="display:block; margin-left:auto; margin-right:auto; width: 80%"}
+
+![Inference sequence diagram.](../camera_4k_resources/images/AI/ai_video_initialization_sequence_diagram.svg)
+
 <center markdown="1">
+
 **Video initialization sequence diagram**
 </center>
 <br/>
+
 ### Network selection
 It is possible to load multiple network graphs simultaneously. Each is allocated
 separate buffers with the FPGA DDR memory. It is possible to switch between these 
 networks, at any time, by scheduling inferences from the newly selected network,
 and no longer scheduling inference objects from the previous network. During
 initialization the inference objects for the default network graph are scheduled.
-![Inference sequence diagram.](../camera_4k_resources/images/AI/ai_select_network_sequence_diagram.svg){:style="display:block; margin-left:auto; margin-right:auto; width: 80%"}
+
+![Inference sequence diagram.](../camera_4k_resources/images/AI/ai_select_network_sequence_diagram.svg)
+
 <center markdown="1">
+
 **Network selection sequence diagram**
 </center>
 <br/>
+
 ### Inference
 Once initialization is complete the VvpIspDemo, and Nios® V stream controller
 applications enter a running phase. After each frame writer completion, the
@@ -216,8 +239,10 @@ graphics overlay. The VvpIspDemo application then signals the overlay completion
 to the Nios® V stream controller application. The Nios® V stream controller
 application manages a triple buffer model for the overlay. This ensures there
 is no video tearing of the overlay during updates.
-![Inference sequence diagram.](../camera_4k_resources/images/AI/ai_inference_sequence_diagram.svg){:style="display:block; margin-left:auto; margin-right:auto"}
+
+![Inference sequence diagram.](../camera_4k_resources/images/AI/ai_inference_sequence_diagram.svg)
 <center markdown="1">
+
 **Inference sequence diagram**
 </center>
 <br/>
@@ -284,17 +309,17 @@ minimum memory bandwidth, but accurate results rendering.
 
 <br>
 
-<br>
-[Back](../camera_4k_ai_warp/camera_4k_ai_warp.md#documentation){ .md-button }
+[Back](../camera_4k_ai_warp/camera_4k_ai_warp.md#documentation)
+
 <br>
 
 
 
 
 [User flow 1]: ../camera_4k_ai_warp/camera_4k_ai_warp.md#pre-requisites
-[User flow 2]: ../camera_4k_ai_warp/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k_ai_warp/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k_ai_warp/flow4.md
+[User flow 2]: ../camera_4k_ai_warp/unsupported_flow.md
+[User flow 3]: ../camera_4k_ai_warp/unsupported_flow.md
+[User flow 4]: ../camera_4k_ai_warp/unsupported_flow.md
 
 
 
@@ -303,17 +328,17 @@ minimum memory bandwidth, but accurate results rendering.
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
-[Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai_warp-MDK_RevC_GrpB
+[Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai_warp-MDK_RevB_GrpB
 [https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1
-[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
-[top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.jic
-[top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.rbf
+[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
+[top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/top.core.jic
+[top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/top.core.rbf
 [model_compiler]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel-26.1/yolo_cnn
 [FPGA AI Suite Prerequisites]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/fpga_ai_suite_prerequisite.tcl
 

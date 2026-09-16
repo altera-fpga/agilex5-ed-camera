@@ -42,9 +42,9 @@
         * Up to 4k ARGB8888 image
   * 1D LUT IP – for OETF operations such as Gamma, HLG, and PQ.
 
-* Up to 4Kp30 10-bit Multi-rate DisplayPort output:
-  * Selects best resolution and color depth supported by the connected Monitor. Supported modes:
-    * 720p30, 1080p30, 4Kp30, 8-bit and 10-bit color depth.
+* 4Kp30 10-bit DisplayPort output:
+  * Selects best color depth supported by the connected Monitor. Supported modes:
+    * 4Kp30, 8-bit and 10-bit color depth.
 
 * Software stack running on HPS (quad-core ARM Cortex CPU):
   * Based on Poky Linux with additional Yocto layers supporting Altera® FPGAs.
@@ -78,14 +78,14 @@
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
 [Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai-MDK_RevC_GrpB
 [https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1
-[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz
+[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aea.wic.gz
 [fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
 [top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/top.core.jic
 [top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai-MDK_RevC_GrpB/top.core.rbf

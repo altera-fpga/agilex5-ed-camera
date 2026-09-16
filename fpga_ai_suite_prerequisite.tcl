@@ -47,7 +47,7 @@ proc download_coredla {{force 0}} {
         puts "creating coredla"
         file mkdir fpga_ai_suite_2026.1.1
         cd fpga_ai_suite_2026.1.1
-        if {[catch {exec curl --silent "https://downloads.intel.com/akdlm/software/fpga_ai_suite/2026.1.1/altera-fpga-ai-suite-ubuntu-2026.1.1_amd64.deb" --output "altera-fpga-ai-suite-ubuntu-2026.1.1_2026.1.1_amd64.deb"} msg ]} {
+        if {[catch {exec curl --silent --header "Accept-Encoding: text/html" --header "Accept-Language: en-US" --header "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36" --header "Connection: keep-alive" "https://download.altera.com/akdlm/software/fpga_ai_suite/2026.1.1/altera-fpga-ai-suite-ubuntu-2026.1.1_amd64.deb" --output "altera-fpga-ai-suite-ubuntu-2026.1.1_2026.1.1_amd64.deb"} msg ]} {
             puts $msg
             puts "ERROR: Failed to download FPGA AI Suite"
             exit -1

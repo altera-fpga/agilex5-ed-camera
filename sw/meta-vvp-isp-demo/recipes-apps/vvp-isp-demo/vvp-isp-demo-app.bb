@@ -29,8 +29,10 @@ SRC_URI += "${@bb.utils.contains('APP_FEATURES', 'ISP_AI', ' \
              https://storage.openvinotoolkit.org/repositories/openvino/packages/2025.4/linux/openvino_toolkit_ubuntu24_2025.4.0.20398.8fdad55727d_x86_64.tgz;name=openvino_x86_64 \
              https://storage.openvinotoolkit.org/repositories/openvino/packages/2025.4/linux/openvino_toolkit_ubuntu22_2025.4.0.20398.8fdad55727d_arm64.tgz;name=openvino_arm64 \
              https://github.com/zeux/pugixml/releases/download/v1.15/pugixml-1.15.tar.gz;name=pugixml \
-             https://downloads.intel.com/akdlm/software/fpga_ai_suite/2026.1.1/altera-fpga-ai-suite-ubuntu-2026.1.1_amd64.deb;name=altera-fpga-ai-suite;subdir=altera-fpga-ai-suite \
+             https://download.altera.com/akdlm/software/fpga_ai_suite/2026.1.1/altera-fpga-ai-suite-ubuntu-2026.1.1_amd64.deb;name=altera-fpga-ai-suite;subdir=altera-fpga-ai-suite \
             ', '', d)}"
+
+FETCHCMD_wget="/usr/bin/env wget --tries=2 --timeout=100 --header 'Accept-Encoding: text/html' --header 'Accept-Language: en-US' --user-agent 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36' --header 'Connection: keep-alive'"
 
 S = "${UNPACKDIR}"
 

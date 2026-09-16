@@ -10,8 +10,8 @@ networks, please review the [Ultralytics license details](https://www.ultralytic
 If acceptable, proceed to download one or both of the supported models:
 <br/>
 
-[yolov8n.pt Yolo v8 Nano Detection](https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt)<br/>
-[yolov8n-pose.pt Yolo v8 Nano Detection](https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n-pose.pt)<br/>
+[yolov8n.pt Yolo v8 Nano Detection](https://github.com/ultralytics/assets/releases/download/v8.4.0/yolov8n.pt)<br/>
+[yolov8n-pose.pt Yolo v8 Nano Detection](https://github.com/ultralytics/assets/releases/download/v8.4.0/yolov8n-pose.pt)<br/>
 
 The files must be placed into this `yolo_cnn` directory.
 

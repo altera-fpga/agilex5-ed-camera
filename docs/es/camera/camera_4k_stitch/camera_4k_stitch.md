@@ -25,9 +25,13 @@ camera stitch solution. The exclusive support for industry-standard MIPI
 (Mobile Industry Processor Interface) D-PHY and MIPI CSI-2 interface on Agilex™
 5 FPGAs provides a powerful tool for camera product development.
 
+| <center markdown="1">Left Image | <center markdown="1">Right Image |
+|-|-|
+| ![stitch-overview](./images/stitch_left.jpg) | ![stitch-overview](./images/stitch_right.jpg) |
+
 |<center markdown="1">An example of Image Stitching|
 |-|
-| ![stitch-overview](../camera_4k_stitch/images/Stitch_Overview.png) |
+| ![stitch-overview](./images/stitch.jpg) |
 
 The MIPI interface supports up to 2.5Gbps per lane and up to 8x lanes per MIPI
 interface, enabling seamless data reception from multiple 4K image sensors to
@@ -761,9 +765,9 @@ flows that you can explore:
 
 
 [User flow 1]: ../camera_4k_stitch/camera_4k_stitch.md#pre-requisites
-[User flow 2]: ../camera_4k_stitch/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k_stitch/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k_stitch/flow4.md
+[User flow 2]: ../camera_4k_stitch/unsupported_flow.md
+[User flow 3]: ../camera_4k_stitch/unsupported_flow.md
+[User flow 4]: ../camera_4k_stitch/unsupported_flow.md
 
 
 

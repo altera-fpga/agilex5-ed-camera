@@ -832,7 +832,7 @@ inference rate is unable to keep up. The Frame Writer IP interfaces to an
 Address Span Extender which provides a 2GB window into the EMIF.
 
 When an inference is completed, the Software App reads the result from the
-appropriate external FPGA DDR4 SDRAM, processes it, and generates a inference
+appropriate external FPGA DDR4 SDRAM, processes it, and generates an inference
 results overlay image in the HPS DDR4 SDRAM. The [VID_Out Subsystem](#vid_out-subsystem)
 uses this overlay image.
 
@@ -1036,7 +1036,7 @@ testing the DP output with an ISP unaltered image.
 <br/>
 <br/>
 
-The mixer also has a pair of additional layers for HPS generared overlay
+The mixer also has a pair of additional layers for HPS generated overlay
 images. The first additional layer supports an ARGB2222 image (Alpha+RGB, 2-bit
 per color sample) up to a resolution of 1920x1080. A Scaler is provided to
 support up scaling if required. The ARGB2222 is then converted to ARGB10101010
@@ -1044,14 +1044,14 @@ using simple glue logic with a fixed conversion. The second additional layer
 supports an ARGB8888 image (Alpha+RGB, 8-bit per color sample) which is
 converted to ARGB10101010 using a Pixel Adapter IP. Both additional layers
 support per pixel alpha blending (to control the opacity of the overlay images)
-as well as global settings. The mixer can place both additional layers anywhere
+and global settings. The mixer can place both additional layers anywhere
 over the base layers.
 
 For the 4K Multi-Sensor Fisheye Camera with AI Inference Solution System Example Design for Agilex™ 5 Devices the HPS uses the first overlay for
 the AI inference results where it produces a 960x540 quarter sized HD image
 that is up scaled to 4k to fit over the entire base layers. The ARGB2222 format
 allows for 64 colors (including black and white) and has 4 levels of alpha
-blend (0%, 33%, 66%, and 100%). Using this image format maximises overlay
+blend (0%, 33%, 66%, and 100%). Using this image format maximizes overlay
 performance. The HPS uses.the second overlay for a small but detailed Altera®
 logo that is typically positioned in one corner over the base layers.
 
@@ -1071,7 +1071,7 @@ LUT is configured as a 9-bit LUT with a 10-bit input and output.
 <br/>
 <br/>
 
-Finally the Vid_Out subsystem feeds the 1 PIP VVP AXI4-S Lite, to the DP_Tx
+Finally, the Vid_Out subsystem feeds the 1 PIP VVP AXI4-S Lite, to the DP_Tx
 subsystem input (2 PIP VVP AXI4-S Full) via a VVP PIP Converter IP and VVP
 Protocol Converter IP.
 
@@ -1287,9 +1287,9 @@ Solution System Example Design Quartus® project:
 
 
 [User flow 1]: ../camera_4k_ai_warp/camera_4k_ai_warp.md#pre-requisites
-[User flow 2]: ../camera_4k_ai_warp/flow2-sof-mdt.md
-[User flow 3]: ../camera_4k_ai_warp/flow3-rbf-mdt.md
-[User flow 4]: ../camera_4k_ai_warp/flow4.md
+[User flow 2]: ../camera_4k_ai_warp/unsupported_flow.md
+[User flow 3]: ../camera_4k_ai_warp/unsupported_flow.md
+[User flow 4]: ../camera_4k_ai_warp/unsupported_flow.md
 
 
 
@@ -1298,17 +1298,17 @@ Solution System Example Design Quartus® project:
 [meta-altera-fpga]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga
 [meta-altera-fpga-ocs]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-altera-fpga-ocs
 [meta-vvp-isp-demo]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/meta-vvp-isp-demo
-[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw-ai/
+[agilex5-ed-camera/sw]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1/sw/
 
 
 
-[Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai_warp-MDK_RevC_GrpB
+[Release Tag]: https://github.com/altera-fpga/agilex5-ed-camera/releases/tag/rel-26.1-isp_ai_warp-MDK_RevB_GrpB
 [https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel/26.1
-[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
-[fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
-[top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.jic
-[top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevC_GrpB/top.core.rbf
+[hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/hps-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/fpga-first-vvp-isp-demo-image-agilex5_mk_a5e065bb32aes1.wic.gz
+[fsbl_agilex5_modkit_vvpisp_time_limited.sof]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/fsbl_agilex5_modkit_vvpisp_time_limited.sof
+[top.core.jic]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/top.core.jic
+[top.core.rbf]: https://github.com/altera-fpga/agilex5-ed-camera/releases/download/rel-26.1-isp_ai_warp-MDK_RevB_GrpB/top.core.rbf
 [model_compiler]: https://github.com/altera-fpga/agilex5-ed-camera/tree/rel-26.1/yolo_cnn
 [FPGA AI Suite Prerequisites]: https://github.com/altera-fpga/agilex5-ed-camera/blob/rel/26.1/fpga_ai_suite_prerequisite.tcl
 
@@ -1367,9 +1367,9 @@ Solution System Example Design Quartus® project:
 
 
 
-
-[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
-[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/embedded-designs/agilex-5/e-series/modular-065b/gsrd/ug-gsrd-agx5e-modular-065b/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (25.1)]: https://altera-fpga.github.io/rel-25.1/gsrd/ug-gsrd-agx5e-modular/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1)]: https://altera-fpga.github.io/rel-26.1/gsrd/ug-gsrd-agx5e-modular/
+[Agilex™ 5 E-Series Modular Development Board GSRD User Guide (26.1.1)]: https://altera-fpga.github.io/rel-26.1.1/gsrd/ug-gsrd-agx5e-modular/
 
 
 [Agilex™ 5 SoC FPGA]: https://www.altera.com/products/fpga/agilex/5
@@ -1377,7 +1377,7 @@ Solution System Example Design Quartus® project:
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1)]:https://docs.altera.com/r/docs/814346/26.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [Hard Processor System Technical Reference Manual: Agilex™ 5 SoCs (26.1.1)]:https://docs.altera.com/r/docs/814346/26.1.1/hard-processor-system-technical-reference-manual-agilextm-5-socs/agilextm-5-hard-processor-system-technical-reference-manual-revision-history
 [NiosV Processor for Altera® FPGA]: https://www.altera.com/design/guidance/nios-v-developer
-[Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3274/agilex-5-fpga-and-soc-e-series-065b-modular-development-kit
+[Agilex™ 5 FPGA E-Series 065B Modular Development Kit]: https://www.altera.com/products/devkit/po-3001/agilex-5-fpga-and-soc-e-series-modular-development-kit-es
 [Agilex™ 5 FPGA E-Series Modular Development Kits - Product Brief]: https://docs.altera.com/v/u/docs/815178/agilex-5-fpga-e-series-065b-and-065a-modular-development-kit-product-brief
 [Altera® FPGA AI Suite]: https://www.altera.com/products/development-tools/fpga-ai-suite
 
@@ -1408,6 +1408,7 @@ Solution System Example Design Quartus® project:
 [Altera® Quartus® Prime Pro Edition version 26.1.1 Windows]: https://www.altera.com/downloads/fpga-development-tools/quartus-prime-pro-edition-design-software-version-26-1-1-windows
 [Altera® Quartus® Prime Pro Edition version 26.1.1 Linux Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127201/22b934d43e3642953f6fa5ea39911dcd3f535cf4?filename=QuartusProProgrammerSetup-26.1.1.110-linux.run
 [Altera® Quartus® Prime Pro Edition version 26.1.1 Windows Programmer and Tools]: https://www.altera.com/download-center/license-agreement/127231/4e7f616c20e1954783e8d9971c0503cab69483c6?filename=QuartusProProgrammerSetup-26.1.1.110-windows.exe
+
 
 
 

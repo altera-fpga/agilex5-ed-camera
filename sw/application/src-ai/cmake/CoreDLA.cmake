@@ -26,9 +26,8 @@ set(FETCHCONTENT_QUIET FALSE)
 FetchContent_Declare(
 MyCoreDLA
 OVERRIDE_FIND_PACKAGE 
-URL     https://downloads.intel.com/akdlm/software/fpga_ai_suite/2026.1.1/altera-fpga-ai-suite-ubuntu-2026.1.1_amd64.deb
-DOWNLOAD_NO_EXTRACT TRUE
-PATCH_COMMAND ${PROJECT_SOURCE_DIR}/cmake/CoreDLAPatchCommand.sh <SOURCE_DIR> <DOWNLOADED_FILE>
+DOWNLOAD_COMMAND ""
+PATCH_COMMAND ${PROJECT_SOURCE_DIR}/cmake/CoreDLAPatchCommand.sh <SOURCE_DIR> "https://download.altera.com/akdlm/software/fpga_ai_suite/2026.1.1/altera-fpga-ai-suite-ubuntu-2026.1.1_amd64.deb" "altera-fpga-ai-suite-ubuntu-2026.1.1_amd64.deb"
 )
 FetchContent_MakeAvailable(MyCoreDLA)
 set(FETCHCONTENT_QUIET TRUE)

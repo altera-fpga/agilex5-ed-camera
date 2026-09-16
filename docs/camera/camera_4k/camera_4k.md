@@ -25,9 +25,9 @@ camera solution. The exclusive support for industry-standard MIPI (Mobile
 Industry Processor Interface) D-PHY and MIPI CSI-2 interface on Agilex™ 5 FPGAs
 provides a powerful tool for camera product development.
 
-|<center markdown="1">Sensor Output (shown as grayscale RGB)</center>|<center markdown="1">ISP Output</center>|
+|<center markdown="1">Sensor Output (ISP Input)</center>|<center markdown="1">ISP Output</center>|
 |-|-|
-| ![Input Capture](../camera_4k/images/Input_Capture.png) | ![Output Capture](../camera_4k/images/Output_Capture.png) |
+| ![Input Capture](./images/Input_Capture.png) | ![Output Capture](./images/Output_Capture.png) |
 
 The MIPI interface supports up to 2.5Gbps per lane and up to 8x lanes per MIPI
 interface, enabling seamless data reception from multiple 4K image sensors to

@@ -28,7 +28,7 @@ auto white balance (AWB) and auto exposure (AE) functions.
 The following block diagram shows the main components and subsystems of the
 Camera Solution System Example Design. Note that the IP instance number is
 shown (bottom right corner of the IP) and is used by the Application Software
-to indentify the unique instance.
+to identify the unique instance.
 
 <br/>
 <center markdown="1">
@@ -827,7 +827,7 @@ and less DDR SDRAM bandwidth requirements than double bounce, but requires
 on-chip cache memory - which can limit the transforms available), and Mipmap
 support (to perform 2:1, 4:1, 8:1 downscale ratios and allow more bandwidth for
 transforms). Warp is also used to produce lower output resolutions like Full HD
-and HD Ready, as well as support UHD. However some Camera Solutions always
+and HD Ready, as well as support UHD. However, some Camera Solutions always
 require the output to be a scaled version of the input. In this instance, and
 depending on the required scaling ratio, using a pair of VVP Scaler IPs to
 perform scaling firstly in the Horizontal domain then the Vertical domain
@@ -860,7 +860,7 @@ typically does not contain a unique alpha channel value for every pixel on a
 line. Instead, the LUT supports a default start and stop alpha channel value,
 as well as a nominal sequential sequence of values in between. The Software
 Application effectively programs a start and stop pixel number such that pixels
-received up until the start start pixel number, will get assigned the same
+received up until the start pixel number, will get assigned the same
 default start alpha channel value as located at the LUT start location. From
 then on, and up to the stop pixel number, the alpha channel value comes from
 sequential LUT locations. At the stop pixel number, the LUT no longer
@@ -871,8 +871,8 @@ first location and the process repeats.
 A VVP Mixer IP can be used to position the left image with the alpha
 channel over the top of the right image with a small overlap. A VVP TPG IP
 provides the solid color base layer for the stitch output. The width of the
-overlap should be the width of the total alpha blend function. Typically the
-Software Application would use a ramp or non linear function to generate the
+overlap should be the width of the total alpha blend function. Typically, the
+Software Application would use a ramp or non-linear function to generate the
 Alpha Channel LUT in order to create a smooth blend affect.
 
 To facilitate an effective blend, the VVP Warp IP is used prior to the stitch
@@ -913,7 +913,7 @@ output image. It uses a VVP Test Pattern Generator IP, a VVP Mixer IP, VVP
 Frame Reader IP, and a VVP Pixel Adapter IP.
 
 The TPG is the base layer for the Mixer IP and is configured to match the
-required output resolution. By default it produces a solid black image which
+required output resolution. By default, it produces a solid black image which
 also serves as the screensaver function. In addition, the TPG also supports
 color bars which can be used to test the DP output.
 
