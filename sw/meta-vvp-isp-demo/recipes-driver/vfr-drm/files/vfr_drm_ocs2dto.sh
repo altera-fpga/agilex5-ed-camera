@@ -264,3 +264,11 @@ rmdir /sys/kernel/config/device-tree/overlays/vfr_drm_ocs/ >/dev/null 2>&1; echo
 mkdir -p /sys/kernel/config/device-tree/overlays/vfr_drm_ocs
 cat vfr_drm_ocs.dtbo > /sys/kernel/config/device-tree/overlays/vfr_drm_ocs/dtbo
 
+if [ "$overlay_ase_ba_lo" != "0" ]; then
+    # increase priority to tbu2noc so that mixer doesn't underrun when VFR reading plane from HPS memory
+    # https://docs.altera.com/v/u/resources/775831/agilex-5-hps-register-map
+    devmem 0x1800128c 32 0      # ccu_dmi0_I_main_QosGenerator_Mode 0 = Fixed
+    devmem 0x18001288 32 0x100  # cu_dmi0_I_main_QosGenerator_Priority P1 (reads) = 1, P0 (writes) = 0
+    devmem 0x1800138c 32 0      # tbu2noc_I_main_QosGenerator_Mode 0 = Fixed
+    devmem 0x18001388 32 0x202  # tbu2noc_I_main_QosGenerator_Priority P1 (reads) = 2, P0 (writes) = 2
+fi
